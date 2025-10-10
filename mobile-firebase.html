@@ -797,7 +797,7 @@
             renderStats();
             renderPlayerSelectors();
             renderScoreInputs();
-            renderGamesList();
+            // renderGamesList(); // 入力タブには表示しない（日別タブのみ）
             renderPlayerList();
             console.log('render() 完了');
         }
@@ -948,20 +948,59 @@
             const colors = ['bg-yellow-50 border-yellow-300', 'bg-blue-50 border-blue-300', 'bg-green-50 border-green-300', 'bg-purple-50 border-purple-300'];
             let html = '';
             d.players.forEach((p,i) => {
+                const isLast = (i === d.type - 1); // 最後のプレイヤーかどうか
                 html += `<div class="flex items-center gap-2 mb-2 p-3 rounded-lg border-2 ${colors[i % colors.length]}">
                     <div class="flex-1">
                         <div class="text-xs text-gray-600 mb-1">プレイヤー${i+1}</div>
                         <div class="font-bold text-sm truncate">${p}</div>
                     </div>
                     <div class="flex-1">
-                        <div class="text-xs text-gray-600 mb-1">スコア</div>
+                        <div class="text-xs text-gray-600 mb-1">スコア${isLast ? ' (自動計算)' : ''}</div>
                         <input type="number" id="score${i}" placeholder="±0" 
                                class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-center font-bold"
-                               inputmode="numeric">
+                               inputmode="numeric"
+                               oninput="autoCalculateScore(${i}, ${d.type})"
+                               ${isLast ? 'readonly style="background-color: #f0f0f0;"' : ''}>
                     </div>
                 </div>`;
             });
             scoreInputsElement.innerHTML = html;
+        }
+
+        // スコア自動計算
+        function autoCalculateScore(changedIndex, totalPlayers) {
+            // 最後のプレイヤー（自動計算対象）のインデックス
+            const lastIndex = totalPlayers - 1;
+            
+            // 最後のプレイヤーが変更された場合は何もしない
+            if(changedIndex === lastIndex) return;
+            
+            // 最後以外のプレイヤーのスコアを合計
+            let sum = 0;
+            let allFilled = true;
+            
+            for(let i = 0; i < lastIndex; i++) {
+                const input = document.getElementById('score' + i);
+                if(!input || input.value === '') {
+                    allFilled = false;
+                    break;
+                }
+                sum += parseInt(input.value) || 0;
+            }
+            
+            // 全員分入力されていれば、最後のプレイヤーのスコアを自動計算
+            if(allFilled) {
+                const lastInput = document.getElementById('score' + lastIndex);
+                if(lastInput) {
+                    lastInput.value = -sum; // 合計が0になるように
+                }
+            } else {
+                // まだ全員分入力されていない場合はクリア
+                const lastInput = document.getElementById('score' + lastIndex);
+                if(lastInput) {
+                    lastInput.value = '';
+                }
+            }
         }
 
         // ゲームリスト表示
