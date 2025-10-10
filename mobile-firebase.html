@@ -958,7 +958,7 @@
                         <div class="text-xs text-gray-600 mb-1">スコア${isLast ? ' (自動計算)' : ''}</div>
                         <input type="number" id="score${i}" placeholder="±0" 
                                class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-center font-bold"
-                               inputmode="numeric"
+                               pattern="[0-9-]*"
                                oninput="autoCalculateScore(${i}, ${d.type})"
                                ${isLast ? 'readonly style="background-color: #f0f0f0;"' : ''}>
                     </div>
