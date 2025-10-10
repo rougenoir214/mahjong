@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>麻雀成績管理 Firebase版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+        body { font-family: 'Noto Sans JP', sans-serif; -webkit-font-smoothing: antialiased; }
+        * { -webkit-tap-highlight-color: transparent; }
+        input, select, button { font-size: 16px !important; }
+        .animate-fade { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { border-collapse: collapse; min-width: 100%; }
+        .login-screen { 
+            position: fixed; 
+            inset: 0; 
+            background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-50 min-h-screen">
+
+    <!-- ログイン画面 -->
+    <div id="loginScreen" class="login-screen">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 animate-fade">
+            <div class="text-center mb-8">
+                <div class="text-6xl mb-4">🀄</div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">麻雀成績管理</h1>
+                <p class="text-gray-600">Firebase版</p>
+            </div>
+            <div class="mb-6">
+                <label class="block text-gray-700 font-semibold mb-2">パスワード</label>
+                <input type="password" id="passwordInput" 
+                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-cyan-500 focus:outline-none"
+                       placeholder="パスワードを入力"
+                       onkeypress="if(event.key==='Enter') login()">
+            </div>
+            <button onclick="login()" 
+                    class="w-full bg-gradient-to-r from-cyan-600 to-teal-600 text-white py-3 rounded-lg font-bold hover:opacity-90 transition">
+                ログイン
+            </button>
+            <div id="loginError" class="mt-4 text-red-500 text-sm text-center hidden"></div>
+            <div class="mt-6 text-center text-sm text-gray-500">
+                パスワードは管理者から取得してください
+            </div>
+        </div>
+    </div>
+
+    <!-- メインアプリ（ログイン後に表示） -->
+    <div id="mainApp" style="display: none;">
+        <header class="bg-gradient-to-r from-cyan-600 to-teal-600 text-white shadow-lg sticky top-0 z-50">
+            <div class="px-3 py-3">
+                <div class="flex items-center justify-between mb-2">
+                    <h1 class="text-xl font-bold">🀄 麻雀成績管理</h1>
+                    <div class="flex items-center gap-2">
+                        <div id="syncStatus" class="text-xs px-2 py-1 bg-white/20 rounded">
+                            <span class="pulse">🔄</span> 同期中...
+                        </div>
+                        <button onclick="logout()" class="bg-white/20 active:bg-white/30 px-3 py-2 rounded text-xs">
+                            🚪 ログアウト
+                        </button>
+                    </div>
+                </div>
+                <div class="flex gap-2 justify-center">
+                    <button onclick="exportData()" class="bg-white/20 active:bg-white/30 px-3 py-2 rounded text-xs">📥 エクスポート</button>
+                    <button onclick="document.getElementById('fileInput').click()" class="bg-white/20 active:bg-white/30 px-3 py-2 rounded text-xs">📤 インポート</button>
+                </div>
+            </div>
+        </header>
+        <input type="file" id="fileInput" accept=".json" style="display:none" onchange="importData(event)">
+
+        <div class="px-3 py-4">
+            <div id="stats" class="grid grid-cols-2 gap-2 mb-4"></div>
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-4 animate-fade">
+                <div class="flex border-b">
+                    <button onclick="switchTab('input')" id="tab-input" class="flex-1 px-4 py-3 text-sm font-medium bg-gradient-to-r from-cyan-500 to-teal-500 text-white">入力</button>
+                    <button onclick="switchTab('daily')" id="tab-daily" class="flex-1 px-4 py-3 text-sm font-medium text-gray-600">日別</button>
+                    <button onclick="switchTab('players')" id="tab-players" class="flex-1 px-4 py-3 text-sm font-medium text-gray-600">統計</button>
+                </div>
+                <div id="content-input" class="p-4">
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium mb-1">日付</label>
+                        <input type="date" id="selectedDate" onchange="dateChanged()" class="w-full px-3 py-2 border rounded-lg">
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-sm font-medium mb-1">麻雀の種類</label>
+                        <select id="gameType" onchange="gameTypeChanged()" class="w-full px-3 py-2 border rounded-lg">
+                            <option value="4">4人麻雀</option>
+                            <option value="3">3人麻雀</option>
+                        </select>
+                    </div>
+                    <div id="playerSelects"></div>
+                    <div id="scoreInputs"></div>
+                    <button onclick="addGame()" class="w-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white py-3 rounded-lg font-bold mt-3 active:opacity-80">半荘を追加</button>
+                    <div id="gamesList"></div>
+                    <div class="mt-4 flex gap-2">
+                        <input type="text" id="newPlayer" placeholder="新しいプレイヤー名" class="flex-1 px-3 py-2 border rounded-lg">
+                        <button onclick="addPlayer()" class="bg-green-500 text-white px-4 py-2 rounded-lg active:bg-green-600">追加</button>
+                    </div>
+                    <button onclick="if(confirm('本当に今日のデータを削除しますか？')) clearToday()" class="w-full bg-red-500 text-white py-2 rounded-lg mt-3 active:bg-red-600">今日のデータを削除</button>
+                </div>
+                <div id="content-daily" class="p-4" style="display:none;">
+                    <div id="dailyList"></div>
+                </div>
+                <div id="content-players" class="p-4" style="display:none;">
+                    <div id="playerStats"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="notification" class="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg" style="display:none;"></div>
+    </div>
+
+    <script>
+        // Firebase設定
+        const firebaseConfig = {
+            apiKey: "AIzaSyA7bkfPDgs3iSNFC2MOxjs1aakbHbMi-jM",
+            authDomain: "mahjong-337a9.firebaseapp.com",
+            databaseURL: "https://mahjong-337a9-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "mahjong-337a9",
+            storageBucket: "mahjong-337a9.firebasestorage.app",
+            messagingSenderId: "605742422445",
+            appId: "1:605742422445:web:e207ae05cba0a67f7b2924",
+            measurementId: "G-2VDY4LKSPP"
+        };
+
+        // Firebase初期化
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // 簡易パスワード（実際の運用では環境変数などに格納推奨）
+        const APP_PASSWORD = "mahjong2025";
+        
+        // アプリの状態
+        let data = { dates: {} };
+        let allPlayers = [];
+        let currentTab = 'input';
+        let isLoggedIn = false;
+
+        // ログイン処理
+        function login() {
+            const password = document.getElementById('passwordInput').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            if (password === APP_PASSWORD) {
+                isLoggedIn = true;
+                localStorage.setItem('mahjong_logged_in', 'true');
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                errorDiv.classList.add('hidden');
+                
+                // データ読み込み
+                loadFromFirebase();
+            } else {
+                errorDiv.textContent = 'パスワードが間違っています';
+                errorDiv.classList.remove('hidden');
+                document.getElementById('passwordInput').value = '';
+            }
+        }
+
+        // ログアウト処理
+        function logout() {
+            if (confirm('ログアウトしますか？')) {
+                isLoggedIn = false;
+                localStorage.removeItem('mahjong_logged_in');
+                document.getElementById('loginScreen').style.display = 'flex';
+                document.getElementById('mainApp').style.display = 'none';
+                document.getElementById('passwordInput').value = '';
+            }
+        }
+
+        // 初期化時のログイン状態チェック
+        window.addEventListener('DOMContentLoaded', () => {
+            const loggedIn = localStorage.getItem('mahjong_logged_in');
+            if (loggedIn === 'true') {
+                isLoggedIn = true;
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                loadFromFirebase();
+            }
+        });
+
+        // Firebaseからデータ読み込み
+        function loadFromFirebase() {
+            updateSyncStatus('loading');
+            
+            database.ref('mahjong').once('value')
+                .then((snapshot) => {
+                    const firebaseData = snapshot.val();
+                    if (firebaseData) {
+                        data = firebaseData.data || { dates: {} };
+                        allPlayers = firebaseData.allPlayers || [];
+                    }
+                    
+                    // リアルタイム監視を開始
+                    setupRealtimeListener();
+                    
+                    // 初期表示
+                    document.getElementById('selectedDate').valueAsDate = new Date();
+                    dateChanged();
+                    render();
+                    updateSyncStatus('synced');
+                })
+                .catch((error) => {
+                    console.error('データ読み込みエラー:', error);
+                    notify('データの読み込みに失敗しました', 'error');
+                    updateSyncStatus('error');
+                });
+        }
+
+        // リアルタイム監視の設定
+        function setupRealtimeListener() {
+            database.ref('mahjong').on('value', (snapshot) => {
+                const firebaseData = snapshot.val();
+                if (firebaseData) {
+                    data = firebaseData.data || { dates: {} };
+                    allPlayers = firebaseData.allPlayers || [];
+                    render();
+                    updateSyncStatus('synced');
+                }
+            });
+        }
+
+        // Firebaseへデータ保存
+        function saveToFirebase() {
+            updateSyncStatus('saving');
+            
+            database.ref('mahjong').set({
+                data: data,
+                allPlayers: allPlayers,
+                lastUpdated: new Date().toISOString()
+            })
+            .then(() => {
+                updateSyncStatus('synced');
+            })
+            .catch((error) => {
+                console.error('保存エラー:', error);
+                notify('データの保存に失敗しました', 'error');
+                updateSyncStatus('error');
+            });
+        }
+
+        // 同期ステータス更新
+        function updateSyncStatus(status) {
+            const statusDiv = document.getElementById('syncStatus');
+            if (!statusDiv) return;
+            
+            switch(status) {
+                case 'loading':
+                    statusDiv.innerHTML = '<span class="pulse">⏳</span> 読込中...';
+                    statusDiv.className = 'text-xs px-2 py-1 bg-white/20 rounded';
+                    break;
+                case 'saving':
+                    statusDiv.innerHTML = '<span class="pulse">💾</span> 保存中...';
+                    statusDiv.className = 'text-xs px-2 py-1 bg-white/20 rounded';
+                    break;
+                case 'synced':
+                    statusDiv.innerHTML = '✅ 同期完了';
+                    statusDiv.className = 'text-xs px-2 py-1 bg-green-500/80 rounded';
+                    setTimeout(() => {
+                        statusDiv.innerHTML = '☁️ 同期済み';
+                        statusDiv.className = 'text-xs px-2 py-1 bg-white/20 rounded';
+                    }, 2000);
+                    break;
+                case 'error':
+                    statusDiv.innerHTML = '❌ エラー';
+                    statusDiv.className = 'text-xs px-2 py-1 bg-red-500/80 rounded';
+                    break;
+            }
+        }
+
+        // 通知表示
+        function notify(msg, type = 'success') {
+            const n = document.getElementById('notification');
+            if (!n) return;
+            
+            n.textContent = msg;
+            n.className = `fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg ${
+                type === 'error' ? 'bg-red-500' : 'bg-green-500'
+            } text-white`;
+            n.style.display = 'block';
+            setTimeout(() => n.style.display = 'none', 3000);
+        }
+
+        // タブ切り替え
+        function switchTab(tab) {
+            currentTab = tab;
+            ['input','daily','players'].forEach(t => {
+                document.getElementById('content-'+t).style.display = t===tab ? 'block' : 'none';
+                document.getElementById('tab-'+t).className = 'flex-1 px-4 py-3 text-sm font-medium ' + 
+                    (t===tab ? 'bg-gradient-to-r from-cyan-500 to-teal-500 text-white' : 'text-gray-600');
+            });
+            if(tab==='daily') renderDaily();
+            if(tab==='players') renderPlayers();
+        }
+
+        // 日付変更
+        let selectedDate = '';
+        function dateChanged() {
+            selectedDate = document.getElementById('selectedDate').value;
+            render();
+        }
+
+        // 麻雀の種類変更
+        function gameTypeChanged() {
+            const d = getData();
+            d.type = parseInt(document.getElementById('gameType').value);
+            if(d.players.length > d.type) d.players = d.players.slice(0, d.type);
+            saveToFirebase();
+            render();
+        }
+
+        // データ取得
+        function getData() {
+            if(!data.dates[selectedDate]) {
+                data.dates[selectedDate] = { type:4, players:[], games:[] };
+            }
+            return data.dates[selectedDate];
+        }
+
+        // プレイヤー変更
+        function playerChanged(index, value) {
+            if(value==='__new__') {
+                const name = prompt('新しいプレイヤー名');
+                if(name && name.trim()) {
+                    if(!allPlayers.includes(name.trim())) {
+                        allPlayers.push(name.trim());
+                    }
+                    getData().players[index] = name.trim();
+                    saveToFirebase();
+                    render();
+                }
+            } else {
+                getData().players[index] = value;
+                saveToFirebase();
+                render();
+            }
+        }
+
+        // プレイヤー追加
+        function addPlayer() {
+            const name = document.getElementById('newPlayer').value.trim();
+            if(name && !allPlayers.includes(name)) {
+                allPlayers.push(name);
+                document.getElementById('newPlayer').value = '';
+                saveToFirebase();
+                render();
+                notify('プレイヤー「' + name + '」を追加しました');
+            }
+        }
+
+        // 半荘追加
+        function addGame() {
+            const d = getData();
+            if(d.players.length < d.type) {
+                alert('全プレイヤーを選択してください');
+                return;
+            }
+            const scores = d.players.map((p,i) => parseInt(document.getElementById('score'+i).value) || 0);
+            
+            // スコア合計チェック
+            const total = scores.reduce((sum, s) => sum + s, 0);
+            if(total !== 0) {
+                const confirmResult = window.confirm(`⚠️ スコアの合計が${total>0?'+':''}${total}です（0になっていません）\n\nこのまま登録しますか？\n\n【入力したスコア】\n${d.players.map((p,i) => `${p}: ${scores[i]>0?'+':''}${scores[i]}`).join('\n')}\n合計: ${total>0?'+':''}${total}`);
+                if(!confirmResult) return;
+            }
+            
+            d.games.push(scores);
+            saveToFirebase();
+            d.players.forEach((p,i) => document.getElementById('score'+i).value = '');
+            render();
+            notify('半荘'+d.games.length+'を追加');
+        }
+
+        // 半荘削除
+        function removeGame(date, idx) {
+            if(confirm('この半荘を削除しますか？')) {
+                data.dates[date].games.splice(idx, 1);
+                saveToFirebase();
+                render();
+                renderDaily();
+                notify('削除しました');
+            }
+        }
+
+        // スコア更新
+        function updateScore(date, gIdx, pIdx, val) {
+            data.dates[date].games[gIdx][pIdx] = parseInt(val) || 0;
+            saveToFirebase();
+        }
+
+        // 今日のデータ削除
+        function clearToday() {
+            if(data.dates[selectedDate]) {
+                delete data.dates[selectedDate];
+                saveToFirebase();
+                render();
+                notify('今日のデータを削除しました');
+            }
+        }
+
+        // エクスポート機能
+        function exportData() {
+            const exp = { data, allPlayers, exportDate: new Date().toISOString(), version: '1.0' };
+            const jsonStr = JSON.stringify(exp, null, 2);
+            const filename = 'mahjong_'+new Date().toISOString().split('T')[0]+'.json';
+            
+            // iOSで共有シートを使う（Web Share API）
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            if(isIOS && navigator.share) {
+                const file = new File([jsonStr], filename, { type: 'application/json' });
+                navigator.share({
+                    files: [file],
+                    title: '麻雀成績データ',
+                    text: '麻雀成績管理のエクスポートデータ'
+                }).then(() => {
+                    notify('共有完了');
+                }).catch((err) => {
+                    if(err.name !== 'AbortError') {
+                        downloadFile(jsonStr, filename);
+                    }
+                });
+            } else {
+                downloadFile(jsonStr, filename);
+            }
+        }
+
+        function downloadFile(content, filename) {
+            const blob = new Blob([content], {type:'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(() => URL.revokeObjectURL(url), 100);
+            
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            if(isIOS) {
+                setTimeout(() => {
+                    alert('📥 ダウンロードが完了しました！\n\n【保存場所】\n1. Safariの「ダウンロード」ボタン（↓）をタップ\n2. または「ファイル」アプリの「ダウンロード」フォルダを確認\n\n保存場所を変更する場合は、ファイルアプリで移動できます。');
+                }, 500);
+            } else {
+                notify('エクスポート完了');
+            }
+        }
+
+        // インポート機能
+        function importData(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                try {
+                    const imp = JSON.parse(ev.target.result);
+                    if(!imp.data || !imp.allPlayers) throw new Error('無効なファイル形式');
+                    if(confirm('データを追加しますか？（キャンセルすると上書きされます）')) {
+                        Object.entries(imp.data.dates).forEach(([d,v]) => {
+                            if(data.dates[d] && !confirm(d+'のデータを上書きしますか？')) return;
+                            data.dates[d] = v;
+                        });
+                        imp.allPlayers.forEach(p => { if(!allPlayers.includes(p)) allPlayers.push(p); });
+                    } else {
+                        data = imp.data;
+                        allPlayers = imp.allPlayers;
+                    }
+                    saveToFirebase();
+                    render();
+                    notify('インポート完了');
+                } catch(err) {
+                    alert('インポート失敗: '+err.message);
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        }
+
+        // レンダリング
+        function render() {
+            const d = getData();
+            document.getElementById('gameType').value = d.type;
+            renderStats();
+            renderPlayerSelectors();
+            renderScoreInputs();
+            renderGamesList();
+        }
+
+        // 統計表示
+        function renderStats() {
+            let games=0, players=new Set(), score=0;
+            Object.values(data.dates).forEach(d => {
+                d.games.forEach(g => {
+                    games++;
+                    g.forEach((s,i) => {
+                        players.add(d.players[i]);
+                        score += s;
+                    });
+                });
+            });
+            document.getElementById('stats').innerHTML = `
+                <div class="bg-gradient-to-br from-cyan-500 to-teal-600 rounded-lg p-3 text-white">
+                    <div class="text-2xl font-bold">${games}</div>
+                    <div class="text-xs">総半荘数</div>
+                </div>
+                <div class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg p-3 text-white">
+                    <div class="text-2xl font-bold">${players.size}</div>
+                    <div class="text-xs">プレイヤー数</div>
+                </div>
+            `;
+        }
+
+        // プレイヤー選択表示
+        function renderPlayerSelectors() {
+            const d = getData();
+            let html = '';
+            for(let i=0; i<d.type; i++) {
+                const current = d.players[i] || '';
+                html += `<select onchange="playerChanged(${i}, this.value)" class="w-full px-3 py-2 border rounded-lg mb-2">
+                    <option value="">プレイヤー${i+1}を選択...</option>
+                    ${allPlayers.map(p => `<option value="${p}" ${p===current?'selected':''}>${p}</option>`).join('')}
+                    <option value="__new__">+ 新しいプレイヤー</option>
+                </select>`;
+            }
+            document.getElementById('playerSelectors').innerHTML = html;
+        }
+
+        // スコア入力表示
+        function renderScoreInputs() {
+            const d = getData();
+            let html = '';
+            d.players.forEach((p,i) => {
+                html += `<div class="mb-2">
+                    <label class="block text-sm mb-1">${p}</label>
+                    <input type="number" id="score${i}" class="w-full px-3 py-2 border rounded-lg" placeholder="スコア">
+                </div>`;
+            });
+            document.getElementById('scoreInputs').innerHTML = html;
+        }
+
+        // ゲームリスト表示
+        function renderGamesList() {
+            const d = getData();
+            if(d.games.length === 0) {
+                document.getElementById('gamesList').innerHTML = '';
+                return;
+            }
+            
+            let html = '<div class="mt-4"><h3 class="font-bold mb-2">今日の半荘</h3>';
+            d.games.forEach((g, idx) => {
+                const totals = g.map((s,i) => s);
+                html += `<div class="bg-gray-50 rounded-lg p-2 mb-2 text-sm">
+                    <div class="font-bold mb-1">半荘${idx+1}</div>
+                    ${d.players.map((p,i) => `<div class="flex justify-between">
+                        <span>${p}</span>
+                        <span class="${totals[i]>0?'text-green-600':totals[i]<0?'text-red-600':'text-gray-600'} font-bold">
+                            ${totals[i]>0?'+':''}${totals[i]}
+                        </span>
+                    </div>`).join('')}
+                </div>`;
+            });
+            html += '</div>';
+            document.getElementById('gamesList').innerHTML = html;
+        }
+
+        // 日別データ表示
+        function renderDaily() {
+            const dates = Object.keys(data.dates).sort().reverse();
+            if(dates.length===0) {
+                document.getElementById('dailyList').innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">データなし</div>';
+                return;
+            }
+            let html = '';
+            dates.forEach(date => {
+                const d = data.dates[date];
+                if(!d.games.length) return;
+                const totals = d.players.map((p,i) => d.games.reduce((sum,g) => sum+(g[i]||0), 0));
+                html += `<div class="bg-cyan-50 rounded-lg p-3 border border-cyan-200 mb-3">
+                    <div class="mb-2">
+                        <div class="text-sm font-bold">${new Date(date).toLocaleDateString('ja-JP',{month:'long',day:'numeric'})}</div>
+                        <div class="inline-block bg-cyan-600 text-white px-2 py-1 rounded-full text-xs mt-1">${d.type}人麻雀 | ${d.games.length}半荘</div>
+                    </div>
+                    <div class="table-scroll">
+                        <table class="w-full text-xs">
+                            <thead><tr class="border-b-2 border-cyan-300">
+                                <th class="text-left py-2 px-1 font-bold sticky left-0 bg-cyan-50">半荘</th>
+                                ${d.players.map(p => `<th class="text-center py-2 px-1 font-bold">${p}</th>`).join('')}
+                            </tr></thead>
+                            <tbody>
+                                ${d.games.map((g,gi) => `<tr class="border-b border-gray-200">
+                                    <td class="py-2 px-1 sticky left-0 bg-cyan-50">
+                                        <div class="flex items-center gap-1">
+                                            <span class="font-medium">${gi+1}</span>
+                                            <button onclick="removeGame('${date}',${gi})" class="bg-red-500 text-white rounded px-2 py-1 text-xs font-bold active:bg-red-600" style="min-width:44px;min-height:32px;">削除</button>
+                                        </div>
+                                    </td>
+                                    ${g.map((s,pi) => `<td class="text-center py-2 px-1">
+                                        <input type="number" value="${s}" onchange="updateScore('${date}',${gi},${pi},this.value)" 
+                                            class="w-16 text-center px-1 py-1 border rounded ${s>0?'text-green-600':s<0?'text-red-600':'text-gray-600'}">
+                                    </td>`).join('')}
+                                </tr>`).join('')}
+                                <tr class="border-t-2 border-cyan-300 bg-cyan-100 font-bold">
+                                    <td class="py-2 px-1 sticky left-0 bg-cyan-100">合計</td>
+                                    ${totals.map(t => `<td class="text-center py-2 px-1 ${t>0?'text-green-600':t<0?'text-red-600':'text-gray-600'}">${t>0?'+':''}${t}</td>`).join('')}
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('dailyList').innerHTML = html;
+        }
+
+        // プレイヤー統計表示
+        function renderPlayers() {
+            const stats = {};
+            Object.values(data.dates).forEach(d => {
+                d.games.forEach(g => {
+                    g.forEach((s,i) => {
+                        const name = d.players[i];
+                        if(!name) return;
+                        if(!stats[name]) stats[name] = {name, totalGames:0, totalScore:0, ranks:{1:0,2:0,3:0,4:0}};
+                        stats[name].totalGames++;
+                        stats[name].totalScore += s;
+                        const sorted = [...g].sort((a,b)=>b-a);
+                        const rank = sorted.indexOf(s) + 1;
+                        stats[name].ranks[rank]++;
+                    });
+                });
+            });
+            const list = Object.values(stats).sort((a,b) => b.totalScore - a.totalScore);
+            if(!list.length) {
+                document.getElementById('playerStats').innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">データなし</div>';
+                return;
+            }
+            let html = '';
+            list.forEach((p,idx) => {
+                const avg = Math.round(p.totalScore / p.totalGames);
+                const medal = ['👑','🥈','🥉'][idx] || '';
+                let ranks = '';
+                for(let r=1; r<=4; r++) {
+                    const count = p.ranks[r] || 0;
+                    const pct = ((count/p.totalGames)*100).toFixed(1);
+                    const colors = ['bg-yellow-500 text-yellow-700 bg-yellow-50','bg-gray-400 text-gray-700 bg-gray-50','bg-orange-500 text-orange-700 bg-orange-50','bg-red-500 text-red-700 bg-red-50'][r-1].split(' ');
+                    ranks += `<div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs font-bold w-8 ${colors[1]}">${r}位</span>
+                        <div class="flex-1 ${colors[2]} rounded-full h-6 overflow-hidden">
+                            <div class="${colors[0]} h-full flex items-center justify-end px-2 text-white text-xs font-bold" style="width:${pct}%">
+                                ${pct>15?pct+'%':''}
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold ${colors[1]} w-12">${pct}%</span>
+                        <span class="text-xs text-gray-500 w-10 text-right">${count}回</span>
+                    </div>`;
+                }
+                html += `<div class="bg-cyan-50 rounded-lg p-4 border border-cyan-200 mb-3">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-10 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold">${p.name[0].toUpperCase()}</div>
+                            <div>
+                                <h3 class="text-base font-bold">${medal} ${p.name}</h3>
+                                <p class="text-xs text-gray-600">${p.totalGames}半荘</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xl font-bold text-cyan-600">${p.totalScore>0?'+':''}${p.totalScore.toLocaleString()}</div>
+                            <div class="text-xs text-gray-600">平均: ${avg>0?'+':''}${avg}</div>
+                        </div>
+                    </div>
+                    <div class="border-t border-cyan-200 pt-3">
+                        <h4 class="text-xs font-bold mb-2">順位取得率</h4>
+                        ${ranks}
+                    </div>
+                </div>`;
+            });
+            document.getElementById('playerStats').innerHTML = html;
+        }
+    </script>
+</body>
+</html>
