@@ -228,6 +228,20 @@
                         data = { dates: {} };
                     }
                     
+                    // データの整合性を確保（全ての日付データにplayers, gamesを追加）
+                    Object.keys(data.dates).forEach(date => {
+                        const d = data.dates[date];
+                        if(!d.players || !Array.isArray(d.players)) {
+                            d.players = [];
+                        }
+                        if(!d.games || !Array.isArray(d.games)) {
+                            d.games = [];
+                        }
+                        if(!d.type || typeof d.type !== 'number') {
+                            d.type = 4;
+                        }
+                    });
+                    
                     // プレイヤーデータの初期化
                     if (firebaseData && Array.isArray(firebaseData.allPlayers)) {
                         allPlayers = firebaseData.allPlayers;
@@ -281,6 +295,20 @@
                         // データの更新
                         if(firebaseData.data && firebaseData.data.dates) {
                             data = firebaseData.data;
+                            
+                            // データの整合性を確保
+                            Object.keys(data.dates).forEach(date => {
+                                const d = data.dates[date];
+                                if(!d.players || !Array.isArray(d.players)) {
+                                    d.players = [];
+                                }
+                                if(!d.games || !Array.isArray(d.games)) {
+                                    d.games = [];
+                                }
+                                if(!d.type || typeof d.type !== 'number') {
+                                    d.type = 4;
+                                }
+                            });
                         }
                         if(Array.isArray(firebaseData.allPlayers)) {
                             allPlayers = firebaseData.allPlayers;
@@ -383,7 +411,9 @@
         function gameTypeChanged() {
             const d = getData();
             d.type = parseInt(document.getElementById('gameType').value);
-            if(d.players.length > d.type) d.players = d.players.slice(0, d.type);
+            if(d.players && Array.isArray(d.players) && d.players.length > d.type) {
+                d.players = d.players.slice(0, d.type);
+            }
             saveToFirebase();
             render();
         }
@@ -393,7 +423,12 @@
             if(!data.dates[selectedDate]) {
                 data.dates[selectedDate] = { type:4, players:[], games:[] };
             }
-            return data.dates[selectedDate];
+            // 既存データの整合性チェック
+            const d = data.dates[selectedDate];
+            if(!d.players) d.players = [];
+            if(!d.games) d.games = [];
+            if(!d.type) d.type = 4;
+            return d;
         }
 
         // プレイヤー変更
@@ -694,6 +729,20 @@
                     // データの整合性を確認
                     if(!data.dates) data.dates = {};
                     
+                    // 全ての日付データの整合性を確保
+                    Object.keys(data.dates).forEach(date => {
+                        const d = data.dates[date];
+                        if(!d.players || !Array.isArray(d.players)) {
+                            d.players = [];
+                        }
+                        if(!d.games || !Array.isArray(d.games)) {
+                            d.games = [];
+                        }
+                        if(!d.type || typeof d.type !== 'number') {
+                            d.type = 4;
+                        }
+                    });
+                    
                     // 最終的なプレイヤー数を確認
                     const finalPlayerCount = allPlayers.length;
                     const dateCount = Object.keys(data.dates).length;
@@ -865,7 +914,14 @@
 
         // プレイヤー選択表示
         function renderPlayerSelectors() {
+            const playerSelectorsElement = document.getElementById('playerSelectors');
+            if(!playerSelectorsElement) return;
+            
             const d = getData();
+            if(!d.players || !Array.isArray(d.players)) {
+                d.players = [];
+            }
+            
             let html = '';
             for(let i=0; i<d.type; i++) {
                 const current = d.players[i] || '';
@@ -875,7 +931,7 @@
                     <option value="__new__">+ 新しいプレイヤー</option>
                 </select>`;
             }
-            document.getElementById('playerSelectors').innerHTML = html;
+            playerSelectorsElement.innerHTML = html;
         }
 
         // スコア入力表示
