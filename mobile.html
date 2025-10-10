@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>麻雀成績管理 Mobile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+        body { font-family: 'Noto Sans JP', sans-serif; -webkit-font-smoothing: antialiased; }
+        * { -webkit-tap-highlight-color: transparent; }
+        input, select, button { font-size: 16px !important; }
+        .animate-fade { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        table { border-collapse: collapse; min-width: 100%; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-50 min-h-screen">
+    <header class="bg-gradient-to-r from-cyan-600 to-teal-600 text-white shadow-lg sticky top-0 z-50">
+        <div class="px-3 py-3">
+            <h1 class="text-xl font-bold text-center mb-2">🀄 麻雀成績管理 Mobile</h1>
+            <div class="flex gap-2 justify-center">
+                <button onclick="exportData()" class="bg-white/20 active:bg-white/30 px-3 py-2 rounded text-xs">📥 エクスポート</button>
+                <button onclick="document.getElementById('fileInput').click()" class="bg-white/20 active:bg-white/30 px-3 py-2 rounded text-xs">📤 インポート</button>
+            </div>
+        </div>
+    </header>
+    <input type="file" id="fileInput" accept=".json" style="display:none" onchange="importData(event)">
+
+    <div class="px-3 py-4">
+        <div id="stats" class="grid grid-cols-2 gap-2 mb-4"></div>
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-4 animate-fade">
+            <div class="flex border-b">
+                <button onclick="switchTab('input')" id="tab-input" class="flex-1 px-4 py-3 text-sm font-medium bg-gradient-to-r from-cyan-500 to-teal-500 text-white">入力</button>
+                <button onclick="switchTab('daily')" id="tab-daily" class="flex-1 px-4 py-3 text-sm font-medium text-gray-600">日別</button>
+                <button onclick="switchTab('players')" id="tab-players" class="flex-1 px-4 py-3 text-sm font-medium text-gray-600">統計</button>
+            </div>
+            <div id="content-input" class="p-4">
+                <div class="mb-3">
+                    <label class="block text-sm font-medium mb-1">日付</label>
+                    <input type="date" id="selectedDate" onchange="dateChanged()" class="w-full px-3 py-2 border rounded-lg">
+                </div>
+                <div class="mb-3">
+                    <label class="block text-sm font-medium mb-1">麻雀の種類</label>
+                    <select id="gameType" onchange="gameTypeChanged()" class="w-full px-3 py-2 border rounded-lg">
+                        <option value="4">4人麻雀</option>
+                        <option value="3">3人麻雀</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="block text-sm font-medium mb-1">プレイヤー選択</label>
+                    <div id="playerSelectors"></div>
+                </div>
+                <div class="mb-3">
+                    <label class="block text-sm font-medium mb-1">スコア入力</label>
+                    <div id="scoreInputs"></div>
+                    <button onclick="addGame()" class="w-full mt-2 bg-gradient-to-r from-cyan-600 to-teal-600 text-white px-4 py-3 rounded-lg font-medium">半荘を追加</button>
+                </div>
+            </div>
+            <div id="content-daily" class="p-4 hidden">
+                <div class="flex justify-between mb-3">
+                    <h3 class="font-bold">日別成績</h3>
+                    <button onclick="if(confirm('全削除?'))clearAll()" class="text-red-600 text-xs">全削除</button>
+                </div>
+                <div id="dailyList"></div>
+            </div>
+            <div id="content-players" class="p-4 hidden">
+                <h3 class="font-bold mb-3">プレイヤー統計</h3>
+                <div id="playerStats"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+let data = JSON.parse(localStorage.getItem('mahjongData') || '{"dates":{}}');
+let allPlayers = JSON.parse(localStorage.getItem('allPlayers') || '[]');
+let selectedDate = new Date().toISOString().split('T')[0];
+
+function save() {
+    localStorage.setItem('mahjongData', JSON.stringify(data));
+    localStorage.setItem('allPlayers', JSON.stringify(allPlayers));
+}
+
+function notify(msg) {
+    const n = document.createElement('div');
+    n.className = 'fixed top-16 left-1/2 -translate-x-1/2 bg-cyan-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm';
+    n.textContent = msg;
+    document.body.appendChild(n);
+    setTimeout(() => n.remove(), 2000);
+}
+
+function switchTab(tab) {
+    ['input','daily','players'].forEach(t => {
+        document.getElementById('tab-'+t).className = t===tab ? 
+            'flex-1 px-4 py-3 text-sm font-medium bg-gradient-to-r from-cyan-500 to-teal-500 text-white' :
+            'flex-1 px-4 py-3 text-sm font-medium text-gray-600';
+        document.getElementById('content-'+t).className = t===tab ? 'p-4' : 'p-4 hidden';
+    });
+    if(tab==='daily') renderDaily();
+    if(tab==='players') renderPlayers();
+}
+
+function dateChanged() {
+    selectedDate = document.getElementById('selectedDate').value;
+    render();
+}
+
+function gameTypeChanged() {
+    const d = getData();
+    d.type = parseInt(document.getElementById('gameType').value);
+    if(d.players.length > d.type) d.players = d.players.slice(0, d.type);
+    save();
+    render();
+}
+
+function getData() {
+    if(!data.dates[selectedDate]) {
+        data.dates[selectedDate] = { type:4, players:[], games:[] };
+    }
+    return data.dates[selectedDate];
+}
+
+function playerChanged(index, value) {
+    if(value==='__new__') {
+        const name = prompt('新しいプレイヤー名');
+        if(name && name.trim()) {
+            if(!allPlayers.includes(name.trim())) {
+                allPlayers.push(name.trim());
+                save();
+            }
+            getData().players[index] = name.trim();
+            save();
+            render();
+        }
+    } else {
+        getData().players[index] = value;
+        save();
+        render();
+    }
+}
+
+function addGame() {
+    const d = getData();
+    if(d.players.length < d.type) {
+        alert('全プレイヤーを選択してください');
+        return;
+    }
+    const scores = d.players.map((p,i) => parseInt(document.getElementById('score'+i).value) || 0);
+    
+    // スコア合計チェック
+    const total = scores.reduce((sum, s) => sum + s, 0);
+    if(total !== 0) {
+        const confirm = window.confirm(`⚠️ スコアの合計が${total>0?'+':''}${total}です（0になっていません）\n\nこのまま登録しますか？\n\n【入力したスコア】\n${d.players.map((p,i) => `${p}: ${scores[i]>0?'+':''}${scores[i]}`).join('\n')}\n合計: ${total>0?'+':''}${total}`);
+        if(!confirm) return;
+    }
+    
+    d.games.push(scores);
+    save();
+    d.players.forEach((p,i) => document.getElementById('score'+i).value = '');
+    render();
+    notify('半荘'+d.games.length+'を追加');
+}
+
+function removeGame(date, idx) {
+    if(confirm('この半荘を削除しますか？')) {
+        data.dates[date].games.splice(idx, 1);
+        save();
+        render();
+        renderDaily();
+        notify('削除しました');
+    }
+}
+
+// クリックイベントの委譲処理を追加
+document.addEventListener('DOMContentLoaded', function() {
+    document.body.addEventListener('click', function(e) {
+        // 削除ボタンのクリック処理
+        if(e.target.classList.contains('delete-game-btn') || e.target.closest('.delete-game-btn')) {
+            const btn = e.target.classList.contains('delete-game-btn') ? e.target : e.target.closest('.delete-game-btn');
+            const date = btn.getAttribute('data-date');
+            const idx = parseInt(btn.getAttribute('data-index'));
+            removeGame(date, idx);
+            e.preventDefault();
+            e.stopPropagation();
+        }
+    });
+});
+
+function updateScore(date, gIdx, pIdx, val) {
+    data.dates[date].games[gIdx][pIdx] = parseInt(val) || 0;
+    save();
+}
+
+function clearAll() {
+    data = {dates:{}};
+    save();
+    render();
+}
+
+function exportData() {
+    const exp = { data, allPlayers, exportDate: new Date().toISOString(), version: '1.0' };
+    const jsonStr = JSON.stringify(exp, null, 2);
+    const filename = 'mahjong_'+new Date().toISOString().split('T')[0]+'.json';
+    
+    // iOSで共有シートを使う（Web Share API）
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if(isIOS && navigator.share) {
+        const file = new File([jsonStr], filename, { type: 'application/json' });
+        navigator.share({
+            files: [file],
+            title: '麻雀成績データ',
+            text: '麻雀成績管理のエクスポートデータ'
+        }).then(() => {
+            notify('共有完了');
+        }).catch((err) => {
+            // 共有がキャンセルされた、またはエラーの場合は通常のダウンロードにフォールバック
+            if(err.name !== 'AbortError') {
+                downloadFile(jsonStr, filename);
+            }
+        });
+    } else {
+        // 通常のダウンロード
+        downloadFile(jsonStr, filename);
+    }
+}
+
+function downloadFile(content, filename) {
+    const blob = new Blob([content], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 100);
+    
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if(isIOS) {
+        setTimeout(() => {
+            alert('📥 ダウンロードが完了しました！\n\n【保存場所】\n1. Safariの「ダウンロード」ボタン（↓）をタップ\n2. または「ファイル」アプリの「ダウンロード」フォルダを確認\n\n保存場所を変更する場合は、ファイルアプリで移動できます。');
+        }, 500);
+    } else {
+        notify('エクスポート完了');
+    }
+}
+
+function importData(e) {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        try {
+            const imp = JSON.parse(ev.target.result);
+            if(!imp.data || !imp.allPlayers) throw new Error('無効');
+            if(confirm('追加しますか？(キャンセル=上書き)')) {
+                Object.entries(imp.data.dates).forEach(([d,v]) => {
+                    if(data.dates[d] && !confirm(d+'上書き?')) return;
+                    data.dates[d] = v;
+                });
+                imp.allPlayers.forEach(p => { if(!allPlayers.includes(p)) allPlayers.push(p); });
+            } else {
+                data = imp.data;
+                allPlayers = imp.allPlayers;
+            }
+            save();
+            render();
+            notify('インポート完了');
+        } catch(err) {
+            alert('失敗: '+err.message);
+        }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+}
+
+function render() {
+    const d = getData();
+    document.getElementById('gameType').value = d.type;
+    renderStats();
+    renderPlayerSelectors();
+    renderScoreInputs();
+}
+
+function renderStats() {
+    let games=0, players=new Set(), score=0;
+    Object.values(data.dates).forEach(d => {
+        d.games.forEach(g => {
+            games++;
+            g.forEach((s,i) => {
+                players.add(d.players[i]);
+                score += s;
+            });
+        });
+    });
+    document.getElementById('stats').innerHTML = `
+        <div class="bg-gradient-to-br from-cyan-500 to-teal-600 rounded-lg p-3 text-white">
+            <div class="text-2xl font-bold">${games}</div>
+            <div class="text-xs">総半荘数</div>
+        </div>
+        <div class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg p-3 text-white">
+            <div class="text-2xl font-bold">${players.size}</div>
+            <div class="text-xs">プレイヤー数</div>
+        </div>
+        <div class="bg-gradient-to-br from-teal-500 to-emerald-600 rounded-lg p-3 text-white">
+            <div class="text-2xl font-bold">${score.toLocaleString()}</div>
+            <div class="text-xs">累計スコア</div>
+        </div>
+        <div class="bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg p-3 text-white">
+            <div class="text-2xl font-bold">${Object.keys(data.dates).length}</div>
+            <div class="text-xs">対戦日数</div>
+        </div>
+    `;
+}
+
+function renderPlayerSelectors() {
+    const d = getData();
+    let html = '';
+    for(let i=0; i<d.type; i++) {
+        const current = d.players[i] || '';
+        html += `<select onchange="playerChanged(${i}, this.value)" class="w-full px-3 py-2 border rounded-lg mb-2">
+            <option value="">プレイヤー${i+1}を選択...</option>
+            ${allPlayers.map(p => `<option value="${p}" ${p===current?'selected':''}>${p}</option>`).join('')}
+            <option value="__new__">+ 新しいプレイヤー</option>
+        </select>`;
+    }
+    document.getElementById('playerSelectors').innerHTML = html;
+}
+
+function renderScoreInputs() {
+    const d = getData();
+    if(d.players.length < d.type) {
+        document.getElementById('scoreInputs').innerHTML = '<div class="text-gray-400 text-sm text-center py-2">全プレイヤーを選択してください</div>';
+        return;
+    }
+    const colors = ['bg-yellow-50 border-yellow-300', 'bg-blue-50 border-blue-300', 'bg-green-50 border-green-300', 'bg-purple-50 border-purple-300'];
+    let html = '';
+    d.players.forEach((p,i) => {
+        html += `<div class="flex items-center gap-2 mb-2 p-3 rounded-lg border-2 ${colors[i]}">
+            <div class="flex-1">
+                <div class="text-xs text-gray-600 mb-1">プレイヤー${i+1}</div>
+                <div class="font-bold text-sm truncate">${p}</div>
+            </div>
+            <div class="flex-1">
+                <div class="text-xs text-gray-600 mb-1">スコア</div>
+                <input type="number" id="score${i}" placeholder="±0" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-center font-bold">
+            </div>
+        </div>`;
+    });
+    document.getElementById('scoreInputs').innerHTML = html;
+}
+
+function renderDaily() {
+    const dates = Object.keys(data.dates).sort().reverse();
+    if(dates.length===0) {
+        document.getElementById('dailyList').innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">データなし</div>';
+        return;
+    }
+    let html = '';
+    dates.forEach(date => {
+        const d = data.dates[date];
+        if(!d.games.length) return;
+        const totals = d.players.map((p,i) => d.games.reduce((sum,g) => sum+(g[i]||0), 0));
+        html += `<div class="bg-cyan-50 rounded-lg p-3 border border-cyan-200 mb-3">
+            <div class="mb-2">
+                <div class="text-sm font-bold">${new Date(date).toLocaleDateString('ja-JP',{month:'long',day:'numeric'})}</div>
+                <div class="inline-block bg-cyan-600 text-white px-2 py-1 rounded-full text-xs mt-1">${d.type}人麻雀 | ${d.games.length}半荘</div>
+            </div>
+            <div class="table-scroll">
+                <table class="w-full text-xs">
+                    <thead><tr class="border-b-2 border-cyan-300">
+                        <th class="text-left py-2 px-1 font-bold sticky left-0 bg-cyan-50">半荘</th>
+                        ${d.players.map(p => `<th class="text-center py-2 px-1 font-bold">${p}</th>`).join('')}
+                    </tr></thead>
+                    <tbody>
+                        ${d.games.map((g,gi) => `<tr class="border-b border-gray-200">
+                            <td class="py-2 px-1 sticky left-0 bg-cyan-50">
+                                <div class="flex items-center gap-1">
+                                    <span class="font-medium">${gi+1}</span>
+                                    <button class="delete-game-btn bg-red-500 text-white rounded px-2 py-1 text-xs font-bold active:bg-red-600" data-date="${date}" data-index="${gi}" style="min-width:44px;min-height:32px;">削除</button>
+                                </div>
+                            </td>
+                            ${g.map((s,pi) => `<td class="text-center py-2 px-1">
+                                <input type="number" value="${s}" onchange="updateScore('${date}',${gi},${pi},this.value)" 
+                                    class="w-16 text-center px-1 py-1 border rounded ${s>0?'text-green-600':s<0?'text-red-600':'text-gray-600'}">
+                            </td>`).join('')}
+                        </tr>`).join('')}
+                        <tr class="border-t-2 border-cyan-300 bg-cyan-100 font-bold">
+                            <td class="py-2 px-1 sticky left-0 bg-cyan-100">合計</td>
+                            ${totals.map(t => `<td class="text-center py-2 px-1 ${t>0?'text-green-600':t<0?'text-red-600':'text-gray-600'}">${t>0?'+':''}${t}</td>`).join('')}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>`;
+    });
+    document.getElementById('dailyList').innerHTML = html;
+}
+
+function renderPlayers() {
+    const stats = {};
+    Object.values(data.dates).forEach(d => {
+        d.games.forEach(g => {
+            g.forEach((s,i) => {
+                const name = d.players[i];
+                if(!name) return;
+                if(!stats[name]) stats[name] = {name, totalGames:0, totalScore:0, ranks:{1:0,2:0,3:0,4:0}};
+                stats[name].totalGames++;
+                stats[name].totalScore += s;
+                const sorted = [...g].sort((a,b)=>b-a);
+                const rank = sorted.indexOf(s) + 1;
+                stats[name].ranks[rank]++;
+            });
+        });
+    });
+    const list = Object.values(stats).sort((a,b) => b.totalScore - a.totalScore);
+    if(!list.length) {
+        document.getElementById('playerStats').innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">データなし</div>';
+        return;
+    }
+    let html = '';
+    list.forEach((p,idx) => {
+        const avg = Math.round(p.totalScore / p.totalGames);
+        const medal = ['👑','🥈','🥉'][idx] || '';
+        let ranks = '';
+        for(let r=1; r<=4; r++) {
+            const count = p.ranks[r] || 0;
+            const pct = ((count/p.totalGames)*100).toFixed(1);
+            const colors = ['bg-yellow-500 text-yellow-700 bg-yellow-50','bg-gray-400 text-gray-700 bg-gray-50','bg-orange-500 text-orange-700 bg-orange-50','bg-red-500 text-red-700 bg-red-50'][r-1].split(' ');
+            ranks += `<div class="flex items-center gap-2 mb-2">
+                <span class="text-xs font-bold w-8 ${colors[1]}">${r}位</span>
+                <div class="flex-1 ${colors[2]} rounded-full h-6 overflow-hidden">
+                    <div class="${colors[0]} h-full flex items-center justify-end px-2 text-white text-xs font-bold" style="width:${pct}%">
+                        ${pct>15?pct+'%':''}
+                    </div>
+                </div>
+                <span class="text-xs font-bold ${colors[1]} w-12">${pct}%</span>
+                <span class="text-xs text-gray-500 w-10 text-right">${count}回</span>
+            </div>`;
+        }
+        html += `<div class="bg-cyan-50 rounded-lg p-4 border border-cyan-200 mb-3">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold">${p.name[0].toUpperCase()}</div>
+                    <div>
+                        <h3 class="text-base font-bold">${medal} ${p.name}</h3>
+                        <p class="text-xs text-gray-600">${p.totalGames}半荘</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-xl font-bold text-cyan-600">${p.totalScore>0?'+':''}${p.totalScore.toLocaleString()}</div>
+                    <div class="text-xs text-gray-600">平均: ${avg>0?'+':''}${avg}</div>
+                </div>
+            </div>
+            <div class="border-t border-cyan-200 pt-3">
+                <h4 class="text-xs font-bold mb-2">順位取得率</h4>
+                ${ranks}
+            </div>
+        </div>`;
+    });
+    document.getElementById('playerStats').innerHTML = html;
+}
+
+document.getElementById('selectedDate').value = selectedDate;
+render();
+    </script>
+</body>
+</html>
