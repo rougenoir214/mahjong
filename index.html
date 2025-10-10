@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>麻雀成績管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#ecfeff',
+                            100: '#cffafe',
+                            200: '#a5f3fc',
+                            300: '#67e8f9',
+                            400: '#22d3ee',
+                            500: '#06b6d4',
+                            600: '#0891b2',
+                            700: '#0e7490',
+                            800: '#155e75',
+                            900: '#164e63',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-50 min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-cyan-600 to-teal-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex justify-between items-center">
+                <div class="flex-1"></div>
+                <div class="flex-1 text-center">
+                    <h1 class="text-4xl font-bold">🀄 麻雀成績管理</h1>
+                    <p class="text-cyan-100 mt-2">あなたの雀力を可視化</p>
+                </div>
+                <div class="flex-1 flex justify-end gap-2">
+                    <button id="exportBtn" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition">
+                        📥 エクスポート
+                    </button>
+                    <button id="importBtn" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm font-medium transition">
+                        📤 インポート
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- インポート用の隠しファイル入力 -->
+    <input type="file" id="fileInput" accept=".json" style="display: none;">
+
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- 統計カード -->
+        <div id="statsCards" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <!-- JavaScript で動的生成 -->
+        </div>
+
+        <!-- メインコンテンツ -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- 左側: 成績入力フォーム -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-2xl shadow-xl p-6 card-hover animate-fade-in">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                        <span class="bg-gradient-to-r from-cyan-500 to-teal-500 text-white rounded-lg px-3 py-1 mr-3">📝</span>
+                        成績登録
+                    </h2>
+                    
+                    <!-- 日付選択 -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">日付</label>
+                        <input type="date" id="selectedDate" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition">
+                    </div>
+
+                    <!-- 麻雀の種類 -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">麻雀の種類</label>
+                        <select id="gameType"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition">
+                            <option value="4">4人麻雀</option>
+                            <option value="3">3人麻雀</option>
+                        </select>
+                    </div>
+
+                    <!-- プレイヤー選択 -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">プレイヤー選択</label>
+                        <div id="playerSelectors" class="space-y-2 mb-3">
+                            <!-- JavaScript で動的生成 -->
+                        </div>
+                    </div>
+
+                    <!-- 半荘スコア入力 -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">半荘スコア入力</label>
+                        <div id="scoreInputs" class="space-y-2">
+                            <!-- JavaScript で動的生成 -->
+                        </div>
+                        <button id="addGameBtn" type="button"
+                            class="w-full mt-3 bg-gradient-to-r from-cyan-600 to-teal-600 text-white px-6 py-3 rounded-lg font-medium hover:from-cyan-700 hover:to-teal-700 transition transform hover:scale-105 shadow-lg">
+                            半荘を追加
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右側: 成績一覧とプレイヤー統計 -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- タブ -->
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden animate-fade-in">
+                    <div class="flex border-b border-gray-200">
+                        <button id="tabDaily" class="tab-btn flex-1 px-6 py-4 text-center font-medium bg-gradient-to-r from-cyan-500 to-teal-500 text-white transition">
+                            日別成績
+                        </button>
+                        <button id="tabPlayers" class="tab-btn flex-1 px-6 py-4 text-center font-medium text-gray-600 hover:bg-gray-50 transition">
+                            プレイヤー統計
+                        </button>
+                    </div>
+
+                    <!-- 日別成績タブコンテンツ -->
+                    <div id="dailyContent" class="p-6">
+                        <div class="mb-4 flex justify-between items-center">
+                            <h3 class="text-xl font-bold text-gray-800">日別成績</h3>
+                            <button id="clearAllBtn" class="text-red-600 hover:text-red-700 text-sm font-medium">
+                                全データ削除
+                            </button>
+                        </div>
+                        <div id="dailyList" class="space-y-4">
+                            <!-- JavaScript で動的生成 -->
+                        </div>
+                    </div>
+
+                    <!-- プレイヤー統計タブコンテンツ -->
+                    <div id="playersContent" class="p-6 hidden">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">プレイヤー統計</h3>
+                        <div id="playerStats" class="space-y-4">
+                            <!-- JavaScript で動的生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // データ管理
+        class MahjongApp {
+            constructor() {
+                this.data = this.loadData();
+                this.allPlayers = this.loadAllPlayers();
+                this.selectedDate = new Date().toISOString().split('T')[0];
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.setTodayDate();
+                this.render();
+            }
+
+            // データ構造: { dates: { "2025-01-01": { type: 4, players: ["A", "B"], games: [[100, -50], [50, -20]] } } }
+            loadData() {
+                const data = localStorage.getItem('mahjongData');
+                return data ? JSON.parse(data) : { dates: {} };
+            }
+
+            // 全プレイヤーリスト（過去に登録した全プレイヤー）
+            loadAllPlayers() {
+                const players = localStorage.getItem('allPlayers');
+                return players ? JSON.parse(players) : [];
+            }
+
+            saveData() {
+                localStorage.setItem('mahjongData', JSON.stringify(this.data));
+            }
+
+            saveAllPlayers() {
+                localStorage.setItem('allPlayers', JSON.stringify(this.allPlayers));
+            }
+
+            addToAllPlayers(playerName) {
+                if (!this.allPlayers.includes(playerName)) {
+                    this.allPlayers.push(playerName);
+                    this.saveAllPlayers();
+                }
+            }
+
+            setTodayDate() {
+                document.getElementById('selectedDate').value = this.selectedDate;
+            }
+
+            setupEventListeners() {
+                // 日付変更
+                document.getElementById('selectedDate').addEventListener('change', (e) => {
+                    this.selectedDate = e.target.value;
+                    this.render();
+                });
+
+                // 麻雀の種類変更
+                document.getElementById('gameType').addEventListener('change', () => {
+                    this.updateGameType();
+                });
+
+                // 半荘追加
+                document.getElementById('addGameBtn').addEventListener('click', () => {
+                    this.addGame();
+                });
+
+                // タブ切り替え
+                document.getElementById('tabDaily').addEventListener('click', () => {
+                    this.switchTab('daily');
+                });
+                document.getElementById('tabPlayers').addEventListener('click', () => {
+                    this.switchTab('players');
+                });
+
+                // 全データ削除
+                document.getElementById('clearAllBtn').addEventListener('click', () => {
+                    if (confirm('全ての対戦データを削除しますか？この操作は取り消せません。')) {
+                        this.clearAllData();
+                    }
+                });
+
+                // エクスポート
+                document.getElementById('exportBtn').addEventListener('click', () => {
+                    this.exportData();
+                });
+
+                // インポート
+                document.getElementById('importBtn').addEventListener('click', () => {
+                    document.getElementById('fileInput').click();
+                });
+
+                document.getElementById('fileInput').addEventListener('change', (e) => {
+                    this.importData(e.target.files[0]);
+                });
+            }
+
+            getCurrentDateData() {
+                if (!this.data.dates[this.selectedDate]) {
+                    this.data.dates[this.selectedDate] = {
+                        type: 4,
+                        players: [],
+                        games: []
+                    };
+                }
+                return this.data.dates[this.selectedDate];
+            }
+
+            updateGameType() {
+                const dateData = this.getCurrentDateData();
+                dateData.type = parseInt(document.getElementById('gameType').value);
+                
+                // プレイヤー数を調整
+                const requiredPlayers = dateData.type;
+                if (dateData.players.length > requiredPlayers) {
+                    dateData.players = dateData.players.slice(0, requiredPlayers);
+                }
+                
+                this.saveData();
+                this.render();
+            }
+
+            updatePlayer(index, playerName) {
+                const dateData = this.getCurrentDateData();
+                dateData.players[index] = playerName;
+                
+                // 全プレイヤーリストに追加
+                this.addToAllPlayers(playerName);
+                
+                this.saveData();
+                this.render();
+            }
+
+            addGame() {
+                const dateData = this.getCurrentDateData();
+                if (dateData.players.length < dateData.type) {
+                    alert('全てのプレイヤーを選択してください');
+                    return;
+                }
+
+                const scores = [];
+                dateData.players.forEach((player, index) => {
+                    const input = document.getElementById(`score_${index}`);
+                    const score = input ? parseInt(input.value) || 0 : 0;
+                    scores.push(score);
+                });
+
+                // スコア合計チェック
+                const total = scores.reduce((sum, s) => sum + s, 0);
+                if (total !== 0) {
+                    const playerScores = dateData.players.map((p, i) => `${p}: ${scores[i] > 0 ? '+' : ''}${scores[i]}`).join('\n');
+                    const message = `⚠️ スコアの合計が${total > 0 ? '+' : ''}${total}です（0になっていません）\n\nこのまま登録しますか？\n\n【入力したスコア】\n${playerScores}\n合計: ${total > 0 ? '+' : ''}${total}`;
+                    if (!confirm(message)) {
+                        return;
+                    }
+                }
+
+                // 入力欄をクリア
+                dateData.players.forEach((player, index) => {
+                    const input = document.getElementById(`score_${index}`);
+                    if (input) input.value = '';
+                });
+
+                dateData.games.push(scores);
+                this.saveData();
+                this.render();
+                this.showNotification(`半荘 ${dateData.games.length} を追加しました`);
+            }
+
+            removeGame(dateStr, gameIndex) {
+                if (!confirm('この半荘を削除しますか？')) return;
+
+                const dateData = this.data.dates[dateStr];
+                if (!dateData) return;
+
+                dateData.games.splice(gameIndex, 1);
+                this.saveData();
+                this.render();
+                this.showNotification('半荘を削除しました');
+            }
+
+            updateScore(dateStr, gameIndex, playerIndex, newScore) {
+                const dateData = this.data.dates[dateStr];
+                if (!dateData || !dateData.games[gameIndex]) return;
+
+                dateData.games[gameIndex][playerIndex] = parseInt(newScore) || 0;
+                this.saveData();
+                this.render();
+            }
+
+            clearAllData() {
+                this.data = { dates: {} };
+                this.saveData();
+                this.render();
+                this.showNotification('全データを削除しました');
+            }
+
+            exportData() {
+                const exportObj = {
+                    data: this.data,
+                    allPlayers: this.allPlayers,
+                    exportDate: new Date().toISOString(),
+                    version: '1.0'
+                };
+
+                const dataStr = JSON.stringify(exportObj, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `mahjong_data_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                this.showNotification('データをエクスポートしました！');
+            }
+
+            importData(file) {
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const importObj = JSON.parse(e.target.result);
+                        
+                        // データの検証
+                        if (!importObj.data || !importObj.allPlayers) {
+                            throw new Error('無効なデータ形式です');
+                        }
+
+                        // 既存データとマージするか確認
+                        const shouldMerge = confirm('既存のデータにインポートデータを追加しますか？\n\n「OK」= 追加\n「キャンセル」= 上書き');
+
+                        if (shouldMerge) {
+                            // マージ処理
+                            Object.entries(importObj.data.dates).forEach(([date, dateData]) => {
+                                if (this.data.dates[date]) {
+                                    // 既に同じ日のデータがある場合は確認
+                                    if (confirm(`${date}のデータが既に存在します。上書きしますか？`)) {
+                                        this.data.dates[date] = dateData;
+                                    }
+                                } else {
+                                    this.data.dates[date] = dateData;
+                                }
+                            });
+
+                            // プレイヤーリストをマージ
+                            importObj.allPlayers.forEach(player => {
+                                this.addToAllPlayers(player);
+                            });
+                        } else {
+                            // 上書き処理
+                            this.data = importObj.data;
+                            this.allPlayers = importObj.allPlayers;
+                        }
+
+                        this.saveData();
+                        this.saveAllPlayers();
+                        this.render();
+                        this.showNotification('データをインポートしました！');
+                    } catch (error) {
+                        alert('データのインポートに失敗しました: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+                
+                // ファイル入力をリセット
+                document.getElementById('fileInput').value = '';
+            }
+
+            switchTab(tab) {
+                const tabDaily = document.getElementById('tabDaily');
+                const tabPlayers = document.getElementById('tabPlayers');
+                const dailyContent = document.getElementById('dailyContent');
+                const playersContent = document.getElementById('playersContent');
+
+                if (tab === 'daily') {
+                    tabDaily.classList.add('bg-gradient-to-r', 'from-cyan-500', 'to-teal-500', 'text-white');
+                    tabDaily.classList.remove('text-gray-600', 'hover:bg-gray-50');
+                    tabPlayers.classList.remove('bg-gradient-to-r', 'from-cyan-500', 'to-teal-500', 'text-white');
+                    tabPlayers.classList.add('text-gray-600', 'hover:bg-gray-50');
+                    dailyContent.classList.remove('hidden');
+                    playersContent.classList.add('hidden');
+                } else {
+                    tabPlayers.classList.add('bg-gradient-to-r', 'from-cyan-500', 'to-teal-500', 'text-white');
+                    tabPlayers.classList.remove('text-gray-600', 'hover:bg-gray-50');
+                    tabDaily.classList.remove('bg-gradient-to-r', 'from-cyan-500', 'to-teal-500', 'text-white');
+                    tabDaily.classList.add('text-gray-600', 'hover:bg-gray-50');
+                    playersContent.classList.remove('hidden');
+                    dailyContent.classList.add('hidden');
+                }
+            }
+
+            showNotification(message) {
+                const notification = document.createElement('div');
+                notification.className = 'fixed top-4 right-4 bg-gradient-to-r from-cyan-600 to-teal-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in';
+                notification.textContent = message;
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    notification.style.transition = 'opacity 0.3s';
+                    setTimeout(() => notification.remove(), 300);
+                }, 3000);
+            }
+
+            render() {
+                this.renderStatsCards();
+                this.renderPlayerSelectors();
+                this.renderScoreInputs();
+                this.renderDailyList();
+                this.renderPlayerStats();
+            }
+
+            renderStatsCards() {
+                const allGames = [];
+                const uniquePlayers = new Set();
+                let totalScore = 0;
+
+                Object.values(this.data.dates).forEach(dateData => {
+                    dateData.games.forEach(game => {
+                        allGames.push(game);
+                        game.forEach((score, index) => {
+                            uniquePlayers.add(dateData.players[index]);
+                            totalScore += score;
+                        });
+                    });
+                });
+
+                const totalGames = allGames.length;
+
+                const container = document.getElementById('statsCards');
+                container.innerHTML = `
+                    <div class="bg-gradient-to-br from-cyan-500 to-teal-600 rounded-xl shadow-lg p-6 text-white card-hover">
+                        <div class="text-3xl font-bold mb-2">${totalGames}</div>
+                        <div class="text-cyan-100">総半荘数</div>
+                    </div>
+                    <div class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl shadow-lg p-6 text-white card-hover">
+                        <div class="text-3xl font-bold mb-2">${uniquePlayers.size}</div>
+                        <div class="text-blue-100">プレイヤー数</div>
+                    </div>
+                    <div class="bg-gradient-to-br from-teal-500 to-emerald-600 rounded-xl shadow-lg p-6 text-white card-hover">
+                        <div class="text-3xl font-bold mb-2">${totalScore.toLocaleString()}</div>
+                        <div class="text-teal-100">累計スコア</div>
+                    </div>
+                    <div class="bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl shadow-lg p-6 text-white card-hover">
+                        <div class="text-3xl font-bold mb-2">${Object.keys(this.data.dates).length}</div>
+                        <div class="text-emerald-100">対戦日数</div>
+                    </div>
+                `;
+            }
+
+            renderPlayerSelectors() {
+                const dateData = this.getCurrentDateData();
+                const container = document.getElementById('playerSelectors');
+                const gameType = dateData.type;
+                
+                container.innerHTML = '';
+                for (let i = 0; i < gameType; i++) {
+                    const currentPlayer = dateData.players[i] || '';
+                    const selectorDiv = document.createElement('div');
+                    selectorDiv.className = 'flex gap-2';
+                    selectorDiv.innerHTML = `
+                        <select id="player_${i}" 
+                            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition">
+                            <option value="">プレイヤー${i + 1}を選択...</option>
+                            ${this.allPlayers.map(p => `<option value="${p}" ${p === currentPlayer ? 'selected' : ''}>${p}</option>`).join('')}
+                            <option value="__new__">+ 新しいプレイヤー</option>
+                        </select>
+                    `;
+                    container.appendChild(selectorDiv);
+
+                    // イベントリスナー追加
+                    const select = selectorDiv.querySelector('select');
+                    select.addEventListener('change', (e) => {
+                        if (e.target.value === '__new__') {
+                            const newName = prompt('新しいプレイヤー名を入力してください');
+                            if (newName && newName.trim()) {
+                                this.addToAllPlayers(newName.trim());
+                                this.updatePlayer(i, newName.trim());
+                            } else {
+                                e.target.value = currentPlayer;
+                            }
+                        } else {
+                            this.updatePlayer(i, e.target.value);
+                        }
+                    });
+                }
+            }
+
+            renderScoreInputs() {
+                const dateData = this.getCurrentDateData();
+                const container = document.getElementById('scoreInputs');
+                
+                if (dateData.players.length < dateData.type) {
+                    container.innerHTML = '<div class="text-gray-400 text-sm text-center py-2">全てのプレイヤーを選択すると入力欄が表示されます</div>';
+                    return;
+                }
+
+                container.innerHTML = dateData.players.map((player, index) => `
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-medium text-gray-700 w-24 truncate" title="${player}">${player}</span>
+                        <input type="number" id="score_${index}" placeholder="スコア"
+                            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition">
+                    </div>
+                `).join('');
+            }
+
+            renderDailyList() {
+                const container = document.getElementById('dailyList');
+                const dates = Object.keys(this.data.dates).sort().reverse();
+                
+                if (dates.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-12 text-gray-400">
+                            <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <p class="text-lg font-medium">まだ対戦データがありません</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = dates.map(dateStr => {
+                    const dateData = this.data.dates[dateStr];
+                    if (!dateData || dateData.games.length === 0) return '';
+
+                    // 各プレイヤーの合計スコアを計算
+                    const totals = dateData.players.map((_, pIndex) => {
+                        return dateData.games.reduce((sum, game) => sum + (game[pIndex] || 0), 0);
+                    });
+
+                    return `
+                        <div class="bg-gradient-to-r from-cyan-50 to-teal-50 rounded-xl p-6 border border-cyan-200 card-hover">
+                            <div class="flex justify-between items-center mb-4">
+                                <div>
+                                    <div class="text-lg font-bold text-gray-800">${new Date(dateStr).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                                    <div class="inline-block bg-gradient-to-r from-cyan-600 to-teal-600 text-white px-3 py-1 rounded-full text-sm font-medium mt-1">
+                                        ${dateData.type}人麻雀 | ${dateData.games.length}半荘
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="table-scroll">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="border-b-2 border-cyan-300">
+                                            <th class="text-left py-2 px-2 font-bold text-gray-700">半荘</th>
+                                            ${dateData.players.map(player => `<th class="text-center py-2 px-2 font-bold text-gray-700">${player}</th>`).join('')}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${dateData.games.map((game, gIndex) => `
+                                            <tr class="border-b border-gray-200 hover:bg-white transition">
+                                                <td class="py-2 px-2 font-medium text-gray-800">
+                                                    ${gIndex + 1}半荘
+                                                    <button onclick="app.removeGame('${dateStr}', ${gIndex})" 
+                                                        class="ml-2 text-xs text-red-500 hover:text-red-700">
+                                                        削除
+                                                    </button>
+                                                </td>
+                                                ${game.map((score, pIndex) => {
+                                                    const colorClass = score > 0 ? 'text-green-600' : score < 0 ? 'text-red-600' : 'text-gray-600';
+                                                    return `
+                                                        <td class="text-center py-2 px-2">
+                                                            <input type="number" 
+                                                                value="${score}"
+                                                                onchange="app.updateScore('${dateStr}', ${gIndex}, ${pIndex}, this.value)"
+                                                                class="w-20 text-center px-2 py-1 border border-gray-300 rounded ${colorClass} focus:ring-2 focus:ring-cyan-500 focus:border-transparent">
+                                                        </td>
+                                                    `;
+                                                }).join('')}
+                                            </tr>
+                                        `).join('')}
+                                        <tr class="border-t-2 border-cyan-300 bg-cyan-50 font-bold">
+                                            <td class="py-2 px-2 text-gray-800">合計</td>
+                                            ${totals.map(total => {
+                                                const colorClass = total > 0 ? 'text-green-600' : total < 0 ? 'text-red-600' : 'text-gray-600';
+                                                return `<td class="text-center py-2 px-2 ${colorClass}">${total > 0 ? '+' : ''}${total}</td>`;
+                                            }).join('')}
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            calculatePlayerStats() {
+                const stats = {};
+
+                Object.entries(this.data.dates).forEach(([dateStr, dateData]) => {
+                    dateData.games.forEach(game => {
+                        game.forEach((score, pIndex) => {
+                            const playerName = dateData.players[pIndex];
+                            if (!playerName) return;
+
+                            if (!stats[playerName]) {
+                                stats[playerName] = {
+                                    name: playerName,
+                                    totalGames: 0,
+                                    totalScore: 0,
+                                    ranks: { 1: 0, 2: 0, 3: 0, 4: 0 },
+                                    avgScore: 0
+                                };
+                            }
+
+                            stats[playerName].totalGames++;
+                            stats[playerName].totalScore += score;
+
+                            // 順位を計算（そのゲームのスコアでソート）
+                            const sortedScores = [...game].sort((a, b) => b - a);
+                            const rank = sortedScores.indexOf(score) + 1;
+                            stats[playerName].ranks[rank]++;
+                        });
+                    });
+                });
+
+                // 平均スコアを計算
+                Object.values(stats).forEach(player => {
+                    player.avgScore = player.totalGames > 0 ? Math.round(player.totalScore / player.totalGames) : 0;
+                });
+
+                return Object.values(stats).sort((a, b) => b.totalScore - a.totalScore);
+            }
+
+            renderPlayerStats() {
+                const container = document.getElementById('playerStats');
+                const playerStats = this.calculatePlayerStats();
+
+                if (playerStats.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center py-12 text-gray-400">
+                            <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                            <p class="text-lg font-medium">まだプレイヤー統計がありません</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = playerStats.map((player, index) => {
+                    // 順位取得率を計算
+                    const rankPercentages = [];
+                    let maxRank = 4;
+                    for (let i = 1; i <= maxRank; i++) {
+                        const count = player.ranks[i] || 0;
+                        const percentage = player.totalGames > 0 ? ((count / player.totalGames) * 100).toFixed(1) : '0.0';
+                        rankPercentages.push({ rank: i, count, percentage: parseFloat(percentage) });
+                    }
+
+                    // 順位取得率のバー表示
+                    const rankBars = rankPercentages.map(r => {
+                        const colors = ['bg-yellow-500', 'bg-gray-400', 'bg-orange-500', 'bg-red-500'];
+                        const textColors = ['text-yellow-700', 'text-gray-700', 'text-orange-700', 'text-red-700'];
+                        const bgColors = ['bg-yellow-50', 'bg-gray-50', 'bg-orange-50', 'bg-red-50'];
+                        return `
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="text-sm font-bold w-10 ${textColors[r.rank - 1]}">${r.rank}位</span>
+                                <div class="flex-1">
+                                    <div class="flex items-center gap-2">
+                                        <div class="flex-1 ${bgColors[r.rank - 1]} rounded-full h-8 overflow-hidden">
+                                            <div class="${colors[r.rank - 1]} h-full flex items-center justify-end px-3 text-white text-xs font-bold transition-all duration-500" 
+                                                style="width: ${r.percentage}%">
+                                                ${r.percentage > 15 ? r.percentage + '%' : ''}
+                                            </div>
+                                        </div>
+                                        <span class="text-sm font-bold ${textColors[r.rank - 1]} w-16">${r.percentage}%</span>
+                                        <span class="text-sm text-gray-500 w-12 text-right">${r.count}回</span>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    const medalEmoji = index === 0 ? '👑' : index === 1 ? '🥈' : index === 2 ? '🥉' : '';
+                    
+                    return `
+                        <div class="bg-gradient-to-r from-cyan-50 to-teal-50 rounded-xl p-6 border border-cyan-200 card-hover">
+                            <div class="flex items-center justify-between mb-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-14 h-14 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                                        ${player.name.charAt(0).toUpperCase()}
+                                    </div>
+                                    <div>
+                                        <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                                            ${medalEmoji} ${player.name}
+                                        </h3>
+                                        <p class="text-sm text-gray-600">${player.totalGames}半荘</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-teal-600">
+                                        ${player.totalScore > 0 ? '+' : ''}${player.totalScore.toLocaleString()}
+                                    </div>
+                                    <div class="text-sm text-gray-600 mt-1">平均: ${player.avgScore > 0 ? '+' : ''}${player.avgScore.toLocaleString()}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="border-t border-cyan-200 pt-4">
+                                <h4 class="text-sm font-bold text-gray-700 mb-3">順位取得率</h4>
+                                ${rankBars}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // アプリ起動
+        const app = new MahjongApp();
+    </script>
+</body>
+</html>
