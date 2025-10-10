@@ -79,6 +79,7 @@
                 <div class="flex gap-2 justify-center">
                     <button onclick="exportData()" class="bg-white/20 active:bg-white/30 px-3 py-2 rounded text-xs">📥 エクスポート</button>
                     <button onclick="document.getElementById('fileInput').click()" class="bg-white/20 active:bg-white/30 px-3 py-2 rounded text-xs">📤 インポート</button>
+                    <button onclick="clearAllData()" class="bg-red-500/80 active:bg-red-600 px-3 py-2 rounded text-xs">🗑️ 全削除</button>
                 </div>
             </div>
         </header>
@@ -104,15 +105,29 @@
                             <option value="3">3人麻雀</option>
                         </select>
                     </div>
-                    <div id="playerSelects"></div>
+                    <div id="playerSelectors"></div>
                     <div id="scoreInputs"></div>
                     <button onclick="addGame()" class="w-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white py-3 rounded-lg font-bold mt-3 active:opacity-80">半荘を追加</button>
                     <div id="gamesList"></div>
-                    <div class="mt-4 flex gap-2">
-                        <input type="text" id="newPlayer" placeholder="新しいプレイヤー名" class="flex-1 px-3 py-2 border rounded-lg">
-                        <button onclick="addPlayer()" class="bg-green-500 text-white px-4 py-2 rounded-lg active:bg-green-600">追加</button>
+                    
+                    <!-- プレイヤー管理セクション -->
+                    <div class="mt-4 bg-gray-50 rounded-lg p-3 border border-gray-200">
+                        <h3 class="text-sm font-bold mb-2 text-gray-700">プレイヤー管理</h3>
+                        <div class="flex gap-2 mb-3">
+                            <input type="text" id="newPlayer" placeholder="新しいプレイヤー名" 
+                                   class="flex-1 px-3 py-2 border rounded-lg text-sm"
+                                   onkeypress="if(event.key==='Enter') addPlayer()">
+                            <button onclick="addPlayer()" class="bg-green-500 text-white px-4 py-2 rounded-lg active:bg-green-600 text-sm font-bold">
+                                ➕ 追加
+                            </button>
+                        </div>
+                        <div id="playerList" class="text-xs text-gray-600"></div>
                     </div>
-                    <button onclick="if(confirm('本当に今日のデータを削除しますか？')) clearToday()" class="w-full bg-red-500 text-white py-2 rounded-lg mt-3 active:bg-red-600">今日のデータを削除</button>
+                    
+                    <button onclick="if(confirm('本当に今日のデータを削除しますか？')) clearToday()" 
+                            class="w-full bg-red-500 text-white py-2 rounded-lg mt-3 active:bg-red-600 text-sm">
+                        今日のデータを削除
+                    </button>
                 </div>
                 <div id="content-daily" class="p-4" style="display:none;">
                     <div id="dailyList"></div>
@@ -202,23 +217,57 @@
             database.ref('mahjong').once('value')
                 .then((snapshot) => {
                     const firebaseData = snapshot.val();
-                    if (firebaseData) {
-                        data = firebaseData.data || { dates: {} };
-                        allPlayers = firebaseData.allPlayers || [];
+                    
+                    // データの初期化（存在しない場合）
+                    if (firebaseData && firebaseData.data) {
+                        data = firebaseData.data;
+                        if(!data.dates || typeof data.dates !== 'object') {
+                            data.dates = {};
+                        }
+                    } else {
+                        data = { dates: {} };
                     }
+                    
+                    // プレイヤーデータの初期化
+                    if (firebaseData && Array.isArray(firebaseData.allPlayers)) {
+                        allPlayers = firebaseData.allPlayers;
+                    } else {
+                        allPlayers = [];
+                    }
+                    
+                    console.log('データ読み込み完了:', {
+                        dates: Object.keys(data.dates).length,
+                        players: allPlayers.length
+                    });
                     
                     // リアルタイム監視を開始
                     setupRealtimeListener();
                     
                     // 初期表示
-                    document.getElementById('selectedDate').valueAsDate = new Date();
-                    dateChanged();
+                    const dateInput = document.getElementById('selectedDate');
+                    if(dateInput) {
+                        dateInput.valueAsDate = new Date();
+                        dateChanged();
+                    }
                     render();
                     updateSyncStatus('synced');
                 })
                 .catch((error) => {
                     console.error('データ読み込みエラー:', error);
-                    notify('データの読み込みに失敗しました', 'error');
+                    
+                    // エラーでも初期化は行う
+                    data = { dates: {} };
+                    allPlayers = [];
+                    
+                    // 初期表示
+                    const dateInput = document.getElementById('selectedDate');
+                    if(dateInput) {
+                        dateInput.valueAsDate = new Date();
+                        dateChanged();
+                    }
+                    render();
+                    
+                    notify('データの読み込みに失敗しました。ローカルデータで起動します。', 'error');
                     updateSyncStatus('error');
                 });
         }
@@ -226,12 +275,26 @@
         // リアルタイム監視の設定
         function setupRealtimeListener() {
             database.ref('mahjong').on('value', (snapshot) => {
-                const firebaseData = snapshot.val();
-                if (firebaseData) {
-                    data = firebaseData.data || { dates: {} };
-                    allPlayers = firebaseData.allPlayers || [];
-                    render();
-                    updateSyncStatus('synced');
+                try {
+                    const firebaseData = snapshot.val();
+                    if (firebaseData) {
+                        // データの更新
+                        if(firebaseData.data && firebaseData.data.dates) {
+                            data = firebaseData.data;
+                        }
+                        if(Array.isArray(firebaseData.allPlayers)) {
+                            allPlayers = firebaseData.allPlayers;
+                        }
+                        
+                        // 画面更新（現在のタブに応じて）
+                        render();
+                        if(currentTab === 'daily') renderDaily();
+                        if(currentTab === 'players') renderPlayers();
+                        
+                        updateSyncStatus('synced');
+                    }
+                } catch(error) {
+                    console.error('リアルタイム更新エラー:', error);
                 }
             });
         }
@@ -354,14 +417,26 @@
 
         // プレイヤー追加
         function addPlayer() {
-            const name = document.getElementById('newPlayer').value.trim();
-            if(name && !allPlayers.includes(name)) {
-                allPlayers.push(name);
-                document.getElementById('newPlayer').value = '';
-                saveToFirebase();
-                render();
-                notify('プレイヤー「' + name + '」を追加しました');
+            const input = document.getElementById('newPlayer');
+            if(!input) return;
+            
+            const name = input.value.trim();
+            if(!name) {
+                alert('プレイヤー名を入力してください');
+                return;
             }
+            
+            if(allPlayers.includes(name)) {
+                alert('このプレイヤーは既に登録されています');
+                input.value = '';
+                return;
+            }
+            
+            allPlayers.push(name);
+            input.value = '';
+            saveToFirebase();
+            render();
+            notify('プレイヤー「' + name + '」を追加しました');
         }
 
         // 半荘追加
@@ -411,6 +486,36 @@
                 saveToFirebase();
                 render();
                 notify('今日のデータを削除しました');
+            }
+        }
+
+        // 全データ削除
+        function clearAllData() {
+            if(confirm('⚠️ 警告\n\n全てのデータ（プレイヤー、半荘記録など）が完全に削除されます。\n\nFirebaseからも削除されるため、復元できません。\n\n本当に削除しますか？')) {
+                if(confirm('最終確認\n\nもう一度確認します。本当に全データを削除しますか？\n\nこの操作は取り消せません！')) {
+                    // データを初期化
+                    data = { dates: {} };
+                    allPlayers = [];
+                    
+                    // Firebaseから削除
+                    database.ref('mahjong').set({
+                        data: { dates: {} },
+                        allPlayers: [],
+                        lastUpdated: new Date().toISOString(),
+                        deletedAt: new Date().toISOString()
+                    })
+                    .then(() => {
+                        render();
+                        if(currentTab === 'daily') renderDaily();
+                        if(currentTab === 'players') renderPlayers();
+                        notify('全データを削除しました');
+                        console.log('全データ削除完了');
+                    })
+                    .catch((error) => {
+                        console.error('削除エラー:', error);
+                        notify('削除に失敗しました', 'error');
+                    });
+                }
             }
         }
 
@@ -482,6 +587,8 @@
                     console.log('ファイル内容:', ev.target.result.substring(0, 200));
                     const imp = JSON.parse(ev.target.result);
                     console.log('パース成功:', imp);
+                    console.log('インポートファイルのallPlayers:', imp.allPlayers);
+                    console.log('インポートファイルのdates:', Object.keys(imp.data.dates));
                     
                     // データ構造の検証
                     if(!imp.data || typeof imp.data !== 'object') {
@@ -520,36 +627,104 @@
                             }
                         });
                         
+                        // プレイヤーの追加（allPlayersから）
                         let newPlayers = 0;
+                        console.log('インポート前のallPlayers:', allPlayers);
+                        console.log('追加予定のallPlayers:', imp.allPlayers);
+                        
                         imp.allPlayers.forEach(p => { 
+                            console.log('プレイヤー処理中:', p, '既存:', allPlayers.includes(p));
                             if(!allPlayers.includes(p)) {
                                 allPlayers.push(p);
                                 newPlayers++;
+                                console.log('✅ プレイヤー追加:', p);
+                            } else {
+                                console.log('⏭️ プレイヤー既存:', p);
                             }
                         });
                         
+                        // データ内のプレイヤーも追加（念のため）
+                        console.log('データ内のプレイヤーをチェック...');
+                        Object.entries(imp.data.dates).forEach(([date, dateData]) => {
+                            console.log('日付:', date, 'プレイヤー:', dateData.players);
+                            if(dateData && dateData.players && Array.isArray(dateData.players)) {
+                                dateData.players.forEach(p => {
+                                    if(p && !allPlayers.includes(p)) {
+                                        allPlayers.push(p);
+                                        newPlayers++;
+                                        console.log('✅ データ内から追加:', p);
+                                    }
+                                });
+                            }
+                        });
+                        
+                        console.log('インポート後のallPlayers:', allPlayers);
                         console.log(`追加完了: ${addedCount}日分のデータ, ${newPlayers}人の新規プレイヤー`);
                         notify(`追加完了: ${addedCount}日分, ${newPlayers}人追加`);
                     } else {
                         // 上書きモード
+                        console.log('上書きモード開始');
+                        console.log('インポート前のallPlayers:', allPlayers);
+                        
                         data = JSON.parse(JSON.stringify(imp.data)); // ディープコピー
                         allPlayers = [...imp.allPlayers]; // コピー
-                        console.log('上書き完了');
+                        
+                        console.log('allPlayersコピー後:', allPlayers);
+                        
+                        // データ内のプレイヤーも確実に追加
+                        let dataPlayers = 0;
+                        Object.entries(data.dates).forEach(([date, dateData]) => {
+                            console.log('日付:', date, 'プレイヤー:', dateData.players);
+                            if(dateData && dateData.players && Array.isArray(dateData.players)) {
+                                dateData.players.forEach(p => {
+                                    if(p && !allPlayers.includes(p)) {
+                                        allPlayers.push(p);
+                                        dataPlayers++;
+                                        console.log('✅ データ内から追加（上書きモード）:', p);
+                                    }
+                                });
+                            }
+                        });
+                        
+                        console.log('上書き完了 - 最終allPlayers:', allPlayers);
+                        console.log('データ内から追加したプレイヤー数:', dataPlayers);
                         notify('データを上書きしました');
                     }
                     
                     // データの整合性を確認
                     if(!data.dates) data.dates = {};
-                    console.log('最終データ:', data);
-                    console.log('プレイヤー:', allPlayers);
+                    
+                    // 最終的なプレイヤー数を確認
+                    const finalPlayerCount = allPlayers.length;
+                    const dateCount = Object.keys(data.dates).length;
+                    const gameCount = Object.values(data.dates).reduce((sum, d) => {
+                        return sum + (d.games ? d.games.length : 0);
+                    }, 0);
+                    
+                    console.log('========================================');
+                    console.log('インポート完了サマリー:');
+                    console.log('- 日付数:', dateCount);
+                    console.log('- 総半荘数:', gameCount);
+                    console.log('- プレイヤー数:', finalPlayerCount);
+                    console.log('- プレイヤー一覧:', allPlayers);
+                    console.log('- データ:', data);
+                    console.log('========================================');
                     
                     // Firebaseに保存
+                    console.log('Firebaseに保存開始...');
                     saveToFirebase();
                     
                     // 画面を更新
+                    console.log('画面更新開始...');
                     render();
                     if(currentTab === 'daily') renderDaily();
                     if(currentTab === 'players') renderPlayers();
+                    console.log('画面更新完了');
+                    
+                    // 詳細な完了通知
+                    setTimeout(() => {
+                        alert(`✅ インポート完了\n\n📊 データ概要:\n・日付: ${dateCount}日分\n・半荘: ${gameCount}回\n・プレイヤー: ${finalPlayerCount}人\n\nプレイヤー一覧:\n${allPlayers.join(', ')}`);
+                    }, 500);
                     
                 } catch(err) {
                     console.error('インポートエラー:', err);
@@ -564,12 +739,18 @@
 
         // レンダリング
         function render() {
+            console.log('render() 呼び出し - allPlayers:', allPlayers);
             const d = getData();
-            document.getElementById('gameType').value = d.type;
+            const gameTypeElement = document.getElementById('gameType');
+            if(gameTypeElement) {
+                gameTypeElement.value = d.type;
+            }
             renderStats();
             renderPlayerSelectors();
             renderScoreInputs();
             renderGamesList();
+            renderPlayerList();
+            console.log('render() 完了');
         }
 
         // 統計表示
@@ -642,6 +823,46 @@
             `;
         }
 
+        // プレイヤー一覧表示
+        function renderPlayerList() {
+            const playerListElement = document.getElementById('playerList');
+            if(!playerListElement) {
+                console.warn('playerListElement が見つかりません');
+                return;
+            }
+            
+            console.log('renderPlayerList 呼び出し - allPlayers:', allPlayers);
+            
+            if(!allPlayers || allPlayers.length === 0) {
+                playerListElement.innerHTML = '<div class="text-center py-2 text-gray-400">登録プレイヤーなし</div>';
+                console.log('プレイヤーなし表示');
+                return;
+            }
+            
+            let html = '<div class="font-semibold mb-1">登録済みプレイヤー (' + allPlayers.length + '人)</div>';
+            html += '<div class="flex flex-wrap gap-1">';
+            allPlayers.forEach((p, idx) => {
+                html += `<span class="inline-block bg-cyan-100 text-cyan-700 px-2 py-1 rounded text-xs">
+                    ${p}
+                    <button onclick="removePlayer(${idx})" class="ml-1 text-red-500 hover:text-red-700 font-bold">×</button>
+                </span>`;
+            });
+            html += '</div>';
+            playerListElement.innerHTML = html;
+            console.log('プレイヤー一覧表示完了:', allPlayers.length + '人');
+        }
+
+        // プレイヤー削除
+        function removePlayer(index) {
+            const playerName = allPlayers[index];
+            if(confirm(`プレイヤー「${playerName}」を削除しますか？\n\n注意: 過去の記録からは削除されません。`)) {
+                allPlayers.splice(index, 1);
+                saveToFirebase();
+                render();
+                notify(`プレイヤー「${playerName}」を削除しました`);
+            }
+        }
+
         // プレイヤー選択表示
         function renderPlayerSelectors() {
             const d = getData();
@@ -660,14 +881,31 @@
         // スコア入力表示
         function renderScoreInputs() {
             const d = getData();
+            const scoreInputsElement = document.getElementById('scoreInputs');
+            if(!scoreInputsElement) return;
+            
+            if(!d.players || d.players.length < d.type) {
+                scoreInputsElement.innerHTML = '<div class="text-gray-400 text-sm text-center py-2">全プレイヤーを選択してください</div>';
+                return;
+            }
+            
+            const colors = ['bg-yellow-50 border-yellow-300', 'bg-blue-50 border-blue-300', 'bg-green-50 border-green-300', 'bg-purple-50 border-purple-300'];
             let html = '';
             d.players.forEach((p,i) => {
-                html += `<div class="mb-2">
-                    <label class="block text-sm mb-1">${p}</label>
-                    <input type="number" id="score${i}" class="w-full px-3 py-2 border rounded-lg" placeholder="スコア">
+                html += `<div class="flex items-center gap-2 mb-2 p-3 rounded-lg border-2 ${colors[i % colors.length]}">
+                    <div class="flex-1">
+                        <div class="text-xs text-gray-600 mb-1">プレイヤー${i+1}</div>
+                        <div class="font-bold text-sm truncate">${p}</div>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-xs text-gray-600 mb-1">スコア</div>
+                        <input type="number" id="score${i}" placeholder="±0" 
+                               class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-center font-bold"
+                               inputmode="numeric">
+                    </div>
                 </div>`;
             });
-            document.getElementById('scoreInputs').innerHTML = html;
+            scoreInputsElement.innerHTML = html;
         }
 
         // ゲームリスト表示
