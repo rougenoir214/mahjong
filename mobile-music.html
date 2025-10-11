@@ -74,9 +74,14 @@
             user-select: none;
         }
         
-        .btn-touch:active {
+        .btn-touch:active:not(:disabled) {
             transform: scale(0.95);
             filter: brightness(0.9);
+        }
+        
+        .btn-touch:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         
         .music-wave {
@@ -331,13 +336,23 @@
                     
                     <!-- コントロールボタン -->
                     <div class="space-y-3">
-                        <button 
-                            onclick="playIntro()"
-                            id="playButton"
-                            class="w-full py-5 bg-white text-cyan-600 font-bold rounded-2xl btn-touch shadow-lg mobile-btn text-lg"
-                        >
-                            ▶️ イントロを再生
-                        </button>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button 
+                                onclick="playIntro()"
+                                id="playButton"
+                                class="py-5 bg-white text-cyan-600 font-bold rounded-2xl btn-touch shadow-lg mobile-btn"
+                            >
+                                ▶️ 再生
+                            </button>
+                            <button 
+                                onclick="pauseIntro()"
+                                id="pauseButton"
+                                class="py-5 bg-orange-500 text-white font-bold rounded-2xl btn-touch shadow-lg mobile-btn"
+                                disabled
+                            >
+                                ⏸️ 停止
+                            </button>
+                        </div>
                         <div class="grid grid-cols-2 gap-3">
                             <button 
                                 onclick="showAnswer()"
@@ -364,7 +379,7 @@
         // グローバル変数
         let players = JSON.parse(localStorage.getItem('quizPlayers')) || [];
         let scores = JSON.parse(localStorage.getItem('quizScores')) || {};
-        let selectedSongs = [];
+        let selectedSongs = JSON.parse(localStorage.getItem('selectedSongs')) || []; // 曲を保持
         let currentQuestionIndex = 0;
         let introTime = 5;
         let questionAnswered = false;
@@ -372,6 +387,7 @@
         let playbackTimer = null;
         let nextPageToken = null; // ページネーション用
         let currentSearchQuery = ''; // 現在の検索クエリ
+        let isPlaying = false; // 再生状態
 
         // YouTube IFrame API準備完了
         function onYouTubeIframeAPIReady() {
@@ -389,6 +405,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             updatePlayerList();
             updateScoreBoard();
+            updateSelectedSongs(); // 保存されている曲を表示
             
             // イントロ時間スライダー
             document.getElementById('introTime').addEventListener('input', function(e) {
@@ -624,12 +641,14 @@
             }
             
             selectedSongs.push({ videoId, title, thumbnail });
+            saveSelectedSongs(); // LocalStorageに保存
             updateSelectedSongs();
         }
 
         // 選択済み曲を削除
         function removeSong(videoId) {
             selectedSongs = selectedSongs.filter(s => s.videoId !== videoId);
+            saveSelectedSongs(); // LocalStorageに保存
             updateSelectedSongs();
         }
 
@@ -701,6 +720,11 @@
             // タイマー表示をリセット
             document.getElementById('timer').textContent = '--';
             
+            // ボタン状態をリセット
+            isPlaying = false;
+            document.getElementById('playButton').disabled = false;
+            document.getElementById('pauseButton').disabled = true;
+            
             const progress = ((currentQuestionIndex + 1) / selectedSongs.length) * 100;
             document.getElementById('progressBar').style.width = progress + '%';
             document.getElementById('currentQuestion').textContent = 
@@ -737,6 +761,11 @@
             // 最初から再生
             ytPlayer.seekTo(0, true);
             
+            // ボタン状態を更新
+            isPlaying = true;
+            document.getElementById('playButton').disabled = true;
+            document.getElementById('pauseButton').disabled = false;
+            
             // シーク完了を待ってから再生開始
             setTimeout(() => {
                 ytPlayer.playVideo();
@@ -758,10 +787,35 @@
                         clearInterval(playbackTimer);
                         ytPlayer.pauseVideo();
                         timerDisplay.textContent = '終了';
+                        isPlaying = false;
+                        document.getElementById('playButton').disabled = false;
+                        document.getElementById('pauseButton').disabled = true;
                     }
                 }, 100); // 100msごとにチェック（より正確）
                 
             }, 300); // シーク完了を待つ
+        }
+        
+        // イントロ一時停止
+        function pauseIntro() {
+            if (!ytPlayer) {
+                return;
+            }
+            
+            // 再生を停止
+            ytPlayer.pauseVideo();
+            
+            // タイマーを停止
+            if (playbackTimer) {
+                clearInterval(playbackTimer);
+                playbackTimer = null;
+            }
+            
+            // ボタン状態を更新
+            isPlaying = false;
+            document.getElementById('playButton').disabled = false;
+            document.getElementById('pauseButton').disabled = true;
+            document.getElementById('timer').textContent = '停止中';
         }
 
         // プレイヤー回答
@@ -875,6 +929,10 @@
 
         function saveScores() {
             localStorage.setItem('quizScores', JSON.stringify(scores));
+        }
+        
+        function saveSelectedSongs() {
+            localStorage.setItem('selectedSongs', JSON.stringify(selectedSongs));
         }
 
         function shuffleArray(array) {
