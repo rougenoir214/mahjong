@@ -370,6 +370,8 @@
         let questionAnswered = false;
         let ytPlayer = null;
         let playbackTimer = null;
+        let nextPageToken = null; // ページネーション用
+        let currentSearchQuery = ''; // 現在の検索クエリ
 
         // YouTube IFrame API準備完了
         function onYouTubeIframeAPIReady() {
@@ -510,7 +512,7 @@
         }
 
         // YouTube検索
-        async function searchYouTube() {
+        async function searchYouTube(clearResults = true) {
             // APIキーを埋め込み（入力不要）
             const apiKey = 'AIzaSyAubPfKVpT9cJNEjH--8LqzPuy39Usy83Q';
             const query = document.getElementById('searchQuery').value.trim();
@@ -520,13 +522,34 @@
                 return;
             }
             
+            // 新しい検索の場合はリセット
+            if (clearResults) {
+                nextPageToken = null;
+                currentSearchQuery = query;
+            }
+            
             const container = document.getElementById('searchResults');
-            container.innerHTML = '<div class="text-white/70 text-center py-3 text-sm">検索中...</div>';
+            
+            if (clearResults) {
+                container.innerHTML = '<div class="text-white/70 text-center py-3 text-sm">検索中...</div>';
+            } else {
+                // 「もっと見る」ボタンを「読み込み中...」に変更
+                const loadMoreBtn = document.getElementById('loadMoreBtn');
+                if (loadMoreBtn) {
+                    loadMoreBtn.textContent = '読み込み中...';
+                    loadMoreBtn.disabled = true;
+                }
+            }
             
             try {
-                const response = await fetch(
-                    `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query + ' music')}&type=video&videoCategoryId=10&maxResults=10&key=${apiKey}`
-                );
+                let url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query + ' music')}&type=video&videoCategoryId=10&maxResults=30&key=${apiKey}`;
+                
+                // ページトークンがある場合は追加
+                if (!clearResults && nextPageToken) {
+                    url += `&pageToken=${nextPageToken}`;
+                }
+                
+                const response = await fetch(url);
                 
                 if (!response.ok) {
                     throw new Error('検索に失敗しました');
@@ -534,12 +557,17 @@
                 
                 const data = await response.json();
                 
+                // 次のページトークンを保存
+                nextPageToken = data.nextPageToken || null;
+                
                 if (!data.items || data.items.length === 0) {
-                    container.innerHTML = '<div class="text-white/70 text-center py-3 text-sm">結果が見つかりませんでした</div>';
+                    if (clearResults) {
+                        container.innerHTML = '<div class="text-white/70 text-center py-3 text-sm">結果が見つかりませんでした</div>';
+                    }
                     return;
                 }
                 
-                container.innerHTML = data.items.map(item => `
+                const resultHTML = data.items.map(item => `
                     <div class="bg-white/10 rounded-xl p-3 flex items-center gap-3">
                         <img src="${item.snippet.thumbnails.default.url}" class="w-16 h-12 rounded object-cover" />
                         <div class="flex-1 min-w-0">
@@ -548,16 +576,44 @@
                         </div>
                         <button 
                             onclick="addSong('${item.id.videoId}', '${item.snippet.title.replace(/'/g, "\\'")}', '${item.snippet.thumbnails.default.url}')"
-                            class="px-3 py-2 bg-cyan-500 text-white rounded-lg btn-touch text-xs font-bold"
+                            class="px-3 py-2 bg-cyan-500 text-white rounded-lg btn-touch text-xs font-bold flex-shrink-0"
                         >
                             追加
                         </button>
                     </div>
                 `).join('');
                 
+                // 「もっと見る」ボタンのHTML
+                const loadMoreHTML = nextPageToken ? `
+                    <button 
+                        id="loadMoreBtn"
+                        onclick="loadMoreResults()"
+                        class="w-full py-3 bg-white/20 text-white font-bold rounded-xl btn-touch text-sm mt-2"
+                    >
+                        ⬇️ もっと見る（${data.items.length}件追加表示）
+                    </button>
+                ` : '';
+                
+                if (clearResults) {
+                    container.innerHTML = resultHTML + loadMoreHTML;
+                } else {
+                    // 既存の結果に追加
+                    const existingHTML = container.innerHTML.replace(/<button[^>]*id="loadMoreBtn"[^>]*>.*?<\/button>/s, '');
+                    container.innerHTML = existingHTML + resultHTML + loadMoreHTML;
+                }
+                
             } catch (error) {
-                container.innerHTML = '<div class="text-red-300 text-center py-3 text-sm">エラー: ' + error.message + '</div>';
+                if (clearResults) {
+                    container.innerHTML = '<div class="text-red-300 text-center py-3 text-sm">エラー: ' + error.message + '</div>';
+                } else {
+                    alert('エラー: ' + error.message);
+                }
             }
+        }
+        
+        // もっと見るボタン
+        async function loadMoreResults() {
+            await searchYouTube(false);
         }
 
         // 曲を追加
