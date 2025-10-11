@@ -745,11 +745,11 @@
             try {
                 ytPlayer.unMute();
                 ytPlayer.setVolume(100);
-                // ダミー再生で音声を確実に有効化
+                // ダミー再生で音声を確実に有効化（時間を少し長めに）
                 ytPlayer.playVideo();
                 setTimeout(() => {
                     ytPlayer.pauseVideo();
-                }, 100);
+                }, 300); // 100ms → 300ms に延長
             } catch (e) {
                 console.log('音声初期化エラー:', e);
             }
@@ -804,10 +804,14 @@
                 videoId: song.videoId,
                 startSeconds: 0
             });
-            // ロード後すぐに停止（再生ボタンを押すまで待機）
+            // ロード後に停止（再生ボタンを押すまで待機）
+            // 少し長めに待って音声も確実にロード
             setTimeout(() => {
                 ytPlayer.pauseVideo();
-            }, 500);
+                // ミュート解除を確認
+                ytPlayer.unMute();
+                ytPlayer.setVolume(100);
+            }, 800);
         }
 
         // イントロ再生
@@ -829,21 +833,27 @@
             playBtn.disabled = true;
             
             try {
-                // 確実にミュート解除（ユーザー操作時なので確実に実行される）
+                // 【重要】ユーザー操作の直後に音声を有効化
                 ytPlayer.unMute();
                 ytPlayer.setVolume(100);
                 
-                // 動画を最初から再ロード（音声も含めて）
-                ytPlayer.loadVideoById({
-                    videoId: selectedSongs[currentQuestionIndex].videoId,
-                    startSeconds: 0
-                });
+                // 既にロードされている動画を最初から再生
+                ytPlayer.seekTo(0, true);
                 
-                // 動画のロード完了を待つ
-                await waitForVideoLoad();
+                // 少し待ってから再生開始（確実に音声が有効化されるように）
+                await new Promise(resolve => setTimeout(resolve, 100));
                 
-                // 再生開始
+                // 再生開始（この時点でユーザー操作の文脈が残っている）
                 ytPlayer.playVideo();
+                
+                // さらに少し待って、音声が確実に出るようにする
+                await new Promise(resolve => setTimeout(resolve, 200));
+                
+                // もう一度ミュート解除を確認（念のため）
+                if (ytPlayer.isMuted()) {
+                    ytPlayer.unMute();
+                    ytPlayer.setVolume(100);
+                }
                 
                 // ボタン状態を更新
                 isPlaying = true;
@@ -872,35 +882,10 @@
                 }, 100);
                 
             } catch (error) {
-                alert('動画の読み込みに失敗しました: ' + error.message);
+                console.error('再生エラー:', error);
                 playBtn.textContent = '▶️ 再生';
                 playBtn.disabled = false;
             }
-        }
-        
-        // 動画のロード完了を待つ
-        function waitForVideoLoad() {
-            return new Promise((resolve, reject) => {
-                let attempts = 0;
-                const maxAttempts = 50; // 5秒まで待つ
-                
-                const checkInterval = setInterval(() => {
-                    attempts++;
-                    
-                    // プレイヤー状態をチェック
-                    const state = ytPlayer.getPlayerState();
-                    
-                    // BUFFERING(3), CUED(5), PLAYING(1) なら準備完了
-                    if (state === 3 || state === 5 || state === 1 || state === 2) {
-                        clearInterval(checkInterval);
-                        // さらに少し待つ（音声の準備）
-                        setTimeout(() => resolve(), 300);
-                    } else if (attempts >= maxAttempts) {
-                        clearInterval(checkInterval);
-                        reject(new Error('動画のロードがタイムアウトしました'));
-                    }
-                }, 100);
-            });
         }
         
         // イントロ一時停止
