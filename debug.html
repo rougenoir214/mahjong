@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>デバッグ情報</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-cyan-500 to-teal-600 min-h-screen p-8">
+    <div class="max-w-2xl mx-auto bg-white/10 backdrop-blur-lg rounded-3xl p-8 shadow-2xl border border-white/20">
+        <h1 class="text-3xl font-bold text-white mb-6">🔍 デバッグ情報</h1>
+        
+        <div class="space-y-4 text-white">
+            <div class="bg-white/10 rounded-xl p-4">
+                <h2 class="text-xl font-bold mb-2">📱 環境情報</h2>
+                <div class="space-y-1 text-sm">
+                    <p>User Agent: <span id="userAgent"></span></p>
+                    <p>URL: <span id="currentUrl"></span></p>
+                    <p>LocalStorage利用可能: <span id="localStorageAvailable"></span></p>
+                </div>
+            </div>
+            
+            <div class="bg-white/10 rounded-xl p-4">
+                <h2 class="text-xl font-bold mb-2">🔑 APIキー状態</h2>
+                <div class="space-y-1 text-sm">
+                    <p>LocalStorageにAPIキー: <span id="hasApiKey"></span></p>
+                    <p>APIキー（最初の5文字）: <span id="apiKeyPreview"></span></p>
+                    <p>プレイヤーデータ: <span id="playersData"></span></p>
+                    <p>選択済み曲数: <span id="selectedSongsCount"></span></p>
+                </div>
+            </div>
+            
+            <div class="bg-white/10 rounded-xl p-4">
+                <h2 class="text-xl font-bold mb-2">🧪 テスト</h2>
+                <button 
+                    onclick="testApiKey()"
+                    class="w-full py-3 bg-white text-cyan-600 font-bold rounded-xl hover:bg-white/90 transition-all mb-2"
+                >
+                    APIキーをテスト
+                </button>
+                <div id="testResult" class="text-xs mt-2"></div>
+            </div>
+            
+            <div class="bg-white/10 rounded-xl p-4">
+                <h2 class="text-xl font-bold mb-2">🔧 リセット</h2>
+                <button 
+                    onclick="clearAllData()"
+                    class="w-full py-3 bg-red-500 text-white font-bold rounded-xl hover:bg-red-600 transition-all"
+                >
+                    全データをクリア
+                </button>
+            </div>
+            
+            <div class="text-center mt-6">
+                <a href="setup.html" class="text-cyan-200 underline">APIキー設定に戻る</a>
+                <span class="mx-2">|</span>
+                <a href="mobile-music.html" class="text-cyan-200 underline">クイズに戻る</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 環境情報を表示
+        document.getElementById('userAgent').textContent = navigator.userAgent;
+        document.getElementById('currentUrl').textContent = window.location.href;
+        document.getElementById('localStorageAvailable').textContent = typeof(Storage) !== "undefined" ? "✅ はい" : "❌ いいえ";
+        
+        // APIキー情報を表示
+        const apiKey = localStorage.getItem('youtubeApiKey');
+        document.getElementById('hasApiKey').textContent = apiKey ? "✅ あり" : "❌ なし";
+        document.getElementById('apiKeyPreview').textContent = apiKey ? apiKey.substring(0, 5) + "..." : "なし";
+        
+        // プレイヤー情報
+        const players = JSON.parse(localStorage.getItem('quizPlayers') || '[]');
+        document.getElementById('playersData').textContent = players.length > 0 ? `${players.length}人` : "なし";
+        
+        // 選択済み曲
+        const songs = JSON.parse(localStorage.getItem('selectedSongs') || '[]');
+        document.getElementById('selectedSongsCount').textContent = songs.length > 0 ? `${songs.length}曲` : "なし";
+        
+        // APIキーテスト
+        async function testApiKey() {
+            const resultDiv = document.getElementById('testResult');
+            const apiKey = localStorage.getItem('youtubeApiKey');
+            
+            if (!apiKey) {
+                resultDiv.innerHTML = '<p class="text-red-300">❌ APIキーが設定されていません</p>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<p class="text-yellow-300">🔄 テスト中...</p>';
+            
+            try {
+                const response = await fetch(
+                    `https://www.googleapis.com/youtube/v3/search?part=snippet&q=test&type=video&maxResults=1&key=${apiKey}`
+                );
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = '<p class="text-green-300">✅ APIキーは正常に動作しています</p>';
+                } else {
+                    const error = await response.json();
+                    resultDiv.innerHTML = `<p class="text-red-300">❌ エラー: ${error.error.message}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="text-red-300">❌ エラー: ${error.message}</p>`;
+            }
+        }
+        
+        // 全データクリア
+        function clearAllData() {
+            if (confirm('全てのデータ（APIキー、プレイヤー、曲、スコア）をクリアしますか？')) {
+                localStorage.clear();
+                alert('全データをクリアしました。setup.htmlでAPIキーを再設定してください。');
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
