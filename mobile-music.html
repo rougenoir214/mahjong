@@ -636,6 +636,15 @@
             questionAnswered = false;
             document.getElementById('currentSongTitle').classList.add('hidden');
             
+            // タイマーをクリア
+            if (playbackTimer) {
+                clearInterval(playbackTimer);
+                playbackTimer = null;
+            }
+            
+            // タイマー表示をリセット
+            document.getElementById('timer').textContent = '--';
+            
             const progress = ((currentQuestionIndex + 1) / selectedSongs.length) * 100;
             document.getElementById('progressBar').style.width = progress + '%';
             document.getElementById('currentQuestion').textContent = 
@@ -652,10 +661,9 @@
                 </button>
             `).join('');
             
-            // YouTube動画をロード
+            // YouTube動画をロード（cueVideoIdを使って事前ロード）
             const song = selectedSongs[currentQuestionIndex];
-            ytPlayer.loadVideoById(song.videoId);
-            ytPlayer.pauseVideo();
+            ytPlayer.cueVideoById(song.videoId);
         }
 
         // イントロ再生
@@ -665,36 +673,39 @@
                 return;
             }
             
-            ytPlayer.seekTo(0);
-            ytPlayer.playVideo();
-            
-            // タイマー表示
-            let timeLeft = introTime;
-            const timerDisplay = document.getElementById('timer');
-            timerDisplay.textContent = timeLeft + '秒';
-            
+            // タイマーをクリア
             if (playbackTimer) {
                 clearInterval(playbackTimer);
             }
             
-            playbackTimer = setInterval(() => {
-                timeLeft--;
-                timerDisplay.textContent = timeLeft + '秒';
-                
-                if (timeLeft <= 0) {
-                    clearInterval(playbackTimer);
-                    ytPlayer.pauseVideo();
-                    timerDisplay.textContent = '終了';
-                }
-            }, 1000);
+            // 最初から再生
+            ytPlayer.seekTo(0, true);
             
-            // 指定時間後に停止
+            // シーク完了を待ってから再生開始
             setTimeout(() => {
-                ytPlayer.pauseVideo();
-                if (playbackTimer) {
-                    clearInterval(playbackTimer);
-                }
-            }, introTime * 1000);
+                ytPlayer.playVideo();
+                
+                const startTime = Date.now();
+                const targetDuration = introTime * 1000; // ミリ秒
+                
+                // タイマー表示と停止制御
+                const timerDisplay = document.getElementById('timer');
+                
+                playbackTimer = setInterval(() => {
+                    const elapsed = Date.now() - startTime;
+                    const remaining = Math.max(0, Math.ceil((targetDuration - elapsed) / 1000));
+                    
+                    timerDisplay.textContent = remaining + '秒';
+                    
+                    // 時間切れで停止
+                    if (elapsed >= targetDuration) {
+                        clearInterval(playbackTimer);
+                        ytPlayer.pauseVideo();
+                        timerDisplay.textContent = '終了';
+                    }
+                }, 100); // 100msごとにチェック（より正確）
+                
+            }, 300); // シーク完了を待つ
         }
 
         // プレイヤー回答
@@ -708,6 +719,16 @@
             const correctAnswer = confirm(`${player.name}さんの回答は正解ですか?`);
             
             if (correctAnswer) {
+                // イントロ再生を停止
+                if (ytPlayer) {
+                    ytPlayer.pauseVideo();
+                }
+                if (playbackTimer) {
+                    clearInterval(playbackTimer);
+                    playbackTimer = null;
+                }
+                document.getElementById('timer').textContent = '正解!';
+                
                 scores[playerId] = (scores[playerId] || 0) + 10;
                 saveScores();
                 updateScoreBoard();
@@ -721,26 +742,39 @@
 
         // 答えを表示
         function showAnswer() {
+            // タイマーをクリア
+            if (playbackTimer) {
+                clearInterval(playbackTimer);
+                playbackTimer = null;
+            }
+            
             const song = selectedSongs[currentQuestionIndex];
             
             document.getElementById('currentSongTitle').textContent = song.title;
             document.getElementById('currentSongTitle').classList.remove('hidden');
+            document.getElementById('timer').textContent = '答え表示中';
             
             // 全曲再生
             if (ytPlayer) {
-                ytPlayer.seekTo(0);
-                ytPlayer.playVideo();
+                ytPlayer.seekTo(0, true);
+                setTimeout(() => {
+                    ytPlayer.playVideo();
+                }, 300);
             }
         }
 
         // 次の問題
         function nextQuestion() {
+            // 再生を停止
             if (ytPlayer) {
                 ytPlayer.pauseVideo();
+                ytPlayer.stopVideo();
             }
             
+            // タイマーをクリア
             if (playbackTimer) {
                 clearInterval(playbackTimer);
+                playbackTimer = null;
             }
             
             currentQuestionIndex++;
@@ -754,12 +788,16 @@
 
         // クイズ終了
         function endQuiz() {
+            // 再生を完全停止
             if (ytPlayer) {
                 ytPlayer.pauseVideo();
+                ytPlayer.stopVideo();
             }
             
+            // タイマーをクリア
             if (playbackTimer) {
                 clearInterval(playbackTimer);
+                playbackTimer = null;
             }
             
             document.getElementById('quizGame').classList.add('hidden');
