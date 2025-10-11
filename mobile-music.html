@@ -550,12 +550,18 @@
         }        
         // APIキーを取得
         function getApiKey() {
-            // config.jsから取得
+            // 1. LocalStorageから取得（GitHub Pages用）
+            const storedKey = localStorage.getItem('youtubeApiKey');
+            if (storedKey) {
+                return storedKey;
+            }
+            
+            // 2. config.jsから取得（ローカル開発用）
             if (typeof CONFIG !== 'undefined' && CONFIG.YOUTUBE_API_KEY) {
                 return CONFIG.YOUTUBE_API_KEY;
             }
             
-            // 取得できない場合
+            // 3. 取得できない場合
             return null;
         }
 
@@ -565,7 +571,9 @@
             const apiKey = getApiKey();
             
             if (!apiKey) {
-                alert('APIキーが設定されていません。config.jsファイルを確認してください。');
+                if (confirm('APIキーが設定されていません。\n設定ページに移動しますか？')) {
+                    window.location.href = 'setup.html';
+                }
                 return;
             }
             

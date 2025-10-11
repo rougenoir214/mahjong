@@ -1,0 +1,33 @@
+# APIキー設定ファイル（絶対に公開しない）
+config.js
+
+# セキュリティ関連
+*.key
+*.pem
+*.env
+.env.local
+
+# バックアップファイル
+*.bak
+*~
+
+# OS固有ファイル
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# エディタ設定
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ログファイル
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 一時ファイル
+*.tmp
+*.temp
