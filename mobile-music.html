@@ -214,14 +214,14 @@
                     </div>
                     
                     <!-- 検索結果 -->
-                    <div id="searchResults" class="space-y-2 max-h-60 overflow-y-auto">
+                    <div id="searchResults" class="space-y-2 max-h-96 overflow-y-auto">
                         <!-- 検索結果はJSで動的生成 -->
                     </div>
                     
                     <!-- 選択済み曲リスト -->
                     <div class="mt-4">
                         <h3 class="text-white font-semibold mb-2 text-sm">選択済み: <span id="selectedCount">0</span>曲</h3>
-                        <div id="selectedSongs" class="space-y-2 max-h-40 overflow-y-auto">
+                        <div id="selectedSongs" class="space-y-2 max-h-96 overflow-y-auto">
                             <!-- 選択済み曲はJSで動的生成 -->
                         </div>
                     </div>
@@ -397,8 +397,18 @@
                 playerVars: {
                     'playsinline': 1,
                     'controls': 0
+                },
+                events: {
+                    'onReady': onPlayerReady
                 }
             });
+        }
+        
+        // プレイヤー準備完了
+        function onPlayerReady(event) {
+            // ミュート解除（音が出るようにする）
+            event.target.unMute();
+            event.target.setVolume(100);
         }
 
         // 初期化
@@ -741,9 +751,16 @@
                 </button>
             `).join('');
             
-            // YouTube動画をロード（cueVideoIdを使って事前ロード）
+            // YouTube動画をロード（loadVideoByIdで音声も準備）
             const song = selectedSongs[currentQuestionIndex];
-            ytPlayer.cueVideoById(song.videoId);
+            ytPlayer.loadVideoById({
+                videoId: song.videoId,
+                startSeconds: 0
+            });
+            // ロード後すぐに停止（再生ボタンを押すまで待機）
+            setTimeout(() => {
+                ytPlayer.pauseVideo();
+            }, 500);
         }
 
         // イントロ再生
@@ -757,6 +774,12 @@
             if (playbackTimer) {
                 clearInterval(playbackTimer);
             }
+            
+            // ミュート解除を確認（音が出るようにする）
+            if (ytPlayer.isMuted()) {
+                ytPlayer.unMute();
+            }
+            ytPlayer.setVolume(100);
             
             // 最初から再生
             ytPlayer.seekTo(0, true);
@@ -866,6 +889,12 @@
             
             // 全曲再生
             if (ytPlayer) {
+                // ミュート解除を確認
+                if (ytPlayer.isMuted()) {
+                    ytPlayer.unMute();
+                }
+                ytPlayer.setVolume(100);
+                
                 ytPlayer.seekTo(0, true);
                 setTimeout(() => {
                     ytPlayer.playVideo();
