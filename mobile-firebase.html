@@ -232,6 +232,75 @@
                 .replace(/'/g, '&#039;');
         }
 
+        // 通知メッセージを表示
+        function showNotification(message, duration = 3000) {
+            // 既存の通知があれば削除
+            const existing = document.getElementById('notification');
+            if (existing) {
+                existing.remove();
+            }
+
+            // 通知要素を作成
+            const notification = document.createElement('div');
+            notification.id = 'notification';
+            notification.innerHTML = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 12px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                z-index: 10000;
+                font-weight: bold;
+                animation: slideDown 0.3s ease-out;
+                max-width: 90%;
+                text-align: center;
+            `;
+
+            // アニメーション用のスタイルを追加（まだなければ）
+            if (!document.getElementById('notificationStyles')) {
+                const style = document.createElement('style');
+                style.id = 'notificationStyles';
+                style.textContent = `
+                    @keyframes slideDown {
+                        from {
+                            opacity: 0;
+                            transform: translateX(-50%) translateY(-20px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateX(-50%) translateY(0);
+                        }
+                    }
+                    @keyframes slideUp {
+                        from {
+                            opacity: 1;
+                            transform: translateX(-50%) translateY(0);
+                        }
+                        to {
+                            opacity: 0;
+                            transform: translateX(-50%) translateY(-20px);
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            document.body.appendChild(notification);
+
+            // 指定時間後に削除
+            setTimeout(() => {
+                notification.style.animation = 'slideUp 0.3s ease-out';
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, duration);
+        }
+
         // Firebaseからパスワードを読み込む
         function loadPasswords() {
             return database.ref('settings/passwords').once('value')
