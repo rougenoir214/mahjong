@@ -1163,13 +1163,42 @@
             quizGame.style.opacity = '1';
             quizGame.style.position = 'relative';
             quizGame.style.zIndex = '9999';
+            quizGame.style.width = '100%';
+            quizGame.style.maxWidth = '500px';
+            quizGame.style.margin = '0 auto';
+            quizGame.style.padding = '20px';
             
             // 親要素も確認
             const app = document.getElementById('app');
             if (app) {
                 app.style.display = 'block';
                 app.style.visibility = 'visible';
+                app.style.width = '100%';
                 console.log('app要素も強制表示');
+                
+                // appのサイズを確認
+                const appRect = app.getBoundingClientRect();
+                console.log('app要素のサイズ:', {
+                    width: appRect.width,
+                    height: appRect.height
+                });
+                
+                if (appRect.width === 0) {
+                    console.error('⚠️ app要素の幅が0です！さらに親要素を確認');
+                    
+                    // containerとbodyを確認
+                    const container = app.parentElement;
+                    if (container) {
+                        console.log('containerクラス:', container.className);
+                        const containerRect = container.getBoundingClientRect();
+                        console.log('container幅:', containerRect.width);
+                        
+                        if (containerRect.width === 0) {
+                            container.style.width = '100%';
+                            container.style.display = 'block';
+                        }
+                    }
+                }
             }
             
             console.log('userManagement hidden:', userMgmt.classList.contains('hidden'));
@@ -1191,6 +1220,8 @@
                     children[i].style.display = 'block';
                     children[i].style.visibility = 'visible';
                     children[i].style.opacity = '1';
+                    children[i].style.width = '100%';
+                    children[i].style.minHeight = '100px';
                     console.log(`子要素${i}:`, children[i].className, 'display:', window.getComputedStyle(children[i]).display);
                 }
                 
@@ -1210,11 +1241,13 @@
                     if (rect.height === 0) {
                         console.error('⚠️ quizGameの高さが0です！子要素に問題があります');
                         
-                        // 最後の手段：最小サイズを強制設定
-                        quizGame.style.minHeight = '800px';
-                        quizGame.style.minWidth = '300px';
+                        // 最後の手段：直接サイズを設定
+                        quizGame.style.height = '800px';
+                        quizGame.style.width = '100%';
+                        quizGame.style.maxWidth = '500px';
                         quizGame.style.backgroundColor = 'rgba(255,255,255,0.1)';
-                        console.log('最小サイズを強制設定しました');
+                        quizGame.style.border = '2px solid red';
+                        console.log('直接サイズを強制設定しました（赤い枠線付き）');
                     }
                     if (rect.width === 0) {
                         console.error('⚠️ quizGameの幅が0です！');
