@@ -1183,23 +1183,43 @@
                 quizGame.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 console.log('quizGameにスクロールしました');
                 
-                // 要素の位置とサイズを確認
-                const rect = quizGame.getBoundingClientRect();
-                console.log('quizGame位置:', {
-                    top: rect.top,
-                    left: rect.left,
-                    width: rect.width,
-                    height: rect.height,
-                    bottom: rect.bottom,
-                    right: rect.right
-                });
+                // 子要素も強制表示
+                const children = quizGame.children;
+                console.log('quizGameの子要素数:', children.length);
                 
-                if (rect.height === 0) {
-                    console.error('⚠️ quizGameの高さが0です！子要素に問題があります');
+                for (let i = 0; i < children.length; i++) {
+                    children[i].style.display = 'block';
+                    children[i].style.visibility = 'visible';
+                    children[i].style.opacity = '1';
+                    console.log(`子要素${i}:`, children[i].className, 'display:', window.getComputedStyle(children[i]).display);
                 }
-                if (rect.width === 0) {
-                    console.error('⚠️ quizGameの幅が0です！');
-                }
+                
+                // さらに100ms待ってサイズ確認
+                setTimeout(() => {
+                    // 要素の位置とサイズを確認
+                    const rect = quizGame.getBoundingClientRect();
+                    console.log('quizGame位置:', {
+                        top: rect.top,
+                        left: rect.left,
+                        width: rect.width,
+                        height: rect.height,
+                        bottom: rect.bottom,
+                        right: rect.right
+                    });
+                    
+                    if (rect.height === 0) {
+                        console.error('⚠️ quizGameの高さが0です！子要素に問題があります');
+                        
+                        // 最後の手段：最小サイズを強制設定
+                        quizGame.style.minHeight = '800px';
+                        quizGame.style.minWidth = '300px';
+                        quizGame.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                        console.log('最小サイズを強制設定しました');
+                    }
+                    if (rect.width === 0) {
+                        console.error('⚠️ quizGameの幅が0です！');
+                    }
+                }, 100);
             }, 100);
             
             loadQuestion();
