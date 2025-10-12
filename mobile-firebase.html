@@ -655,12 +655,13 @@
                 alert('全プレイヤーを選択してください');
                 return;
             }
-            const scores = d.players.map((p,i) => parseInt(document.getElementById('score'+i).value) || 0);
+            const scores = d.players.map((p,i) => parseFloat(document.getElementById('score'+i).value) || 0);
             
             // スコア合計チェック
             const total = scores.reduce((sum, s) => sum + s, 0);
-            if(total !== 0) {
-                const confirmResult = window.confirm(`⚠️ スコアの合計が${total>0?'+':''}${total}です（0になっていません）\n\nこのまま登録しますか？\n\n【入力したスコア】\n${d.players.map((p,i) => `${p}: ${scores[i]>0?'+':''}${scores[i]}`).join('\n')}\n合計: ${total>0?'+':''}${total}`);
+            // 小数点の誤差を考慮して、0.01未満なら0として扱う
+            if(Math.abs(total) >= 0.01) {
+                const confirmResult = window.confirm(`⚠️ スコアの合計が${total>0?'+':''}${total.toFixed(1)}です（0になっていません）\n\nこのまま登録しますか？\n\n【入力したスコア】\n${d.players.map((p,i) => `${p}: ${scores[i]>0?'+':''}${scores[i]}`).join('\n')}\n合計: ${total>0?'+':''}${total.toFixed(1)}`);
                 if(!confirmResult) return;
             }
             
@@ -684,7 +685,7 @@
 
         // スコア更新
         function updateScore(date, gIdx, pIdx, val) {
-            data.dates[date].games[gIdx][pIdx] = parseInt(val) || 0;
+            data.dates[date].games[gIdx][pIdx] = parseFloat(val) || 0;
             saveToFirebase();
         }
 
@@ -1147,8 +1148,8 @@
                     <div class="flex-1">
                         <div class="text-xs text-gray-600 mb-1">スコア${isLast ? ' (自動計算)' : ''}</div>
                         <input type="number" id="score${i}" placeholder="±0" 
+                               step="0.1"
                                class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-center font-bold"
-                               pattern="[0-9-]*"
                                oninput="autoCalculateScore(${i}, ${d.type})"
                                ${isLast ? 'readonly style="background-color: #f0f0f0;"' : ''}>
                     </div>
@@ -1175,14 +1176,15 @@
                     allFilled = false;
                     break;
                 }
-                sum += parseInt(input.value) || 0;
+                sum += parseFloat(input.value) || 0;
             }
             
             // 全員分入力されていれば、最後のプレイヤーのスコアを自動計算
             if(allFilled) {
                 const lastInput = document.getElementById('score' + lastIndex);
                 if(lastInput) {
-                    lastInput.value = -sum; // 合計が0になるように
+                    // 小数点1桁に丸める
+                    lastInput.value = Math.round(-sum * 10) / 10;
                 }
             } else {
                 // まだ全員分入力されていない場合はクリア
@@ -1280,7 +1282,7 @@
                                         </div>
                                     </td>
                                     ${g.map((s,pi) => `<td class="text-center py-2 px-1">
-                                        <input type="number" value="${s}" onchange="updateScore('${date}',${gi},${pi},this.value)" 
+                                        <input type="number" step="0.1" value="${s}" onchange="updateScore('${date}',${gi},${pi},this.value)" 
                                             class="w-16 text-center px-1 py-1 border rounded ${s>0?'text-green-600':s<0?'text-red-600':'text-gray-600'}">
                                     </td>`).join('')}
                                 </tr>`).join('')}
@@ -1344,7 +1346,7 @@
                 
                 let html = '';
                 list.forEach((p,idx) => {
-                    const avg = Math.round(p.totalScore / p.totalGames);
+                    const avg = (p.totalScore / p.totalGames).toFixed(1);
                     const medal = ['👑','🥈','🥉'][idx] || '';
                     let ranks = '';
                     for(let r=1; r<=4; r++) {
@@ -1673,7 +1675,7 @@
             `;
 
             list.forEach((p, idx) => {
-                const avg = Math.round(p.totalScore / p.totalGames);
+                const avg = (p.totalScore / p.totalGames).toFixed(1);
                 const medals = ['🥇', '🥈', '🥉', '4️⃣'];
                 const borderColors = ['border-yellow-400', 'border-gray-400', 'border-orange-400', 'border-blue-300'];
                 const bgColors = ['bg-yellow-50', 'bg-gray-50', 'bg-orange-50', 'bg-blue-50'];
