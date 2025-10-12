@@ -1238,6 +1238,16 @@
             
             // YouTube動画をロード（loadVideoByIdで音声も準備）
             const song = selectedSongs[currentQuestionIndex];
+            console.log('現在の曲:', song);
+            
+            if (!song || !song.videoId) {
+                console.error('曲情報が不正です:', song);
+                alert('曲情報の取得に失敗しました。次の曲に進みます。');
+                nextQuestion();
+                return;
+            }
+            
+            console.log('ロードする videoId:', song.videoId);
             
             // プレイヤーが準備できているか確認
             if (!ytPlayer || !playerReady || typeof ytPlayer.loadVideoById !== 'function') {
@@ -1247,10 +1257,12 @@
             }
             
             try {
+                console.log('loadVideoById実行開始');
                 ytPlayer.loadVideoById({
-                    videoId: song.videoId,
-                    startSeconds: 0
+                    'videoId': song.videoId,
+                    'startSeconds': 0
                 });
+                console.log('loadVideoById実行完了');
             } catch (error) {
                 console.error('動画の読み込みエラー:', error);
                 alert('動画の読み込みに失敗しました。次の曲に進みます。');
