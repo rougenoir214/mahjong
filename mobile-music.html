@@ -2,10 +2,14 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- Permissions Policy for YouTube Player -->
+    <meta http-equiv="Permissions-Policy" content="autoplay=*, encrypted-media=*, accelerometer=*, gyroscope=*, picture-in-picture=*, clipboard-write=*, web-share=*">
+    
     <title>イントロクイズ - モバイル版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
@@ -17,6 +21,19 @@
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
             box-sizing: border-box;
+        }
+        
+        /* スクリーンリーダー専用（視覚的には非表示、スクリーンリーダーには読み上げられる） */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
         }
         
         /* iPhone Safari対応 */
@@ -64,6 +81,7 @@
         
         .glass-effect {
             background: rgba(255, 255, 255, 0.15);
+            -webkit-backdrop-filter: blur(15px);
             backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.25);
         }
@@ -149,6 +167,11 @@
                 🎵 イントロクイズ
             </h1>
             <p class="text-base text-white/90 drop-shadow">スマホ最適化版</p>
+            
+            <!-- YouTube Player ステータス表示 -->
+            <div id="playerStatus" class="mt-3 text-sm">
+                <span class="text-yellow-300">⏳ YouTube Player準備中...</span>
+            </div>
         </header>
 
         <!-- メイン画面切り替えエリア -->
@@ -163,21 +186,26 @@
                     </h2>
                     
                     <!-- プレイヤー追加フォーム -->
-                    <div class="mb-4 flex gap-2">
-                        <input 
-                            type="text" 
-                            id="newPlayerName" 
-                            placeholder="プレイヤー名"
-                            maxlength="15"
-                            style="min-width: 0; flex: 1 1 0%;"
-                            class="px-4 py-4 rounded-2xl bg-white/20 text-white placeholder-white/60 border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/50"
-                        />
-                        <button 
-                            onclick="addPlayer()"
-                            class="px-6 py-4 bg-white text-cyan-600 rounded-2xl font-bold btn-touch flex-shrink-0"
-                        >
-                            追加
-                        </button>
+                    <div class="mb-4">
+                        <label for="newPlayerName" class="sr-only">プレイヤー名</label>
+                        <div class="flex gap-2">
+                            <input 
+                                type="text" 
+                                id="newPlayerName" 
+                                placeholder="プレイヤー名"
+                                aria-label="プレイヤー名を入力"
+                                maxlength="15"
+                                style="min-width: 0; flex: 1 1 0%;"
+                                class="px-4 py-4 rounded-2xl bg-white/20 text-white placeholder-white/60 border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/50"
+                            />
+                            <button 
+                                onclick="addPlayer()"
+                                class="px-6 py-4 bg-white text-cyan-600 rounded-2xl font-bold btn-touch flex-shrink-0"
+                                aria-label="プレイヤーを追加"
+                            >
+                                追加
+                            </button>
+                        </div>
                     </div>
                     
                     <!-- プレイヤーリスト -->
@@ -276,17 +304,20 @@
                             <span>🎤</span>
                             アーティスト指定クイズ
                         </h3>
+                        <label for="artistName" class="sr-only">アーティスト名</label>
                         <div class="flex gap-2">
                             <input 
                                 type="text" 
                                 id="artistName" 
                                 placeholder="アーティスト名を入力"
+                                aria-label="アーティスト名を入力"
                                 style="min-width: 0; flex: 1 1 0%;"
                                 class="px-4 py-3 rounded-xl bg-white/20 text-white placeholder-white/60 border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/50"
                             />
                             <button 
                                 onclick="startArtistQuiz()"
                                 class="px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-xl font-bold btn-touch flex-shrink-0 shadow-lg"
+                                aria-label="アーティスト指定クイズを開始"
                             >
                                 開始
                             </button>
@@ -306,19 +337,23 @@
                     </h2>
                     
                     <!-- 検索フォーム -->
-                    <div class="mb-4 flex gap-2">
-                        <input 
-                            type="text" 
-                            id="searchQuery" 
-                            placeholder="曲名で検索"
-                            style="min-width: 0; flex: 1 1 0%;"
-                            class="px-4 py-3 rounded-xl bg-white/20 text-white placeholder-white/60 border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/50"
-                        />
-                        <button 
-                            onclick="searchYouTube()"
-                            class="px-6 py-3 bg-white text-cyan-600 rounded-xl font-bold btn-touch flex-shrink-0"
-                        >
-                            検索
+                    <div class="mb-4">
+                        <label for="searchQuery" class="sr-only">曲名で検索</label>
+                        <div class="flex gap-2">
+                            <input 
+                                type="text" 
+                                id="searchQuery" 
+                                placeholder="曲名で検索"
+                                aria-label="曲名で検索"
+                                style="min-width: 0; flex: 1 1 0%;"
+                                class="px-4 py-3 rounded-xl bg-white/20 text-white placeholder-white/60 border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/50"
+                            />
+                            <button 
+                                onclick="searchYouTube()"
+                                class="px-6 py-3 bg-white text-cyan-600 rounded-xl font-bold btn-touch flex-shrink-0"
+                                aria-label="曲を検索"
+                            >
+                                検索
                         </button>
                     </div>
                     
@@ -366,6 +401,7 @@
                     <button 
                         onclick="startQuiz()"
                         class="w-full py-5 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xl font-bold rounded-2xl btn-touch shadow-lg mobile-btn"
+                        aria-label="イントロクイズを開始"
                     >
                         🎵 クイズを開始
                     </button>
@@ -498,6 +534,7 @@
         let currentSearchQuery = ''; // 現在の検索クエリ
         let isPlaying = false; // 再生状態
         let videoLoaded = false; // 動画ロード完了フラグ
+        let playerReady = false; // プレイヤー準備完了フラグ
         
         // クイズ設定
         let quizSongCount = 10; // デフォルトは10曲
@@ -510,19 +547,25 @@
 
         // YouTube IFrame API準備完了
         function onYouTubeIframeAPIReady() {
-            ytPlayer = new YT.Player('player', {
-                height: '0',
-                width: '0',
-                playerVars: {
-                    'playsinline': 1,
-                    'controls': 0,
-                    'origin': window.location.origin
-                },
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
-                }
-            });
+            console.log('onYouTubeIframeAPIReady 呼び出されました');
+            try {
+                ytPlayer = new YT.Player('player', {
+                    height: '0',
+                    width: '0',
+                    playerVars: {
+                        'playsinline': 1,
+                        'controls': 0,
+                        'origin': window.location.origin
+                    },
+                    events: {
+                        'onReady': onPlayerReady,
+                        'onStateChange': onPlayerStateChange
+                    }
+                });
+                console.log('YouTube Player作成成功');
+            } catch (error) {
+                console.error('YouTube Player作成エラー:', error);
+            }
         }
         
         // プレイヤー準備完了
@@ -530,6 +573,18 @@
             // ミュート解除（音が出るようにする）
             event.target.unMute();
             event.target.setVolume(100);
+            playerReady = true; // プレイヤー準備完了
+            console.log('YouTube Player準備完了');
+            
+            // ステータス表示を更新
+            const statusElement = document.getElementById('playerStatus');
+            if (statusElement) {
+                statusElement.innerHTML = '<span class="text-green-300">✅ YouTube Player準備完了</span>';
+                // 3秒後に非表示
+                setTimeout(() => {
+                    statusElement.style.display = 'none';
+                }, 3000);
+            }
         }
         
         // プレイヤー状態変更
@@ -542,9 +597,50 @@
 
         // 初期化
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOMContentLoaded');
             updatePlayerList();
             updateScoreBoard();
             updateSelectedSongs(); // 保存されている曲を表示
+            
+            // YouTube APIが読み込まれているか確認して手動初期化
+            let initAttempts = 0;
+            const maxAttempts = 10;
+            
+            const tryInitYouTubePlayer = () => {
+                initAttempts++;
+                console.log(`YouTube Player初期化試行 ${initAttempts}/${maxAttempts}`);
+                
+                const statusElement = document.getElementById('playerStatus');
+                if (statusElement) {
+                    statusElement.innerHTML = `<span class="text-yellow-300">⏳ YouTube Player準備中... (${initAttempts}/${maxAttempts})</span>`;
+                }
+                
+                if (typeof YT !== 'undefined' && typeof YT.Player !== 'undefined') {
+                    console.log('YouTube API利用可能');
+                    
+                    // プレイヤーがまだ初期化されていない場合のみ初期化
+                    if (!ytPlayer) {
+                        console.log('手動でYouTube Player初期化を開始');
+                        onYouTubeIframeAPIReady();
+                    } else {
+                        console.log('YouTube Player既に初期化済み');
+                    }
+                } else {
+                    console.log('YouTube API未ロード、待機中...');
+                    if (initAttempts < maxAttempts) {
+                        setTimeout(tryInitYouTubePlayer, 1000);
+                    } else {
+                        console.error('YouTube APIの読み込みがタイムアウトしました');
+                        if (statusElement) {
+                            statusElement.innerHTML = '<span class="text-red-300">❌ YouTube APIの読み込み失敗</span>';
+                        }
+                        alert('YouTube APIの読み込みに失敗しました。ページを再読み込みしてください。');
+                    }
+                }
+            };
+            
+            // 500ms後に初期化を試行
+            setTimeout(tryInitYouTubePlayer, 500);
             
             // イントロ時間スライダー
             document.getElementById('introTime').addEventListener('input', function(e) {
@@ -749,7 +845,7 @@
                 
                 const resultHTML = data.items.map(item => `
                     <div class="bg-white/10 rounded-xl p-3 flex items-center gap-3">
-                        <img src="${item.snippet.thumbnails.default.url}" class="w-16 h-12 rounded object-cover" />
+                        <img src="${item.snippet.thumbnails.default.url}" alt="${item.snippet.title}" class="w-16 h-12 rounded object-cover" />
                         <div class="flex-1 min-w-0">
                             <p class="text-white text-sm font-semibold truncate">${item.snippet.title}</p>
                             <p class="text-white/60 text-xs truncate">${item.snippet.channelTitle}</p>
@@ -757,6 +853,7 @@
                         <button 
                             onclick="addSong('${item.id.videoId}', '${item.snippet.title.replace(/'/g, "\\'")}', '${item.snippet.thumbnails.default.url}')"
                             class="px-3 py-2 bg-cyan-500 text-white rounded-lg btn-touch text-xs font-bold flex-shrink-0"
+                            aria-label="${item.snippet.title}を追加"
                         >
                             追加
                         </button>
@@ -828,7 +925,7 @@
             // イントロ時間を自動設定
             introTime = difficultySettings[difficulty];
             document.getElementById('introTime').value = introTime;
-            document.getElementById('introTimeValue').textContent = introTime + '秒';
+            document.getElementById('introTimeDisplay').textContent = introTime;
         }
         
         // アーティスト指定クイズ
@@ -854,7 +951,7 @@
             }
             
             // YouTube Playerチェック
-            if (!ytPlayer) {
+            if (!ytPlayer || !playerReady) {
                 alert('YouTube Playerの準備ができていません。少し待ってから再試行してください。');
                 return;
             }
@@ -935,7 +1032,7 @@
                 // 難易度に応じてイントロ時間を設定
                 introTime = difficultySettings[quizDifficulty];
                 document.getElementById('introTime').value = introTime;
-                document.getElementById('introTimeValue').textContent = introTime + '秒';
+                document.getElementById('introTimeDisplay').textContent = introTime;
                 
                 // 進捗更新
                 document.getElementById('themeLoadingProgress').style.width = '90%';
@@ -997,13 +1094,14 @@
             
             container.innerHTML = selectedSongs.map(song => `
                 <div class="bg-white/10 rounded-lg p-2 flex items-center gap-2">
-                    <img src="${song.thumbnail}" class="w-12 h-9 rounded object-cover" />
+                    <img src="${song.thumbnail}" alt="${song.title}" class="w-12 h-9 rounded object-cover" />
                     <div class="flex-1 min-w-0">
                         <p class="text-white text-xs truncate">${song.title}</p>
                     </div>
                     <button 
                         onclick="removeSong('${song.videoId}')"
                         class="text-red-300 font-bold text-lg w-8 h-8 flex items-center justify-center"
+                        aria-label="${song.title}を削除"
                     >
                         ✕
                     </button>
@@ -1023,7 +1121,7 @@
                 return;
             }
             
-            if (!ytPlayer) {
+            if (!ytPlayer || !playerReady) {
                 alert('YouTube Playerの準備ができていません。少し待ってから再試行してください。');
                 return;
             }
@@ -1087,10 +1185,25 @@
             
             // YouTube動画をロード（loadVideoByIdで音声も準備）
             const song = selectedSongs[currentQuestionIndex];
-            ytPlayer.loadVideoById({
-                videoId: song.videoId,
-                startSeconds: 0
-            });
+            
+            // プレイヤーが準備できているか確認
+            if (!ytPlayer || !playerReady || typeof ytPlayer.loadVideoById !== 'function') {
+                console.error('YouTube Player is not ready');
+                alert('YouTube Playerの準備ができていません。ページを再読み込みしてください。');
+                return;
+            }
+            
+            try {
+                ytPlayer.loadVideoById({
+                    videoId: song.videoId,
+                    startSeconds: 0
+                });
+            } catch (error) {
+                console.error('動画の読み込みエラー:', error);
+                alert('動画の読み込みに失敗しました。次の曲に進みます。');
+                nextQuestion();
+                return;
+            }
             // ロード後に停止（再生ボタンを押すまで待機）
             // 少し長めに待って音声も確実にロード
             setTimeout(() => {
@@ -1103,8 +1216,14 @@
 
         // イントロ再生
         async function playIntro() {
-            if (!ytPlayer) {
+            if (!ytPlayer || !playerReady) {
                 alert('YouTube Playerが準備できていません');
+                return;
+            }
+            
+            // プレイヤーのメソッドが利用可能か確認
+            if (typeof ytPlayer.playVideo !== 'function') {
+                alert('YouTube Playerが正しく初期化されていません。ページを再読み込みしてください。');
                 return;
             }
             
