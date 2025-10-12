@@ -1161,12 +1161,46 @@
             quizGame.style.display = 'block';
             quizGame.style.visibility = 'visible';
             quizGame.style.opacity = '1';
+            quizGame.style.position = 'relative';
+            quizGame.style.zIndex = '9999';
+            
+            // 親要素も確認
+            const app = document.getElementById('app');
+            if (app) {
+                app.style.display = 'block';
+                app.style.visibility = 'visible';
+                console.log('app要素も強制表示');
+            }
             
             console.log('userManagement hidden:', userMgmt.classList.contains('hidden'));
             console.log('quizGame hidden:', quizGame.classList.contains('hidden'));
             console.log('quizGame display style:', window.getComputedStyle(quizGame).display);
             console.log('quizGame visibility:', window.getComputedStyle(quizGame).visibility);
             console.log('quizGame opacity:', window.getComputedStyle(quizGame).opacity);
+            
+            // スクロールして表示
+            setTimeout(() => {
+                quizGame.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                console.log('quizGameにスクロールしました');
+                
+                // 要素の位置とサイズを確認
+                const rect = quizGame.getBoundingClientRect();
+                console.log('quizGame位置:', {
+                    top: rect.top,
+                    left: rect.left,
+                    width: rect.width,
+                    height: rect.height,
+                    bottom: rect.bottom,
+                    right: rect.right
+                });
+                
+                if (rect.height === 0) {
+                    console.error('⚠️ quizGameの高さが0です！子要素に問題があります');
+                }
+                if (rect.width === 0) {
+                    console.error('⚠️ quizGameの幅が0です！');
+                }
+            }, 100);
             
             loadQuestion();
         }
