@@ -158,8 +158,11 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // 簡易パスワード（実際の運用では環境変数などに格納推奨）
-        const APP_PASSWORD = "mahjong2025";
+        // パスワード管理（Firebaseから取得）
+        let appPasswords = {
+            login: 'mahjong2024',      // デフォルト（初回用）
+            delete: 'mahjong1234'      // デフォルト（初回用）
+        };
         
         // アプリの状態
         let data = { dates: {} };
@@ -167,12 +170,35 @@
         let currentTab = 'input';
         let isLoggedIn = false;
 
+        // Firebaseからパスワードを読み込む
+        function loadPasswords() {
+            return database.ref('settings/passwords').once('value')
+                .then((snapshot) => {
+                    const passwords = snapshot.val();
+                    if (passwords) {
+                        appPasswords = passwords;
+                        console.log('パスワード設定を読み込みました');
+                    } else {
+                        // 初回起動時：デフォルトパスワードをFirebaseに保存
+                        database.ref('settings/passwords').set(appPasswords);
+                        console.log('デフォルトパスワードを設定しました');
+                    }
+                })
+                .catch((error) => {
+                    console.error('パスワード読み込みエラー:', error);
+                    // エラーでもデフォルト値を使用
+                });
+        }
+
         // ログイン処理
-        function login() {
+        async function login() {
             const password = document.getElementById('passwordInput').value;
             const errorDiv = document.getElementById('loginError');
             
-            if (password === APP_PASSWORD) {
+            // まずパスワードを読み込む
+            await loadPasswords();
+            
+            if (password === appPasswords.login) {
                 isLoggedIn = true;
                 localStorage.setItem('mahjong_logged_in', 'true');
                 document.getElementById('loginScreen').style.display = 'none';
@@ -200,7 +226,10 @@
         }
 
         // 初期化時のログイン状態チェック
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
+            // パスワードを読み込む
+            await loadPasswords();
+            
             const loggedIn = localStorage.getItem('mahjong_logged_in');
             if (loggedIn === 'true') {
                 isLoggedIn = true;
@@ -526,31 +555,46 @@
 
         // 全データ削除
         function clearAllData() {
-            if(confirm('⚠️ 警告\n\n全てのデータ（プレイヤー、半荘記録など）が完全に削除されます。\n\nFirebaseからも削除されるため、復元できません。\n\n本当に削除しますか？')) {
-                if(confirm('最終確認\n\nもう一度確認します。本当に全データを削除しますか？\n\nこの操作は取り消せません！')) {
-                    // データを初期化
-                    data = { dates: {} };
-                    allPlayers = [];
-                    
-                    // Firebaseから削除
-                    database.ref('mahjong').set({
-                        data: { dates: {} },
-                        allPlayers: [],
-                        lastUpdated: new Date().toISOString(),
-                        deletedAt: new Date().toISOString()
-                    })
-                    .then(() => {
-                        render();
-                        if(currentTab === 'daily') renderDaily();
-                        if(currentTab === 'players') renderPlayers();
-                        notify('全データを削除しました');
-                        console.log('全データ削除完了');
-                    })
-                    .catch((error) => {
-                        console.error('削除エラー:', error);
-                        notify('削除に失敗しました', 'error');
-                    });
-                }
+            // まず削除用パスワードを要求
+            const deletePassword = prompt('⚠️ 全データ削除\n\n全てのデータを完全に削除します。\nこの操作は取り消せません！\n\n削除用パスワードを入力してください:');
+            
+            if (!deletePassword) {
+                notify('削除がキャンセルされました');
+                return;
+            }
+            
+            // パスワード確認
+            if (deletePassword !== appPasswords.delete) {
+                alert('❌ パスワードが間違っています。\n\n削除用パスワードを管理者に確認してください。');
+                return;
+            }
+            
+            // パスワードが正しい場合のみ続行
+            if(confirm('⚠️ 最終確認\n\nパスワードが確認されました。\n\n全てのデータ（プレイヤー、半荘記録など）が完全に削除されます。\n\n本当に削除を実行しますか？')) {
+                // データを初期化
+                data = { dates: {} };
+                allPlayers = [];
+                
+                // Firebaseから削除
+                database.ref('mahjong').set({
+                    data: { dates: {} },
+                    allPlayers: [],
+                    lastUpdated: new Date().toISOString(),
+                    deletedAt: new Date().toISOString()
+                })
+                .then(() => {
+                    render();
+                    if(currentTab === 'daily') renderDaily();
+                    if(currentTab === 'players') renderPlayers();
+                    notify('全データを削除しました');
+                    console.log('全データ削除完了');
+                })
+                .catch((error) => {
+                    console.error('削除エラー:', error);
+                    notify('削除に失敗しました', 'error');
+                });
+            } else {
+                notify('削除がキャンセルされました');
             }
         }
 
