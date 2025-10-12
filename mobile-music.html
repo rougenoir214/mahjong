@@ -552,10 +552,14 @@
                 ytPlayer = new YT.Player('player', {
                     height: '0',
                     width: '0',
+                    videoId: 'dQw4w9WgXcQ', // ダミー動画で初期化
                     playerVars: {
                         'playsinline': 1,
                         'controls': 0,
-                        'enablejsapi': 1
+                        'enablejsapi': 1,
+                        'autoplay': 0,
+                        'modestbranding': 1,
+                        'rel': 0
                     },
                     events: {
                         'onReady': onPlayerReady,
@@ -592,6 +596,9 @@
         
         // プレイヤー準備完了
         function onPlayerReady(event) {
+            console.log('onPlayerReady呼び出されました');
+            // ダミー動画を停止
+            event.target.stopVideo();
             // ミュート解除（音が出るようにする）
             event.target.unMute();
             event.target.setVolume(100);
@@ -1258,10 +1265,8 @@
             
             try {
                 console.log('loadVideoById実行開始');
-                ytPlayer.loadVideoById({
-                    videoId: song.videoId,
-                    startSeconds: 0
-                });
+                // 別の構文を試す：loadVideoById(videoId, startSeconds)
+                ytPlayer.loadVideoById(song.videoId, 0);
                 console.log('loadVideoById実行完了');
             } catch (error) {
                 console.error('動画の読み込みエラー:', error);
