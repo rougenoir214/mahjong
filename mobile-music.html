@@ -1241,13 +1241,41 @@
                     if (rect.height === 0) {
                         console.error('⚠️ quizGameの高さが0です！子要素に問題があります');
                         
-                        // 最後の手段：直接サイズを設定
-                        quizGame.style.height = '800px';
-                        quizGame.style.width = '100%';
-                        quizGame.style.maxWidth = '500px';
-                        quizGame.style.backgroundColor = 'rgba(255,255,255,0.1)';
-                        quizGame.style.border = '2px solid red';
-                        console.log('直接サイズを強制設定しました（赤い枠線付き）');
+                        // 最後の手段：!importantで直接サイズを設定
+                        quizGame.style.setProperty('height', '800px', 'important');
+                        quizGame.style.setProperty('width', '100%', 'important');
+                        quizGame.style.setProperty('max-width', '500px', 'important');
+                        quizGame.style.setProperty('background-color', 'rgba(255,255,255,0.1)', 'important');
+                        quizGame.style.setProperty('border', '5px solid red', 'important');
+                        quizGame.style.setProperty('box-sizing', 'border-box', 'important');
+                        quizGame.style.setProperty('overflow', 'visible', 'important');
+                        console.log('直接サイズを強制設定しました（赤い太枠付き）');
+                        
+                        // 設定を確認
+                        console.log('設定後のスタイル:', {
+                            height: quizGame.style.height,
+                            width: quizGame.style.width,
+                            border: quizGame.style.border,
+                            display: quizGame.style.display
+                        });
+                        
+                        // レンダリングを待ってから再確認
+                        setTimeout(() => {
+                            const rect2 = quizGame.getBoundingClientRect();
+                            console.log('再確認後のquizGame位置:', rect2);
+                            
+                            if (rect2.height === 0) {
+                                console.error('❌ まだ高さが0です。CSSが上書きしている可能性');
+                                console.log('computedStyle:', {
+                                    display: window.getComputedStyle(quizGame).display,
+                                    height: window.getComputedStyle(quizGame).height,
+                                    width: window.getComputedStyle(quizGame).width,
+                                    border: window.getComputedStyle(quizGame).border
+                                });
+                            } else {
+                                console.log('✅ サイズが反映されました！', rect2);
+                            }
+                        }, 500);
                     }
                     if (rect.width === 0) {
                         console.error('⚠️ quizGameの幅が0です！');
