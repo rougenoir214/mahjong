@@ -1142,8 +1142,24 @@
             currentQuestionIndex = 0;
             shuffleArray(selectedSongs);
             
-            document.getElementById('userManagement').classList.add('hidden');
-            document.getElementById('quizGame').classList.remove('hidden');
+            const userMgmt = document.getElementById('userManagement');
+            const quizGame = document.getElementById('quizGame');
+            
+            console.log('userManagement要素:', userMgmt);
+            console.log('quizGame要素:', quizGame);
+            
+            if (!userMgmt || !quizGame) {
+                console.error('画面要素が見つかりません');
+                alert('画面の初期化に失敗しました。ページを再読み込みしてください。');
+                return;
+            }
+            
+            userMgmt.classList.add('hidden');
+            quizGame.classList.remove('hidden');
+            
+            console.log('userManagement hidden:', userMgmt.classList.contains('hidden'));
+            console.log('quizGame hidden:', quizGame.classList.contains('hidden'));
+            console.log('quizGame display style:', window.getComputedStyle(quizGame).display);
             
             loadQuestion();
         }
@@ -1205,6 +1221,20 @@
             
             // プレイヤーボタン生成
             const buttonContainer = document.getElementById('playerButtons');
+            if (!buttonContainer) {
+                console.error('playerButtons要素が見つかりません');
+                return;
+            }
+            
+            console.log('プレイヤーボタン生成開始');
+            console.log('players配列:', players);
+            
+            if (players.length === 0) {
+                console.error('players配列が空です');
+                buttonContainer.innerHTML = '<p class="text-white text-center col-span-2">プレイヤーが登録されていません</p>';
+                return;
+            }
+            
             buttonContainer.innerHTML = players.map(player => `
                 <button 
                     onclick="playerAnswer(${player.id})"
@@ -1213,6 +1243,8 @@
                     ${player.name}
                 </button>
             `).join('');
+            console.log('プレイヤーボタン生成完了:', players.length + '個');
+            console.log('buttonContainer.innerHTML length:', buttonContainer.innerHTML.length);
             
             // YouTube動画をロード（loadVideoByIdで音声も準備）
             const song = selectedSongs[currentQuestionIndex];
