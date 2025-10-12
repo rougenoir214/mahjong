@@ -88,10 +88,11 @@
         <div class="px-3 py-4">
             <div id="stats" class="grid grid-cols-2 gap-2 mb-4"></div>
             <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-4 animate-fade">
-                <div class="flex border-b">
-                    <button onclick="switchTab('input')" id="tab-input" class="flex-1 px-4 py-3 text-sm font-medium bg-gradient-to-r from-cyan-500 to-teal-500 text-white">入力</button>
-                    <button onclick="switchTab('daily')" id="tab-daily" class="flex-1 px-4 py-3 text-sm font-medium text-gray-600">日別</button>
-                    <button onclick="switchTab('players')" id="tab-players" class="flex-1 px-4 py-3 text-sm font-medium text-gray-600">統計</button>
+                <div class="flex border-b overflow-x-auto">
+                    <button onclick="switchTab('input')" id="tab-input" class="flex-1 px-3 py-3 text-sm font-medium bg-gradient-to-r from-cyan-500 to-teal-500 text-white whitespace-nowrap">入力</button>
+                    <button onclick="switchTab('daily')" id="tab-daily" class="flex-1 px-3 py-3 text-sm font-medium text-gray-600 whitespace-nowrap">日別</button>
+                    <button onclick="switchTab('players')" id="tab-players" class="flex-1 px-3 py-3 text-sm font-medium text-gray-600 whitespace-nowrap">統計</button>
+                    <button onclick="switchTab('league')" id="tab-league" class="flex-1 px-3 py-3 text-sm font-medium text-gray-600 whitespace-nowrap">🏆 リーグ戦</button>
                 </div>
                 <div id="content-input" class="p-4">
                     <div class="mb-3">
@@ -135,6 +136,54 @@
                 <div id="content-players" class="p-4" style="display:none;">
                     <div id="playerStats"></div>
                 </div>
+                <div id="content-league" class="p-4" style="display:none;">
+                    <!-- 新規リーグ戦作成ボタン -->
+                    <button onclick="showLeagueCreateForm()" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white py-3 rounded-lg font-bold mb-4 active:opacity-80 flex items-center justify-center gap-2">
+                        <span class="text-xl">➕</span> 新しいリーグ戦を作成
+                    </button>
+                    
+                    <!-- リーグ戦作成フォーム（初期は非表示） -->
+                    <div id="leagueCreateForm" class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 mb-4 border-2 border-blue-300" style="display:none;">
+                        <h3 class="text-lg font-bold text-blue-800 mb-3">🆕 リーグ戦を作成</h3>
+                        
+                        <div class="mb-3">
+                            <label class="block text-sm font-medium text-blue-800 mb-1">リーグ戦名</label>
+                            <input type="text" id="leagueName" placeholder="例: 週末麻雀会" 
+                                   class="w-full px-3 py-2 border-2 border-blue-300 rounded-lg text-sm">
+                        </div>
+                        
+                        <label class="block text-sm font-medium text-blue-800 mb-2">参加プレイヤー（4人）</label>
+                        <div class="grid grid-cols-2 gap-2 mb-3">
+                            <select id="newLeaguePlayer1" class="px-3 py-2 border-2 border-blue-300 rounded-lg text-sm">
+                                <option value="">プレイヤー1</option>
+                            </select>
+                            <select id="newLeaguePlayer2" class="px-3 py-2 border-2 border-blue-300 rounded-lg text-sm">
+                                <option value="">プレイヤー2</option>
+                            </select>
+                            <select id="newLeaguePlayer3" class="px-3 py-2 border-2 border-blue-300 rounded-lg text-sm">
+                                <option value="">プレイヤー3</option>
+                            </select>
+                            <select id="newLeaguePlayer4" class="px-3 py-2 border-2 border-blue-300 rounded-lg text-sm">
+                                <option value="">プレイヤー4</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex gap-2">
+                            <button onclick="createLeague()" class="flex-1 bg-blue-500 text-white py-2 rounded-lg font-bold active:bg-blue-600">
+                                💾 作成
+                            </button>
+                            <button onclick="hideLeagueCreateForm()" class="flex-1 bg-gray-400 text-white py-2 rounded-lg font-bold active:bg-gray-500">
+                                キャンセル
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- リーグ戦一覧 -->
+                    <div id="leagueList"></div>
+                    
+                    <!-- 選択されたリーグ戦の成績表示 -->
+                    <div id="leagueResults"></div>
+                </div>
             </div>
         </div>
 
@@ -167,6 +216,8 @@
         // アプリの状態
         let data = { dates: {} };
         let allPlayers = [];
+        let leagues = {}; // リーグ戦データ { leagueId: { name, players: [], createdAt } }
+        let selectedLeagueId = null; // 現在選択されているリーグ戦ID
         let currentTab = 'input';
         let isLoggedIn = false;
 
@@ -420,13 +471,21 @@
         // タブ切り替え
         function switchTab(tab) {
             currentTab = tab;
-            ['input','daily','players'].forEach(t => {
-                document.getElementById('content-'+t).style.display = t===tab ? 'block' : 'none';
-                document.getElementById('tab-'+t).className = 'flex-1 px-4 py-3 text-sm font-medium ' + 
-                    (t===tab ? 'bg-gradient-to-r from-cyan-500 to-teal-500 text-white' : 'text-gray-600');
+            ['input','daily','players','league'].forEach(t => {
+                const contentEl = document.getElementById('content-'+t);
+                const tabEl = document.getElementById('tab-'+t);
+                if(contentEl) contentEl.style.display = t===tab ? 'block' : 'none';
+                if(tabEl) {
+                    tabEl.className = 'flex-1 px-3 py-3 text-sm font-medium whitespace-nowrap ' + 
+                        (t===tab ? 'bg-gradient-to-r from-cyan-500 to-teal-500 text-white' : 'text-gray-600');
+                }
             });
             if(tab==='daily') renderDaily();
             if(tab==='players') renderPlayers();
+            if(tab==='league') {
+                updateLeaguePlayerSelects();
+                renderLeagues();
+            }
         }
 
         // 日付変更
@@ -843,6 +902,7 @@
             renderScoreInputs();
             // renderGamesList(); // 入力タブには表示しない（日別タブのみ）
             renderPlayerList();
+            updateLeaguePlayerSelects(); // リーグ戦のプレイヤー選択肢を更新
             console.log('render() 完了');
         }
 
@@ -1241,6 +1301,338 @@
                 console.error('プレイヤー統計表示エラー:', error);
                 playerStatsElement.innerHTML = '<div class="text-center py-8 text-red-400 text-sm">表示エラーが発生しました</div>';
             }
+        }
+
+        // リーグ戦：プレイヤー選択肢を更新
+        function renderLeagueSelectors() {
+            for(let i = 1; i <= 4; i++) {
+                const select = document.getElementById('leaguePlayer' + i);
+                if(!select) continue;
+                
+                let html = `<option value="">プレイヤー${i}を選択</option>`;
+                allPlayers.forEach(p => {
+                    html += `<option value="${p}">${p}</option>`;
+                });
+                select.innerHTML = html;
+            }
+        }
+
+        // ========== リーグ戦管理機能 ==========
+        
+        // リーグ戦作成フォームを表示
+        function showLeagueCreateForm() {
+            document.getElementById('leagueCreateForm').style.display = 'block';
+            document.getElementById('leagueName').value = '';
+            updateLeaguePlayerSelects();
+            document.getElementById('leagueName').focus();
+        }
+
+        // リーグ戦作成フォームを非表示
+        function hideLeagueCreateForm() {
+            document.getElementById('leagueCreateForm').style.display = 'none';
+        }
+
+        // リーグ戦作成用のプレイヤー選択肢を更新
+        function updateLeaguePlayerSelects() {
+            const html = '<option value="">選択してください</option>' + 
+                         allPlayers.map(p => `<option value="${p}">${p}</option>`).join('');
+            
+            for(let i = 1; i <= 4; i++) {
+                const select = document.getElementById('newLeaguePlayer' + i);
+                if(select) select.innerHTML = html;
+            }
+        }
+
+        // リーグ戦を作成
+        function createLeague() {
+            const name = document.getElementById('leagueName').value.trim();
+            if(!name) {
+                alert('リーグ戦名を入力してください');
+                return;
+            }
+
+            // 4人のプレイヤーを取得
+            const selectedPlayers = [];
+            for(let i = 1; i <= 4; i++) {
+                const select = document.getElementById('newLeaguePlayer' + i);
+                const player = select ? select.value : '';
+                if(!player) {
+                    alert(`プレイヤー${i}を選択してください`);
+                    return;
+                }
+                if(selectedPlayers.includes(player)) {
+                    alert(`同じプレイヤーが複数選択されています: ${player}`);
+                    return;
+                }
+                selectedPlayers.push(player);
+            }
+
+            // リーグ戦IDを生成（タイムスタンプベース）
+            const leagueId = 'league_' + Date.now();
+            
+            // リーグ戦データ
+            const leagueData = {
+                name: name,
+                players: selectedPlayers,
+                createdAt: Date.now()
+            };
+
+            // Firebaseに保存
+            database.ref('leagues/' + leagueId).set(leagueData)
+                .then(() => {
+                    console.log('リーグ戦を作成しました:', leagueId, leagueData);
+                    leagues[leagueId] = leagueData;
+                    hideLeagueCreateForm();
+                    renderLeagues();
+                    showNotification('✅ リーグ戦「' + name + '」を作成しました');
+                })
+                .catch(error => {
+                    console.error('リーグ戦の作成に失敗:', error);
+                    alert('リーグ戦の作成に失敗しました');
+                });
+        }
+
+        // Firebaseからリーグ戦一覧を読み込み
+        function loadLeagues() {
+            return database.ref('leagues').once('value')
+                .then(snapshot => {
+                    leagues = snapshot.val() || {};
+                    console.log('リーグ戦を読み込みました:', Object.keys(leagues).length + '件');
+                    renderLeagues();
+                })
+                .catch(error => {
+                    console.error('リーグ戦の読み込みに失敗:', error);
+                });
+        }
+
+        // リーグ戦一覧を表示
+        function renderLeagues() {
+            const container = document.getElementById('leagueList');
+            if(!container) return;
+
+            const leagueArray = Object.entries(leagues).sort((a, b) => b[1].createdAt - a[1].createdAt);
+
+            if(leagueArray.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 bg-gray-50 rounded-lg mb-4">
+                        <div class="text-4xl mb-3">🏆</div>
+                        <p class="text-gray-600 font-semibold mb-2">リーグ戦がありません</p>
+                        <p class="text-sm text-gray-500">「新しいリーグ戦を作成」ボタンから作成してください</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="mb-4">';
+            html += '<h3 class="text-lg font-bold text-gray-800 mb-3">📋 リーグ戦一覧</h3>';
+            
+            leagueArray.forEach(([leagueId, league]) => {
+                const isSelected = leagueId === selectedLeagueId;
+                const borderColor = isSelected ? 'border-amber-400' : 'border-gray-200';
+                const bgColor = isSelected ? 'bg-amber-50' : 'bg-white';
+                
+                html += `
+                    <div class="mb-3 border-2 ${borderColor} ${bgColor} rounded-lg p-3 shadow-sm">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-gray-800 flex-1">${escapeHtml(league.name)}</h4>
+                            <button onclick="deleteLeague('${leagueId}')" 
+                                    class="text-red-500 text-sm px-2 py-1 hover:bg-red-50 rounded active:bg-red-100">
+                                🗑️
+                            </button>
+                        </div>
+                        <div class="text-sm text-gray-600 mb-2">
+                            👥 ${league.players.map(p => escapeHtml(p)).join(' / ')}
+                        </div>
+                        <button onclick="selectLeague('${leagueId}')" 
+                                class="w-full ${isSelected ? 'bg-amber-500' : 'bg-blue-500'} text-white py-2 rounded-lg text-sm font-bold active:opacity-80">
+                            ${isSelected ? '✅ 選択中' : '📊 成績を表示'}
+                        </button>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // リーグ戦を選択して成績を表示
+        function selectLeague(leagueId) {
+            selectedLeagueId = leagueId;
+            const league = leagues[leagueId];
+            
+            if(!league) {
+                alert('リーグ戦が見つかりません');
+                return;
+            }
+
+            console.log('リーグ戦を選択:', leagueId, league);
+            renderLeagues(); // 選択状態を更新
+            calculateLeagueById(leagueId);
+        }
+
+        // リーグ戦を削除
+        function deleteLeague(leagueId) {
+            const league = leagues[leagueId];
+            if(!league) return;
+
+            if(!confirm(`リーグ戦「${league.name}」を削除しますか？`)) {
+                return;
+            }
+
+            database.ref('leagues/' + leagueId).remove()
+                .then(() => {
+                    console.log('リーグ戦を削除しました:', leagueId);
+                    delete leagues[leagueId];
+                    
+                    if(selectedLeagueId === leagueId) {
+                        selectedLeagueId = null;
+                        document.getElementById('leagueResults').innerHTML = '';
+                    }
+                    
+                    renderLeagues();
+                    showNotification('🗑️ リーグ戦を削除しました');
+                })
+                .catch(error => {
+                    console.error('リーグ戦の削除に失敗:', error);
+                    alert('リーグ戦の削除に失敗しました');
+                });
+        }
+
+        // リーグ戦IDから成績を計算
+        function calculateLeagueById(leagueId) {
+            const league = leagues[leagueId];
+            if(!league) return;
+
+            const selectedPlayers = league.players;
+            console.log('リーグ戦メンバー:', selectedPlayers);
+
+            // このメンバーで行われた試合を抽出
+            const leagueGames = [];
+            Object.entries(data.dates).forEach(([date, dateData]) => {
+                if(!dateData || !dateData.games || !dateData.players) return;
+                
+                // この日のプレイヤーがリーグ戦メンバーと完全一致するか確認
+                const dayPlayers = dateData.players.filter(p => p); // 空文字を除外
+                if(dayPlayers.length !== 4) return;
+                
+                const isLeagueMatch = dayPlayers.every(p => selectedPlayers.includes(p)) && 
+                                     selectedPlayers.every(p => dayPlayers.includes(p));
+                
+                if(isLeagueMatch) {
+                    dateData.games.forEach((game, gameIndex) => {
+                        leagueGames.push({
+                            date: date,
+                            gameIndex: gameIndex + 1,
+                            players: dateData.players,
+                            scores: game
+                        });
+                    });
+                }
+            });
+
+            console.log('リーグ戦試合数:', leagueGames.length);
+
+            if(leagueGames.length === 0) {
+                document.getElementById('leagueResults').innerHTML = `
+                    <div class="text-center py-12 bg-gray-50 rounded-lg">
+                        <div class="text-4xl mb-3">🤔</div>
+                        <p class="text-gray-600 font-semibold mb-2">この4人での対戦記録が見つかりません</p>
+                        <p class="text-sm text-gray-500">「${escapeHtml(league.name)}」のメンバー全員で対戦した記録が必要です</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // 統計を計算
+            const stats = {};
+            selectedPlayers.forEach(p => {
+                stats[p] = {
+                    name: p,
+                    totalGames: 0,
+                    totalScore: 0,
+                    ranks: {1:0, 2:0, 3:0, 4:0}
+                };
+            });
+
+            leagueGames.forEach(game => {
+                game.scores.forEach((score, idx) => {
+                    const playerName = game.players[idx];
+                    if(!stats[playerName]) return;
+                    
+                    stats[playerName].totalGames++;
+                    stats[playerName].totalScore += score;
+                    
+                    // 順位計算
+                    const sorted = [...game.scores].sort((a,b) => b-a);
+                    const rank = sorted.indexOf(score) + 1;
+                    stats[playerName].ranks[rank]++;
+                });
+            });
+
+            // 結果を表示
+            renderLeagueResults(league.name, selectedPlayers, stats, leagueGames);
+        }
+
+        // リーグ戦：結果表示（リーグ戦名を追加）
+        function renderLeagueResults(leagueName, players, stats, games) {
+            const list = players.map(p => stats[p]).sort((a,b) => b.totalScore - a.totalScore);
+            
+            let html = `
+                <div class="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-lg p-4 mb-4 border-2 border-amber-300">
+                    <h3 class="text-lg font-bold text-amber-800 mb-2 flex items-center">
+                        🏆 ${escapeHtml(leagueName)} - 成績
+                    </h3>
+                    <p class="text-sm text-amber-700">総対戦数: <span class="font-bold">${games.length}半荘</span></p>
+                </div>
+            `;
+
+            list.forEach((p, idx) => {
+                const avg = Math.round(p.totalScore / p.totalGames);
+                const medals = ['🥇', '🥈', '🥉', '4️⃣'];
+                const borderColors = ['border-yellow-400', 'border-gray-400', 'border-orange-400', 'border-blue-300'];
+                const bgColors = ['bg-yellow-50', 'bg-gray-50', 'bg-orange-50', 'bg-blue-50'];
+                
+                let ranks = '';
+                for(let r=1; r<=4; r++) {
+                    const count = p.ranks[r] || 0;
+                    const pct = ((count/p.totalGames)*100).toFixed(1);
+                    const colors = ['bg-yellow-500 text-yellow-700 bg-yellow-50','bg-gray-400 text-gray-700 bg-gray-50','bg-orange-500 text-orange-700 bg-orange-50','bg-red-500 text-red-700 bg-red-50'][r-1].split(' ');
+                    ranks += `<div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs font-bold w-8 ${colors[1]}">${r}位</span>
+                        <div class="flex-1 ${colors[2]} rounded-full h-6 overflow-hidden">
+                            <div class="${colors[0]} h-full flex items-center justify-end px-2 text-white text-xs font-bold" style="width:${pct}%">
+                                ${pct>15?pct+'%':''}
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold ${colors[1]} w-12">${pct}%</span>
+                        <span class="text-xs text-gray-500 w-10 text-right">${count}回</span>
+                    </div>`;
+                }
+                
+                html += `<div class="${bgColors[idx]} rounded-lg p-4 border-2 ${borderColors[idx]} mb-3">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="text-4xl">${medals[idx]}</div>
+                            <div>
+                                <h3 class="text-lg font-bold">${p.name}</h3>
+                                <p class="text-xs text-gray-600">${p.totalGames}半荘</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-2xl font-bold ${p.totalScore>=0?'text-green-600':'text-red-600'}">
+                                ${p.totalScore>0?'+':''}${p.totalScore.toLocaleString()}
+                            </div>
+                            <div class="text-xs text-gray-600">平均: ${avg>0?'+':''}${avg}</div>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-300 pt-3">
+                        <h4 class="text-xs font-bold mb-2">順位取得率</h4>
+                        ${ranks}
+                    </div>
+                </div>`;
+            });
+
+            document.getElementById('leagueResults').innerHTML = html;
         }
     </script>
 </body>
