@@ -552,19 +552,13 @@
                 ytPlayer = new YT.Player('player', {
                     height: '0',
                     width: '0',
-                    videoId: 'dQw4w9WgXcQ', // ダミー動画で初期化
                     playerVars: {
                         'playsinline': 1,
-                        'controls': 0,
-                        'enablejsapi': 1,
-                        'autoplay': 0,
-                        'modestbranding': 1,
-                        'rel': 0
+                        'controls': 0
                     },
                     events: {
                         'onReady': onPlayerReady,
-                        'onStateChange': onPlayerStateChange,
-                        'onError': onPlayerError
+                        'onStateChange': onPlayerStateChange
                     }
                 });
                 console.log('YouTube Player作成成功');
@@ -573,32 +567,9 @@
             }
         }
         
-        // プレイヤーエラーハンドリング
-        function onPlayerError(event) {
-            console.error('YouTube Player Error:', event.data);
-            const errorMessages = {
-                2: 'リクエストに無効なパラメータが含まれています',
-                5: 'HTML5プレイヤーのエラーです',
-                100: 'この動画は見つかりませんでした',
-                101: 'この動画の所有者が埋め込み再生を許可していません',
-                150: 'この動画の所有者が埋め込み再生を許可していません'
-            };
-            
-            const message = errorMessages[event.data] || '不明なエラーが発生しました';
-            console.error('エラー詳細:', message);
-            
-            // 次の曲に進む
-            if (typeof nextQuestion === 'function') {
-                alert(message + '\n次の曲に進みます。');
-                nextQuestion();
-            }
-        }
-        
         // プレイヤー準備完了
         function onPlayerReady(event) {
             console.log('onPlayerReady呼び出されました');
-            // ダミー動画を停止
-            event.target.stopVideo();
             // ミュート解除（音が出るようにする）
             event.target.unMute();
             event.target.setVolume(100);
@@ -1265,8 +1236,10 @@
             
             try {
                 console.log('loadVideoById実行開始');
-                // 別の構文を試す：loadVideoById(videoId, startSeconds)
-                ytPlayer.loadVideoById(song.videoId, 0);
+                ytPlayer.loadVideoById({
+                    videoId: song.videoId,
+                    startSeconds: 0
+                });
                 console.log('loadVideoById実行完了');
             } catch (error) {
                 console.error('動画の読み込みエラー:', error);
