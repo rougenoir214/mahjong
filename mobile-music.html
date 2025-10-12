@@ -555,16 +555,38 @@
                     playerVars: {
                         'playsinline': 1,
                         'controls': 0,
-                        'origin': window.location.origin
+                        'enablejsapi': 1
                     },
                     events: {
                         'onReady': onPlayerReady,
-                        'onStateChange': onPlayerStateChange
+                        'onStateChange': onPlayerStateChange,
+                        'onError': onPlayerError
                     }
                 });
                 console.log('YouTube Player作成成功');
             } catch (error) {
                 console.error('YouTube Player作成エラー:', error);
+            }
+        }
+        
+        // プレイヤーエラーハンドリング
+        function onPlayerError(event) {
+            console.error('YouTube Player Error:', event.data);
+            const errorMessages = {
+                2: 'リクエストに無効なパラメータが含まれています',
+                5: 'HTML5プレイヤーのエラーです',
+                100: 'この動画は見つかりませんでした',
+                101: 'この動画の所有者が埋め込み再生を許可していません',
+                150: 'この動画の所有者が埋め込み再生を許可していません'
+            };
+            
+            const message = errorMessages[event.data] || '不明なエラーが発生しました';
+            console.error('エラー詳細:', message);
+            
+            // 次の曲に進む
+            if (typeof nextQuestion === 'function') {
+                alert(message + '\n次の曲に進みます。');
+                nextQuestion();
             }
         }
         
@@ -1150,6 +1172,11 @@
 
         // 問題読み込み
         function loadQuestion() {
+            console.log('loadQuestion開始');
+            console.log('currentQuestionIndex:', currentQuestionIndex);
+            console.log('selectedSongs:', selectedSongs);
+            console.log('players:', players);
+            
             questionAnswered = false;
             document.getElementById('currentSongTitle').classList.add('hidden');
             
@@ -1160,17 +1187,43 @@
             }
             
             // タイマー表示をリセット
-            document.getElementById('timer').textContent = '--';
+            const timerElement = document.getElementById('timer');
+            if (timerElement) {
+                timerElement.textContent = '--';
+                console.log('タイマーをリセット');
+            } else {
+                console.error('timer要素が見つかりません');
+            }
             
             // ボタン状態をリセット
             isPlaying = false;
-            document.getElementById('playButton').disabled = false;
-            document.getElementById('pauseButton').disabled = true;
+            const playButton = document.getElementById('playButton');
+            const pauseButton = document.getElementById('pauseButton');
+            if (playButton && pauseButton) {
+                playButton.disabled = false;
+                pauseButton.disabled = true;
+                console.log('ボタン状態をリセット');
+            } else {
+                console.error('playButton または pauseButton が見つかりません');
+            }
             
             const progress = ((currentQuestionIndex + 1) / selectedSongs.length) * 100;
-            document.getElementById('progressBar').style.width = progress + '%';
-            document.getElementById('currentQuestion').textContent = 
-                `問題 ${currentQuestionIndex + 1}/${selectedSongs.length}`;
+            const progressBar = document.getElementById('progressBar');
+            const currentQuestion = document.getElementById('currentQuestion');
+            
+            if (progressBar) {
+                progressBar.style.width = progress + '%';
+                console.log('進捗バー更新:', progress + '%');
+            } else {
+                console.error('progressBar要素が見つかりません');
+            }
+            
+            if (currentQuestion) {
+                currentQuestion.textContent = `問題 ${currentQuestionIndex + 1}/${selectedSongs.length}`;
+                console.log('問題番号更新:', currentQuestion.textContent);
+            } else {
+                console.error('currentQuestion要素が見つかりません');
+            }
             
             // プレイヤーボタン生成
             const buttonContainer = document.getElementById('playerButtons');
