@@ -189,11 +189,119 @@
                     </div>
                 </div>
 
+                <!-- テーマクイズ（NEW） -->
+                <div class="glass-effect rounded-3xl p-5 shadow-2xl">
+                    <h2 class="text-2xl font-bold text-white mb-4 flex items-center gap-2">
+                        <span class="text-3xl">🎯</span>
+                        テーマクイズ
+                    </h2>
+                    
+                    <!-- クイズ設定 -->
+                    <div class="glass-effect rounded-xl p-4 mb-4 space-y-3">
+                        <!-- 曲数選択 -->
+                        <div>
+                            <label class="text-white text-sm font-semibold block mb-2">📊 曲数</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="setQuizSongCount(5)" id="songCount5" class="py-2 bg-white/20 text-white rounded-lg btn-touch text-sm font-semibold">
+                                    5曲
+                                </button>
+                                <button onclick="setQuizSongCount(10)" id="songCount10" class="py-2 bg-white/40 text-white rounded-lg btn-touch text-sm font-semibold border-2 border-white">
+                                    10曲
+                                </button>
+                                <button onclick="setQuizSongCount(20)" id="songCount20" class="py-2 bg-white/20 text-white rounded-lg btn-touch text-sm font-semibold">
+                                    20曲
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 難易度選択 -->
+                        <div>
+                            <label class="text-white text-sm font-semibold block mb-2">⚡ 難易度</label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="setQuizDifficulty('easy')" id="diffEasy" class="py-2 bg-white/20 text-white rounded-lg btn-touch text-sm font-semibold">
+                                    😊 簡単<br><span class="text-xs">(10秒)</span>
+                                </button>
+                                <button onclick="setQuizDifficulty('normal')" id="diffNormal" class="py-2 bg-white/40 text-white rounded-lg btn-touch text-sm font-semibold border-2 border-white">
+                                    🎵 普通<br><span class="text-xs">(5秒)</span>
+                                </button>
+                                <button onclick="setQuizDifficulty('hard')" id="diffHard" class="py-2 bg-white/20 text-white rounded-lg btn-touch text-sm font-semibold">
+                                    🔥 難しい<br><span class="text-xs">(3秒)</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p class="text-white/80 text-sm mb-4">
+                        テーマを選んで自動的に曲を選択！
+                    </p>
+                    
+                    <!-- テーマボタン -->
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <button 
+                            onclick="startThemeQuiz('2000年 ヒット曲 J-POP')"
+                            class="py-4 bg-gradient-to-br from-purple-500 to-pink-500 text-white font-bold rounded-xl btn-touch shadow-lg"
+                        >
+                            🎵 2000年代<br>ヒット曲
+                        </button>
+                        <button 
+                            onclick="startThemeQuiz('2010年 ヒット曲 J-POP')"
+                            class="py-4 bg-gradient-to-br from-blue-500 to-cyan-500 text-white font-bold rounded-xl btn-touch shadow-lg"
+                        >
+                            🎤 2010年代<br>ヒット曲
+                        </button>
+                        <button 
+                            onclick="startThemeQuiz('1990年 ヒット曲 J-POP')"
+                            class="py-4 bg-gradient-to-br from-green-500 to-teal-500 text-white font-bold rounded-xl btn-touch shadow-lg"
+                        >
+                            💿 1990年代<br>ヒット曲
+                        </button>
+                        <button 
+                            onclick="startThemeQuiz('アニメソング 人気')"
+                            class="py-4 bg-gradient-to-br from-red-500 to-orange-500 text-white font-bold rounded-xl btn-touch shadow-lg"
+                        >
+                            🌟 アニメ<br>ソング
+                        </button>
+                        <button 
+                            onclick="startThemeQuiz('ドラマ 主題歌 日本')"
+                            class="py-4 bg-gradient-to-br from-yellow-500 to-orange-400 text-white font-bold rounded-xl btn-touch shadow-lg"
+                        >
+                            📺 ドラマ<br>主題歌
+                        </button>
+                    </div>
+                    
+                    <!-- アーティスト指定クイズ -->
+                    <div class="glass-effect rounded-xl p-4 mb-3">
+                        <h3 class="text-white text-sm font-semibold mb-2 flex items-center gap-2">
+                            <span>🎤</span>
+                            アーティスト指定クイズ
+                        </h3>
+                        <div class="flex gap-2">
+                            <input 
+                                type="text" 
+                                id="artistName" 
+                                placeholder="アーティスト名を入力"
+                                style="min-width: 0; flex: 1 1 0%;"
+                                class="px-4 py-3 rounded-xl bg-white/20 text-white placeholder-white/60 border border-white/30 focus:outline-none focus:ring-2 focus:ring-white/50"
+                            />
+                            <button 
+                                onclick="startArtistQuiz()"
+                                class="px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-xl font-bold btn-touch flex-shrink-0 shadow-lg"
+                            >
+                                開始
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="text-xs text-white/60 text-center">
+                        ※ プレイヤー登録後に選択してください
+                    </div>
+                </div>
+
                 <!-- YouTube検索 -->
                 <div class="glass-effect rounded-3xl p-5 shadow-2xl">
                     <h2 class="text-2xl font-bold text-white mb-4 flex items-center gap-2">
                         <span class="text-3xl">🎬</span>
-                        曲を検索
+                        手動で曲を検索
                     </h2>
                     
                     <!-- 検索フォーム -->
@@ -389,6 +497,15 @@
         let currentSearchQuery = ''; // 現在の検索クエリ
         let isPlaying = false; // 再生状態
         let videoLoaded = false; // 動画ロード完了フラグ
+        
+        // クイズ設定
+        let quizSongCount = 10; // デフォルトは10曲
+        let quizDifficulty = 'normal'; // デフォルトは普通
+        const difficultySettings = {
+            easy: 10,
+            normal: 5,
+            hard: 3
+        };
 
         // YouTube IFrame API準備完了
         function onYouTubeIframeAPIReady() {
@@ -675,6 +792,174 @@
         // もっと見るボタン
         async function loadMoreResults() {
             await searchYouTube(false);
+        }
+        
+        // 曲数設定
+        function setQuizSongCount(count) {
+            quizSongCount = count;
+            
+            // ボタンのスタイル更新
+            ['songCount5', 'songCount10', 'songCount20'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (id === 'songCount' + count) {
+                    btn.className = 'py-2 bg-white/40 text-white rounded-lg btn-touch text-sm font-semibold border-2 border-white';
+                } else {
+                    btn.className = 'py-2 bg-white/20 text-white rounded-lg btn-touch text-sm font-semibold';
+                }
+            });
+        }
+        
+        // 難易度設定
+        function setQuizDifficulty(difficulty) {
+            quizDifficulty = difficulty;
+            
+            // ボタンのスタイル更新
+            ['diffEasy', 'diffNormal', 'diffHard'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (id === 'diff' + difficulty.charAt(0).toUpperCase() + difficulty.slice(1)) {
+                    btn.className = 'py-2 bg-white/40 text-white rounded-lg btn-touch text-sm font-semibold border-2 border-white';
+                } else {
+                    btn.className = 'py-2 bg-white/20 text-white rounded-lg btn-touch text-sm font-semibold';
+                }
+            });
+            
+            // イントロ時間を自動設定
+            introTime = difficultySettings[difficulty];
+            document.getElementById('introTime').value = introTime;
+            document.getElementById('introTimeValue').textContent = introTime + '秒';
+        }
+        
+        // アーティスト指定クイズ
+        async function startArtistQuiz() {
+            const artistName = document.getElementById('artistName').value.trim();
+            
+            if (!artistName) {
+                alert('アーティスト名を入力してください');
+                return;
+            }
+            
+            // アーティスト名で検索クエリを作成
+            const searchQuery = `${artistName} 曲`;
+            await startThemeQuiz(searchQuery);
+        }
+
+        // テーマクイズを開始
+        async function startThemeQuiz(theme) {
+            // プレイヤーチェック
+            if (players.length === 0) {
+                alert('先にプレイヤーを追加してください');
+                return;
+            }
+            
+            // YouTube Playerチェック
+            if (!ytPlayer) {
+                alert('YouTube Playerの準備ができていません。少し待ってから再試行してください。');
+                return;
+            }
+            
+            // 確認ダイアログ
+            const difficultyText = quizDifficulty === 'easy' ? '簡単(10秒)' : quizDifficulty === 'normal' ? '普通(5秒)' : '難しい(3秒)';
+            if (!confirm(`「${theme}」のテーマで${quizSongCount}曲を自動選択してクイズを開始しますか？\n\n難易度: ${difficultyText}\n※ 現在選択中の曲はクリアされます`)) {
+                return;
+            }
+            
+            // ローディング表示
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'themeLoadingOverlay';
+            loadingDiv.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50';
+            loadingDiv.innerHTML = `
+                <div class="bg-white/10 rounded-3xl p-8 max-w-sm mx-4">
+                    <div class="text-center text-white">
+                        <div class="text-4xl mb-4">🎵</div>
+                        <h3 class="text-xl font-bold mb-2">曲を選んでいます...</h3>
+                        <p class="text-sm text-white/80 mb-4">${theme}</p>
+                        <div class="w-full bg-white/20 rounded-full h-2">
+                            <div id="themeLoadingProgress" class="bg-white h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        <p id="themeLoadingStatus" class="text-xs text-white/60 mt-2">検索中...</p>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(loadingDiv);
+            
+            try {
+                // APIキー取得
+                const apiKey = getApiKey();
+                if (!apiKey) {
+                    throw new Error('APIキーが設定されていません');
+                }
+                
+                // 進捗更新
+                document.getElementById('themeLoadingProgress').style.width = '30%';
+                document.getElementById('themeLoadingStatus').textContent = 'YouTube検索中...';
+                
+                // YouTube検索（多めに取得）
+                const response = await fetch(
+                    `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(theme)}&type=video&videoCategoryId=10&maxResults=50&key=${apiKey}`
+                );
+                
+                if (!response.ok) {
+                    throw new Error('検索に失敗しました');
+                }
+                
+                const data = await response.json();
+                
+                if (!data.items || data.items.length === 0) {
+                    throw new Error('曲が見つかりませんでした');
+                }
+                
+                // 進捗更新
+                document.getElementById('themeLoadingProgress').style.width = '60%';
+                document.getElementById('themeLoadingStatus').textContent = `${data.items.length}曲見つかりました...`;
+                
+                // ランダムに指定曲数（または利用可能な曲数）を選択
+                const songsToSelect = Math.min(quizSongCount, data.items.length);
+                const shuffledItems = [...data.items].sort(() => Math.random() - 0.5);
+                const selectedItems = shuffledItems.slice(0, songsToSelect);
+                
+                // 曲リストをクリアして新しい曲を追加
+                selectedSongs = [];
+                selectedItems.forEach(item => {
+                    selectedSongs.push({
+                        videoId: item.id.videoId,
+                        title: item.snippet.title,
+                        thumbnail: item.snippet.thumbnails.default.url
+                    });
+                });
+                
+                saveSelectedSongs();
+                updateSelectedSongs();
+                
+                // 難易度に応じてイントロ時間を設定
+                introTime = difficultySettings[quizDifficulty];
+                document.getElementById('introTime').value = introTime;
+                document.getElementById('introTimeValue').textContent = introTime + '秒';
+                
+                // 進捗更新
+                document.getElementById('themeLoadingProgress').style.width = '90%';
+                document.getElementById('themeLoadingStatus').textContent = `${songsToSelect}曲を選択しました...`;
+                
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // 進捗完了
+                document.getElementById('themeLoadingProgress').style.width = '100%';
+                document.getElementById('themeLoadingStatus').textContent = 'クイズを開始します！';
+                
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // ローディング削除
+                document.body.removeChild(loadingDiv);
+                
+                // クイズ開始
+                startQuiz();
+                
+            } catch (error) {
+                // ローディング削除
+                if (document.getElementById('themeLoadingOverlay')) {
+                    document.body.removeChild(loadingDiv);
+                }
+                alert('エラー: ' + error.message);
+            }
         }
 
         // 曲を追加
