@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>イントロクイズ - iTunes版</title>
+    <title>曲当てクイズ - Apple Music版</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .gradient-cyan-teal {
@@ -40,7 +40,7 @@
         <!-- ヘッダー -->
         <header class="text-center mb-8">
             <h1 class="text-5xl font-black text-white mb-3 drop-shadow-lg">
-                🎵 イントロクイズ
+                🎵 曲当てクイズ
             </h1>
             <p class="text-lg text-white/90 drop-shadow">Apple Music プレビュー版</p>
         </header>
@@ -126,31 +126,56 @@
                     </div>
                     
                     <!-- テーマ別クイズボタン -->
-                    <div class="mb-6 grid grid-cols-2 gap-3">
-                        <button 
-                            onclick="startThemeQuiz('J-POP 2000年代 ヒット曲')"
-                            class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-3 rounded-xl font-bold hover:shadow-xl transition-all transform hover:scale-105"
-                        >
-                            🎵 2000年代J-POP
-                        </button>
-                        <button 
-                            onclick="startThemeQuiz('J-POP 2010年代 ヒット曲')"
-                            class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-3 rounded-xl font-bold hover:shadow-xl transition-all transform hover:scale-105"
-                        >
-                            🎤 2010年代J-POP
-                        </button>
-                        <button 
-                            onclick="startThemeQuiz('アニメソング 人気')"
-                            class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-3 rounded-xl font-bold hover:shadow-xl transition-all transform hover:scale-105"
-                        >
-                            🌟 アニメソング
-                        </button>
-                        <button 
-                            onclick="startThemeQuiz('洋楽 ヒット曲')"
-                            class="bg-gradient-to-r from-green-500 to-teal-500 text-white px-4 py-3 rounded-xl font-bold hover:shadow-xl transition-all transform hover:scale-105"
-                        >
-                            🌍 洋楽ヒット
-                        </button>
+                    <div class="mb-6">
+                        <h3 class="text-white font-bold mb-3 text-lg">📅 年代別J-POP</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+                            <button 
+                                onclick="startThemeQuiz('J-POP 1980年代 ヒット曲')"
+                                class="bg-gradient-to-r from-pink-500 to-rose-500 text-white px-4 py-3 rounded-xl font-bold hover:shadow-xl transition-all transform hover:scale-105"
+                            >
+                                🎸 1980年代
+                            </button>
+                            <button 
+                                onclick="startThemeQuiz('J-POP 1990年代 ヒット曲')"
+                                class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-3 rounded-xl font-bold hover:shadow-xl transition-all transform hover:scale-105"
+                            >
+                                💿 1990年代
+                            </button>
+                            <button 
+                                onclick="startThemeQuiz('J-POP 2000年代 ヒット曲')"
+                                class="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-4 py-3 rounded-xl font-bold hover:shadow-xl transition-all transform hover:scale-105"
+                            >
+                                🎵 2000年代
+                            </button>
+                            <button 
+                                onclick="startThemeQuiz('J-POP 2010年代 ヒット曲')"
+                                class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-3 rounded-xl font-bold hover:shadow-xl transition-all transform hover:scale-105"
+                            >
+                                🎤 2010年代
+                            </button>
+                            <button 
+                                onclick="startThemeQuiz('J-POP 2020年代 ヒット曲')"
+                                class="bg-gradient-to-r from-cyan-500 to-teal-500 text-white px-4 py-3 rounded-xl font-bold hover:shadow-xl transition-all transform hover:scale-105"
+                            >
+                                🌟 2020年代
+                            </button>
+                        </div>
+                        
+                        <h3 class="text-white font-bold mb-3 text-lg">🎭 ジャンル別</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button 
+                                onclick="startThemeQuiz('アニメソング 人気')"
+                                class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-3 rounded-xl font-bold hover:shadow-xl transition-all transform hover:scale-105"
+                            >
+                                🎬 アニメソング
+                            </button>
+                            <button 
+                                onclick="startThemeQuiz('洋楽 ヒット曲')"
+                                class="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-3 rounded-xl font-bold hover:shadow-xl transition-all transform hover:scale-105"
+                            >
+                                🌍 洋楽ヒット
+                            </button>
+                        </div>
                     </div>
                     
                     <!-- 検索結果 -->
@@ -168,7 +193,7 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-white font-bold mb-2 text-lg">
-                                イントロの長さ: <span id="introLengthValue">3</span>秒
+                                再生時間: <span id="introLengthValue">3</span>秒
                             </label>
                             <input 
                                 type="range" 
@@ -215,7 +240,7 @@
                             onclick="playIntro()"
                             class="bg-green-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-green-600 transition-all transform hover:scale-105"
                         >
-                            🔊 イントロ再生
+                            🔊 再生
                         </button>
                         <button 
                             onclick="stopAudio()"
@@ -451,21 +476,33 @@
         // アーティスト検索の結果を表示
         function displayArtistResults(songs) {
             const resultsDiv = document.getElementById('searchResults');
+            const searchQuery = document.getElementById('searchQuery').value.trim().toLowerCase();
             
             // アーティストごとにグループ化
             const artistMap = {};
             songs.forEach(song => {
-                if (!artistMap[song.artistId]) {
-                    artistMap[song.artistId] = {
-                        artistName: song.artistName,
-                        artistId: song.artistId,
-                        songs: []
-                    };
+                // アーティスト名に検索キーワードが含まれるかチェック
+                if (song.artistName.toLowerCase().includes(searchQuery)) {
+                    if (!artistMap[song.artistId]) {
+                        artistMap[song.artistId] = {
+                            artistName: song.artistName,
+                            artistId: song.artistId,
+                            songs: []
+                        };
+                    }
+                    artistMap[song.artistId].songs.push(song);
                 }
-                artistMap[song.artistId].songs.push(song);
             });
             
             const artists = Object.values(artistMap);
+            
+            if (artists.length === 0) {
+                resultsDiv.innerHTML = '<p class="text-white text-center py-4">該当するアーティストが見つかりませんでした</p>';
+                return;
+            }
+            
+            // 曲数の多い順にソート
+            artists.sort((a, b) => b.songs.length - a.songs.length);
             
             resultsDiv.innerHTML = artists.map(artist => `
                 <div class="bg-white/20 rounded-xl p-4 mb-3">
@@ -701,7 +738,7 @@
             playIntro();
         }
         
-        // イントロを再生
+        // プレビューを再生
         function playIntro() {
             const song = selectedSongs[currentQuestionIndex];
             audioPlayer.src = song.previewUrl;
