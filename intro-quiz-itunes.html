@@ -29,11 +29,6 @@
         .progress-bar {
             transition: width 0.1s linear;
         }
-        
-        .tab-active {
-            background: rgba(255, 255, 255, 0.3);
-            border-bottom: 3px solid white;
-        }
     </style>
 </head>
 <body class="gradient-cyan-teal min-h-screen">
@@ -96,120 +91,66 @@
                         曲を追加
                     </h2>
                     
-                    <!-- 検索タイプ切り替え -->
-                    <div class="flex gap-2 mb-4">
+                    <!-- 検索タイプ選択 -->
+                    <div class="mb-4 flex gap-2">
                         <button 
-                            id="tabSong"
-                            onclick="switchSearchTab('song')"
-                            class="tab-active flex-1 px-4 py-3 rounded-t-xl text-white font-bold transition-all"
+                            id="artistSearchBtn"
+                            onclick="setSearchType('artist')"
+                            class="flex-1 bg-white/30 text-white px-4 py-2 rounded-xl font-bold hover:bg-white/40 transition-all"
+                        >
+                            👤 アーティスト検索
+                        </button>
+                        <button 
+                            id="songSearchBtn"
+                            onclick="setSearchType('song')"
+                            class="flex-1 bg-white/20 text-white px-4 py-2 rounded-xl font-bold hover:bg-white/40 transition-all"
                         >
                             🎵 曲名検索
                         </button>
+                    </div>
+                    
+                    <!-- 検索フォーム -->
+                    <div class="mb-4 flex gap-3">
+                        <input 
+                            type="text" 
+                            id="searchQuery" 
+                            placeholder="アーティスト名を入力"
+                            class="flex-1 px-4 py-3 rounded-xl text-lg focus:outline-none focus:ring-4 focus:ring-cyan-400/50"
+                        />
                         <button 
-                            id="tabArtist"
-                            onclick="switchSearchTab('artist')"
-                            class="flex-1 px-4 py-3 rounded-t-xl text-white font-bold transition-all hover:bg-white/20"
+                            onclick="searchSongs()"
+                            class="bg-white text-cyan-600 px-8 py-3 rounded-xl font-bold text-lg hover:bg-cyan-50 transition-all transform hover:scale-105 shadow-lg"
                         >
-                            🎤 アーティスト検索
+                            🔍 検索
                         </button>
-                        <button 
-                            id="tabArtistQuiz"
-                            onclick="switchSearchTab('artistQuiz')"
-                            class="flex-1 px-4 py-3 rounded-t-xl text-white font-bold transition-all hover:bg-white/20"
-                        >
-                            🎯 アーティストクイズ
-                        </button>
-                    </div>
-                    
-                    <!-- 曲名検索タブ -->
-                    <div id="songSearchTab" class="space-y-4">
-                        <div class="flex gap-3">
-                            <input 
-                                type="text" 
-                                id="songSearchQuery" 
-                                placeholder="曲名で検索（例: Lemon）"
-                                class="flex-1 px-4 py-3 rounded-xl text-lg focus:outline-none focus:ring-4 focus:ring-cyan-400/50"
-                            />
-                            <button 
-                                onclick="searchBySong()"
-                                class="bg-white text-cyan-600 px-8 py-3 rounded-xl font-bold text-lg hover:bg-cyan-50 transition-all transform hover:scale-105 shadow-lg"
-                            >
-                                🔍 検索
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- アーティスト検索タブ -->
-                    <div id="artistSearchTab" class="hidden space-y-4">
-                        <div class="flex gap-3">
-                            <input 
-                                type="text" 
-                                id="artistSearchQuery" 
-                                placeholder="アーティスト名で検索（例: あいみょん）"
-                                class="flex-1 px-4 py-3 rounded-xl text-lg focus:outline-none focus:ring-4 focus:ring-cyan-400/50"
-                            />
-                            <button 
-                                onclick="searchByArtist()"
-                                class="bg-white text-cyan-600 px-8 py-3 rounded-xl font-bold text-lg hover:bg-cyan-50 transition-all transform hover:scale-105 shadow-lg"
-                            >
-                                🔍 検索
-                            </button>
-                        </div>
-                        <div id="artistResults" class="space-y-2 max-h-96 overflow-y-auto"></div>
-                    </div>
-                    
-                    <!-- アーティストクイズタブ -->
-                    <div id="artistQuizTab" class="hidden space-y-4">
-                        <div class="bg-white/10 rounded-xl p-4 mb-4">
-                            <p class="text-white text-sm mb-2">
-                                💡 アーティスト名を入力すると、そのアーティストの曲を自動で10曲選択してクイズを開始します
-                            </p>
-                        </div>
-                        <div class="flex gap-3">
-                            <input 
-                                type="text" 
-                                id="artistQuizQuery" 
-                                placeholder="アーティスト名を入力（例: 米津玄師）"
-                                class="flex-1 px-4 py-3 rounded-xl text-lg focus:outline-none focus:ring-4 focus:ring-cyan-400/50"
-                            />
-                            <button 
-                                onclick="startArtistQuiz()"
-                                class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-8 py-3 rounded-xl font-bold text-lg hover:shadow-xl transition-all transform hover:scale-105"
-                            >
-                                🎯 開始
-                            </button>
-                        </div>
                     </div>
                     
                     <!-- テーマ別クイズボタン -->
-                    <div class="mb-6 mt-6">
-                        <h3 class="text-white font-bold mb-3 text-lg">📋 テーマ別クイズ</h3>
-                        <div class="grid grid-cols-2 gap-3">
-                            <button 
-                                onclick="startThemeQuiz('J-POP 2000年代 ヒット曲')"
-                                class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-3 rounded-xl font-bold hover:shadow-xl transition-all transform hover:scale-105"
-                            >
-                                🎵 2000年代J-POP
-                            </button>
-                            <button 
-                                onclick="startThemeQuiz('J-POP 2010年代 ヒット曲')"
-                                class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-3 rounded-xl font-bold hover:shadow-xl transition-all transform hover:scale-105"
-                            >
-                                🎤 2010年代J-POP
-                            </button>
-                            <button 
-                                onclick="startThemeQuiz('アニメソング 人気')"
-                                class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-3 rounded-xl font-bold hover:shadow-xl transition-all transform hover:scale-105"
-                            >
-                                🌟 アニメソング
-                            </button>
-                            <button 
-                                onclick="startThemeQuiz('洋楽 ヒット曲')"
-                                class="bg-gradient-to-r from-green-500 to-teal-500 text-white px-4 py-3 rounded-xl font-bold hover:shadow-xl transition-all transform hover:scale-105"
-                            >
-                                🌍 洋楽ヒット
-                            </button>
-                        </div>
+                    <div class="mb-6 grid grid-cols-2 gap-3">
+                        <button 
+                            onclick="startThemeQuiz('J-POP 2000年代 ヒット曲')"
+                            class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-3 rounded-xl font-bold hover:shadow-xl transition-all transform hover:scale-105"
+                        >
+                            🎵 2000年代J-POP
+                        </button>
+                        <button 
+                            onclick="startThemeQuiz('J-POP 2010年代 ヒット曲')"
+                            class="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-3 rounded-xl font-bold hover:shadow-xl transition-all transform hover:scale-105"
+                        >
+                            🎤 2010年代J-POP
+                        </button>
+                        <button 
+                            onclick="startThemeQuiz('アニメソング 人気')"
+                            class="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-3 rounded-xl font-bold hover:shadow-xl transition-all transform hover:scale-105"
+                        >
+                            🌟 アニメソング
+                        </button>
+                        <button 
+                            onclick="startThemeQuiz('洋楽 ヒット曲')"
+                            class="bg-gradient-to-r from-green-500 to-teal-500 text-white px-4 py-3 rounded-xl font-bold hover:shadow-xl transition-all transform hover:scale-105"
+                        >
+                            🌍 洋楽ヒット
+                        </button>
                     </div>
                     
                     <!-- 検索結果 -->
@@ -263,24 +204,31 @@
                     </div>
                 </div>
 
-                <!-- 曲情報と再生コントロール -->
+                <!-- 曲情報 -->
                 <div class="glass-effect rounded-3xl p-8 shadow-2xl text-center">
                     <div class="text-6xl mb-4">🎵</div>
                     <h3 class="text-3xl font-black text-white mb-4">この曲は何でしょう？</h3>
                     
                     <!-- 再生コントロール -->
-                    <div class="flex justify-center gap-4 mb-6">
+                    <div class="flex gap-3 justify-center mb-4">
                         <button 
                             onclick="playIntro()"
-                            class="bg-green-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-green-600 transition-all transform hover:scale-105 shadow-lg"
+                            class="bg-green-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-green-600 transition-all transform hover:scale-105"
                         >
-                            🔊 再生
+                            🔊 イントロ再生
                         </button>
                         <button 
                             onclick="stopAudio()"
-                            class="bg-red-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-red-600 transition-all transform hover:scale-105 shadow-lg"
+                            class="bg-red-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-600 transition-all transform hover:scale-105"
                         >
                             ⏸️ 停止
+                        </button>
+                        <button 
+                            id="playFullBtn"
+                            onclick="playFull()"
+                            class="bg-blue-500 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-600 transition-all transform hover:scale-105 hidden"
+                        >
+                            🎵 全曲再生
                         </button>
                     </div>
                     
@@ -327,38 +275,37 @@
         let audioPlayer = document.getElementById('audioPlayer');
         let playbackTimer = null;
         let startTime = 0;
-        let currentSearchTab = 'song';
+        let searchType = 'artist'; // 'artist' or 'song'
 
         // 初期化
         renderPlayerList();
+        setSearchType('artist');
 
-        // タブ切り替え
-        function switchSearchTab(tab) {
-            currentSearchTab = tab;
+        // 検索タイプを設定
+        function setSearchType(type) {
+            searchType = type;
+            const artistBtn = document.getElementById('artistSearchBtn');
+            const songBtn = document.getElementById('songSearchBtn');
+            const searchInput = document.getElementById('searchQuery');
             
-            // タブボタンのスタイル更新
-            document.getElementById('tabSong').classList.remove('tab-active');
-            document.getElementById('tabArtist').classList.remove('tab-active');
-            document.getElementById('tabArtistQuiz').classList.remove('tab-active');
-            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('tab-active');
-            
-            // タブコンテンツの表示切り替え
-            document.getElementById('songSearchTab').classList.add('hidden');
-            document.getElementById('artistSearchTab').classList.add('hidden');
-            document.getElementById('artistQuizTab').classList.add('hidden');
-            
-            if (tab === 'song') {
-                document.getElementById('songSearchTab').classList.remove('hidden');
-            } else if (tab === 'artist') {
-                document.getElementById('artistSearchTab').classList.remove('hidden');
-            } else if (tab === 'artistQuiz') {
-                document.getElementById('artistQuizTab').classList.remove('hidden');
+            if (type === 'artist') {
+                artistBtn.classList.remove('bg-white/20');
+                artistBtn.classList.add('bg-white/30');
+                songBtn.classList.remove('bg-white/30');
+                songBtn.classList.add('bg-white/20');
+                searchInput.placeholder = 'アーティスト名を入力';
+            } else {
+                songBtn.classList.remove('bg-white/20');
+                songBtn.classList.add('bg-white/30');
+                artistBtn.classList.remove('bg-white/30');
+                artistBtn.classList.add('bg-white/20');
+                searchInput.placeholder = '曲名を入力';
             }
             
             // 検索結果をクリア
             document.getElementById('searchResults').innerHTML = '';
-            document.getElementById('artistResults').innerHTML = '';
         }
+        setSearchType('artist');
 
         // プレイヤー追加
         function addPlayer() {
@@ -427,12 +374,12 @@
             `).join('');
         }
 
-        // 曲名で検索
-        async function searchBySong() {
-            const query = document.getElementById('songSearchQuery').value.trim();
+        // iTunes Search APIで曲を検索
+        async function searchSongs() {
+            const query = document.getElementById('searchQuery').value.trim();
             
             if (!query) {
-                alert('曲名を入力してください');
+                alert('検索キーワードを入力してください');
                 return;
             }
             
@@ -440,15 +387,22 @@
             resultsDiv.innerHTML = '<p class="text-white text-center py-4">🔍 検索中...</p>';
             
             try {
-                const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&attribute=songTerm&limit=25&country=JP`;
+                // iTunes Search API
+                const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=50&country=JP`;
+                
+                console.log('検索URL:', url);
                 
                 const response = await fetch(url);
+                
+                console.log('レスポンスステータス:', response.status);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 
                 const data = await response.json();
+                
+                console.log('検索結果:', data);
                 
                 if (!data.results || data.results.length === 0) {
                     resultsDiv.innerHTML = '<p class="text-white text-center py-4">検索結果がありません</p>';
@@ -462,177 +416,99 @@
                     return;
                 }
                 
-                resultsDiv.innerHTML = songsWithPreview.map(song => `
-                    <div class="bg-white/20 rounded-xl p-3 flex items-center gap-3 hover:bg-white/30 transition-all cursor-pointer" onclick='addSong(${JSON.stringify(song).replace(/'/g, "&apos;")})'>
-                        <img src="${song.artworkUrl60}" alt="${song.trackName}" class="w-16 h-16 rounded-lg" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22%3E%3Crect fill=%22%23ccc%22 width=%2260%22 height=%2260%22/%3E%3C/svg%3E'" />
-                        <div class="flex-1 min-w-0">
-                            <div class="text-white font-bold truncate">${song.trackName}</div>
-                            <div class="text-white/80 text-sm truncate">${song.artistName}</div>
+                // 検索タイプに応じて表示を変更
+                if (searchType === 'artist') {
+                    displayArtistResults(songsWithPreview);
+                } else {
+                    displaySongResults(songsWithPreview);
+                }
+                
+            } catch (error) {
+                console.error('検索エラー詳細:', error);
+                resultsDiv.innerHTML = `
+                    <div class="bg-red-500/30 rounded-xl p-4 text-white">
+                        <p class="font-bold mb-2">❌ 検索に失敗しました</p>
+                        <p class="text-sm mb-3">エラー: ${error.message}</p>
+                        <p class="text-sm mb-2">以下を確認してください：</p>
+                        <ul class="text-sm list-disc list-inside space-y-1">
+                            <li>インターネット接続を確認</li>
+                            <li>ブラウザのコンソールでエラーを確認（F12キー）</li>
+                            <li>別の検索キーワードを試す</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+        
+        // アーティスト検索の結果を表示
+        function displayArtistResults(songs) {
+            const resultsDiv = document.getElementById('searchResults');
+            
+            // アーティストごとにグループ化
+            const artistMap = {};
+            songs.forEach(song => {
+                if (!artistMap[song.artistId]) {
+                    artistMap[song.artistId] = {
+                        artistName: song.artistName,
+                        artistId: song.artistId,
+                        songs: []
+                    };
+                }
+                artistMap[song.artistId].songs.push(song);
+            });
+            
+            const artists = Object.values(artistMap);
+            
+            resultsDiv.innerHTML = artists.map(artist => `
+                <div class="bg-white/20 rounded-xl p-4 mb-2">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <div class="text-white font-bold text-lg">👤 ${artist.artistName}</div>
+                            <div class="text-white/80 text-sm">${artist.songs.length}曲見つかりました</div>
                         </div>
-                        <button class="bg-cyan-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-cyan-600 transition-all">
-                            ➕
+                        <button 
+                            onclick='startArtistQuiz(${JSON.stringify(artist.songs).replace(/'/g, "&apos;")})'
+                            class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg font-bold hover:shadow-xl transition-all"
+                        >
+                            🎮 クイズ開始
                         </button>
                     </div>
-                `).join('');
-                
-            } catch (error) {
-                console.error('検索エラー詳細:', error);
-                resultsDiv.innerHTML = `
-                    <div class="bg-red-500/30 rounded-xl p-4 text-white">
-                        <p class="font-bold mb-2">❌ 検索に失敗しました</p>
-                        <p class="text-sm">エラー: ${error.message}</p>
-                    </div>
-                `;
-            }
+                </div>
+            `).join('');
         }
-
-        // アーティストで検索
-        async function searchByArtist() {
-            const query = document.getElementById('artistSearchQuery').value.trim();
+        
+        // 曲名検索の結果を表示
+        function displaySongResults(songs) {
+            const resultsDiv = document.getElementById('searchResults');
             
-            if (!query) {
-                alert('アーティスト名を入力してください');
-                return;
-            }
-            
-            const resultsDiv = document.getElementById('artistResults');
-            resultsDiv.innerHTML = '<p class="text-white text-center py-4">🔍 検索中...</p>';
-            
-            try {
-                const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&attribute=artistTerm&limit=200&country=JP`;
-                
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                if (!data.results || data.results.length === 0) {
-                    resultsDiv.innerHTML = '<p class="text-white text-center py-4">検索結果がありません</p>';
-                    return;
-                }
-                
-                // アーティストごとにグループ化
-                const artistGroups = {};
-                data.results.filter(song => song.previewUrl).forEach(song => {
-                    const artistName = song.artistName;
-                    if (!artistGroups[artistName]) {
-                        artistGroups[artistName] = [];
-                    }
-                    artistGroups[artistName].push(song);
-                });
-                
-                // アーティスト一覧を表示
-                resultsDiv.innerHTML = Object.keys(artistGroups).map(artistName => `
-                    <div class="bg-white/20 rounded-xl p-4">
-                        <div class="flex justify-between items-center mb-3">
-                            <div class="flex items-center gap-3">
-                                <img src="${artistGroups[artistName][0].artworkUrl60}" alt="${artistName}" class="w-12 h-12 rounded-lg" />
-                                <div>
-                                    <div class="text-white font-bold text-lg">${artistName}</div>
-                                    <div class="text-white/70 text-sm">${artistGroups[artistName].length}曲</div>
-                                </div>
-                            </div>
-                            <button 
-                                onclick="toggleArtistSongs('${artistName.replace(/'/g, "\\'")}')"
-                                class="bg-cyan-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-cyan-600 transition-all"
-                            >
-                                曲を表示
-                            </button>
-                        </div>
-                        <div id="artist-songs-${artistName.replace(/[^a-zA-Z0-9]/g, '_')}" class="hidden space-y-2 mt-3 max-h-64 overflow-y-auto">
-                            ${artistGroups[artistName].map(song => `
-                                <div class="bg-white/10 rounded-lg p-2 flex items-center gap-2 hover:bg-white/20 transition-all cursor-pointer" onclick='addSong(${JSON.stringify(song).replace(/'/g, "&apos;")})'>
-                                    <img src="${song.artworkUrl60}" alt="${song.trackName}" class="w-10 h-10 rounded" />
-                                    <div class="flex-1 min-w-0">
-                                        <div class="text-white text-sm font-semibold truncate">${song.trackName}</div>
-                                    </div>
-                                    <button class="bg-cyan-500 text-white px-3 py-1 rounded font-bold hover:bg-cyan-600 transition-all text-sm">
-                                        ➕
-                                    </button>
-                                </div>
-                            `).join('')}
-                        </div>
+            resultsDiv.innerHTML = songs.map(song => `
+                <div class="bg-white/20 rounded-xl p-3 flex items-center gap-3 hover:bg-white/30 transition-all cursor-pointer" onclick='addSong(${JSON.stringify(song).replace(/'/g, "&apos;")})'>
+                    <img src="${song.artworkUrl60}" alt="${song.trackName}" class="w-16 h-16 rounded-lg" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2260%22 height=%2260%22%3E%3Crect fill=%22%23ccc%22 width=%2260%22 height=%2260%22/%3E%3C/svg%3E'" />
+                    <div class="flex-1 min-w-0">
+                        <div class="text-white font-bold truncate">${song.trackName}</div>
+                        <div class="text-white/80 text-sm truncate">${song.artistName}</div>
                     </div>
-                `).join('');
-                
-                // グループデータを保存
-                window.artistGroupsData = artistGroups;
-                
-            } catch (error) {
-                console.error('検索エラー詳細:', error);
-                resultsDiv.innerHTML = `
-                    <div class="bg-red-500/30 rounded-xl p-4 text-white">
-                        <p class="font-bold mb-2">❌ 検索に失敗しました</p>
-                        <p class="text-sm">エラー: ${error.message}</p>
-                    </div>
-                `;
-            }
+                    <button class="bg-cyan-500 text-white px-4 py-2 rounded-lg font-bold hover:bg-cyan-600 transition-all">
+                        ➕
+                    </button>
+                </div>
+            `).join('');
         }
-
-        // アーティストの曲リストを表示/非表示
-        function toggleArtistSongs(artistName) {
-            const cleanName = artistName.replace(/[^a-zA-Z0-9]/g, '_');
-            const element = document.getElementById(`artist-songs-${cleanName}`);
-            if (element.classList.contains('hidden')) {
-                element.classList.remove('hidden');
-            } else {
-                element.classList.add('hidden');
-            }
-        }
-
-        // アーティストクイズを開始
-        async function startArtistQuiz() {
-            const query = document.getElementById('artistQuizQuery').value.trim();
-            
-            if (!query) {
-                alert('アーティスト名を入力してください');
-                return;
-            }
-            
+        
+        // アーティスト別クイズを開始
+        function startArtistQuiz(artistSongs) {
             if (players.length === 0) {
                 alert('プレイヤーを追加してください');
                 return;
             }
             
-            const resultsDiv = document.getElementById('searchResults');
-            resultsDiv.innerHTML = `<p class="text-white text-center py-4">🔍 「${query}」の曲を検索中...</p>`;
+            // ランダムに10曲選択（曲数が10未満の場合はその数だけ）
+            const numSongs = Math.min(10, artistSongs.length);
+            selectedSongs = shuffleArray([...artistSongs]).slice(0, numSongs);
+            updateSelectedSongsList();
             
-            try {
-                const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&attribute=artistTerm&limit=200&country=JP`;
-                
-                const response = await fetch(url);
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                
-                const songsWithPreview = data.results.filter(song => song.previewUrl);
-                
-                if (songsWithPreview.length === 0) {
-                    alert('プレビュー可能な曲が見つかりませんでした');
-                    resultsDiv.innerHTML = '';
-                    return;
-                }
-                
-                // ランダムに10曲選択
-                const numSongs = Math.min(10, songsWithPreview.length);
-                selectedSongs = shuffleArray([...songsWithPreview]).slice(0, numSongs);
-                updateSelectedSongsList();
-                resultsDiv.innerHTML = `<p class="text-white text-center py-4">✅ ${query}の曲を${selectedSongs.length}曲選択しました！</p>`;
-                
-                // すぐにクイズを開始
-                setTimeout(startQuiz, 1000);
-                
-            } catch (error) {
-                console.error('検索エラー詳細:', error);
-                alert(`検索に失敗しました: ${error.message}`);
-                resultsDiv.innerHTML = '';
-            }
+            // すぐにクイズを開始
+            setTimeout(startQuiz, 500);
         }
 
         // テーマ別クイズを開始
@@ -648,6 +524,8 @@
             try {
                 const url = `https://itunes.apple.com/search?term=${encodeURIComponent(theme)}&media=music&entity=song&limit=50&country=JP`;
                 
+                console.log('テーマ検索URL:', url);
+                
                 const response = await fetch(url);
                 
                 if (!response.ok) {
@@ -656,15 +534,17 @@
                 
                 const data = await response.json();
                 
+                console.log('テーマ検索結果:', data);
+                
                 const songsWithPreview = data.results.filter(song => song.previewUrl);
                 
                 if (songsWithPreview.length === 0) {
-                    alert('プレビュー可能な曲が見つかりませんでした');
+                    alert('プレビュー可能な曲が見つかりませんでした。別のテーマを試してください。');
                     resultsDiv.innerHTML = '';
                     return;
                 }
                 
-                // ランダムに10曲選択
+                // ランダムに10曲選択（見つかった曲数が10曲未満の場合はその数だけ）
                 const numSongs = Math.min(10, songsWithPreview.length);
                 selectedSongs = shuffleArray([...songsWithPreview]).slice(0, numSongs);
                 updateSelectedSongsList();
@@ -675,8 +555,13 @@
                 
             } catch (error) {
                 console.error('検索エラー詳細:', error);
-                alert(`検索に失敗しました: ${error.message}`);
-                resultsDiv.innerHTML = '';
+                alert(`検索に失敗しました: ${error.message}\n\nブラウザのコンソール（F12）でエラー詳細を確認してください。`);
+                resultsDiv.innerHTML = `
+                    <div class="bg-red-500/30 rounded-xl p-4 text-white">
+                        <p class="font-bold mb-2">❌ テーマ検索に失敗しました</p>
+                        <p class="text-sm">エラー: ${error.message}</p>
+                    </div>
+                `;
             }
         }
 
@@ -759,6 +644,7 @@
             document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
             document.getElementById('totalQuestions').textContent = selectedSongs.length;
             document.getElementById('currentSongTitle').classList.add('hidden');
+            document.getElementById('playFullBtn').classList.add('hidden');
             document.getElementById('timer').textContent = '0';
             
             const progress = ((currentQuestionIndex + 1) / selectedSongs.length) * 100;
@@ -779,25 +665,23 @@
             // スコア表示を更新
             updateCurrentScores();
             
-            // 音楽を設定（自動再生はしない）
-            audioPlayer.src = song.previewUrl;
-            audioPlayer.currentTime = 0;
-            
-            // 最初のイントロを自動再生
+            // 音楽を自動再生
             playIntro();
         }
-
+        
         // イントロを再生
         function playIntro() {
             const song = selectedSongs[currentQuestionIndex];
+            audioPlayer.src = song.previewUrl;
             audioPlayer.currentTime = 0;
             audioPlayer.play();
             
-            // タイマー開始
+            // 既存のタイマーをクリア
             if (playbackTimer) {
                 clearInterval(playbackTimer);
             }
             
+            // タイマー開始
             startTime = Date.now();
             playbackTimer = setInterval(() => {
                 const elapsed = Math.floor((Date.now() - startTime) / 1000);
@@ -809,10 +693,23 @@
                 }
             }, 100);
         }
-
-        // 音声を停止
+        
+        // 音楽を停止
         function stopAudio() {
             audioPlayer.pause();
+            if (playbackTimer) {
+                clearInterval(playbackTimer);
+            }
+        }
+        
+        // 全曲を再生
+        function playFull() {
+            const song = selectedSongs[currentQuestionIndex];
+            audioPlayer.src = song.previewUrl;
+            audioPlayer.currentTime = 0;
+            audioPlayer.play();
+            
+            // タイマーをクリア
             if (playbackTimer) {
                 clearInterval(playbackTimer);
             }
@@ -846,9 +743,11 @@
             titleElement.textContent = `♪ ${song.trackName} - ${song.artistName}`;
             titleElement.classList.remove('hidden');
             
+            // 全曲再生ボタンを表示
+            document.getElementById('playFullBtn').classList.remove('hidden');
+            
             // 全曲再生
-            audioPlayer.currentTime = 0;
-            audioPlayer.play();
+            playFull();
         }
 
         // 次の問題
@@ -884,4 +783,53 @@
             renderPlayerList();
         }
 
-        // 現在の
+        // 現在のスコアを更新
+        function updateCurrentScores() {
+            const scoresDiv = document.getElementById('currentScores');
+            const sortedPlayers = [...players].sort((a, b) => (scores[b.id] || 0) - (scores[a.id] || 0));
+            
+            scoresDiv.innerHTML = sortedPlayers.map((player, index) => {
+                const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '　';
+                return `
+                    <div class="bg-white/20 rounded-xl p-3 flex justify-between items-center">
+                        <span class="text-white font-bold">${medal} ${player.name}</span>
+                        <span class="text-white font-black text-xl">${scores[player.id] || 0}pt</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 成績リセット
+        function resetScores() {
+            if (!confirm('全プレイヤーの成績をリセットしますか？')) {
+                return;
+            }
+            
+            Object.keys(scores).forEach(key => {
+                scores[key] = 0;
+            });
+            
+            saveScores();
+            renderPlayerList();
+            alert('✅ 成績をリセットしました');
+        }
+
+        // ユーティリティ関数
+        function savePlayers() {
+            localStorage.setItem('quizPlayers', JSON.stringify(players));
+        }
+
+        function saveScores() {
+            localStorage.setItem('quizScores', JSON.stringify(scores));
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+    </script>
+</body>
+</html>
