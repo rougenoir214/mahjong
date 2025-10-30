@@ -108,6 +108,14 @@
                     </div>
                     <div id="playerSelectors"></div>
                     <div id="scoreInputs"></div>
+                    
+                    <!-- スコア合計表示 -->
+                    <div id="scoreTotal" class="mt-2 p-3 rounded-lg border-2 text-center font-bold" style="display:none;">
+                        <div class="text-sm text-gray-600">現在の合計</div>
+                        <div id="scoreTotalValue" class="text-2xl"></div>
+                        <div id="scoreTotalRemaining" class="text-sm text-gray-600 mt-1"></div>
+                    </div>
+                    
                     <button onclick="addGame()" class="w-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white py-3 rounded-lg font-bold mt-3 active:opacity-80">半荘を追加</button>
                     <div id="gamesList"></div>
                     
@@ -668,6 +676,7 @@
             d.games.push(scores);
             saveToFirebase();
             d.players.forEach((p,i) => document.getElementById('score'+i).value = '');
+            updateScoreTotal(); // 合計表示をクリア
             render();
             notify('半荘'+d.games.length+'を追加');
         }
@@ -1139,59 +1148,75 @@
             const colors = ['bg-yellow-50 border-yellow-300', 'bg-blue-50 border-blue-300', 'bg-green-50 border-green-300', 'bg-purple-50 border-purple-300'];
             let html = '';
             d.players.forEach((p,i) => {
-                const isLast = (i === d.type - 1); // 最後のプレイヤーかどうか
                 html += `<div class="flex items-center gap-2 mb-2 p-3 rounded-lg border-2 ${colors[i % colors.length]}">
                     <div class="flex-1">
                         <div class="text-xs text-gray-600 mb-1">プレイヤー${i+1}</div>
                         <div class="font-bold text-sm truncate">${p}</div>
                     </div>
                     <div class="flex-1">
-                        <div class="text-xs text-gray-600 mb-1">スコア${isLast ? ' (自動計算)' : ''}</div>
+                        <div class="text-xs text-gray-600 mb-1">スコア</div>
                         <input type="number" id="score${i}" placeholder="±0" 
                                step="0.1"
                                class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-center font-bold"
-                               oninput="autoCalculateScore(${i}, ${d.type})"
-                               ${isLast ? 'readonly style="background-color: #f0f0f0;"' : ''}>
+                               oninput="updateScoreTotal()">
                     </div>
                 </div>`;
             });
             scoreInputsElement.innerHTML = html;
         }
 
-        // スコア自動計算
-        function autoCalculateScore(changedIndex, totalPlayers) {
-            // 最後のプレイヤー（自動計算対象）のインデックス
-            const lastIndex = totalPlayers - 1;
+        // スコア合計表示の更新
+        function updateScoreTotal() {
+            const d = getData();
+            const totalElement = document.getElementById('scoreTotal');
+            const totalValueElement = document.getElementById('scoreTotalValue');
+            const totalRemainingElement = document.getElementById('scoreTotalRemaining');
             
-            // 最後のプレイヤーが変更された場合は何もしない
-            if(changedIndex === lastIndex) return;
+            if (!totalElement || !totalValueElement || !totalRemainingElement) return;
             
-            // 最後以外のプレイヤーのスコアを合計
+            // 全プレイヤーのスコアを合計
             let sum = 0;
-            let allFilled = true;
+            let filledCount = 0;
             
-            for(let i = 0; i < lastIndex; i++) {
+            for(let i = 0; i < d.type; i++) {
                 const input = document.getElementById('score' + i);
-                if(!input || input.value === '') {
-                    allFilled = false;
-                    break;
+                if(input && input.value !== '') {
+                    sum += parseFloat(input.value) || 0;
+                    filledCount++;
                 }
-                sum += parseFloat(input.value) || 0;
             }
             
-            // 全員分入力されていれば、最後のプレイヤーのスコアを自動計算
-            if(allFilled) {
-                const lastInput = document.getElementById('score' + lastIndex);
-                if(lastInput) {
-                    // 小数点1桁に丸める
-                    lastInput.value = Math.round(-sum * 10) / 10;
+            // 小数点1桁に丸める
+            sum = Math.round(sum * 10) / 10;
+            
+            // 何か入力されている場合のみ表示
+            if(filledCount > 0) {
+                totalElement.style.display = 'block';
+                
+                // 合計値の色を設定
+                if(sum === 0) {
+                    totalElement.className = 'mt-2 p-3 rounded-lg border-2 border-green-400 bg-green-50 text-center font-bold';
+                    totalValueElement.className = 'text-2xl text-green-600';
+                } else if(sum > 0) {
+                    totalElement.className = 'mt-2 p-3 rounded-lg border-2 border-red-400 bg-red-50 text-center font-bold';
+                    totalValueElement.className = 'text-2xl text-red-600';
+                } else {
+                    totalElement.className = 'mt-2 p-3 rounded-lg border-2 border-blue-400 bg-blue-50 text-center font-bold';
+                    totalValueElement.className = 'text-2xl text-blue-600';
+                }
+                
+                totalValueElement.textContent = (sum > 0 ? '+' : '') + sum;
+                
+                // 残りの値を表示
+                if(filledCount < d.type) {
+                    const remaining = -sum;
+                    totalRemainingElement.textContent = `残り${d.type - filledCount}人で: ${remaining > 0 ? '+' : ''}${remaining.toFixed(1)}`;
+                    totalRemainingElement.style.display = 'block';
+                } else {
+                    totalRemainingElement.style.display = 'none';
                 }
             } else {
-                // まだ全員分入力されていない場合はクリア
-                const lastInput = document.getElementById('score' + lastIndex);
-                if(lastInput) {
-                    lastInput.value = '';
-                }
+                totalElement.style.display = 'none';
             }
         }
 
