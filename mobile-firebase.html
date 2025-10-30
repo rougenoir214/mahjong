@@ -106,6 +106,18 @@
                             <option value="3">3人麻雀</option>
                         </select>
                     </div>
+                    
+                    <!-- リーグ戦選択 -->
+                    <div class="mb-3 bg-amber-50 rounded-lg p-3 border-2 border-amber-300">
+                        <label class="block text-sm font-medium mb-1 text-amber-800">
+                            🏆 リーグ戦から選択
+                        </label>
+                        <select id="leagueQuickSelect" onchange="applyLeagueMembers()" class="w-full px-3 py-2 border-2 border-amber-300 rounded-lg bg-white">
+                            <option value="">-- リーグ戦を選択 --</option>
+                        </select>
+                        <div class="text-xs text-amber-700 mt-1">リーグ戦を選択するとメンバーが自動設定されます</div>
+                    </div>
+                    
                     <div id="playerSelectors"></div>
                     <div id="scoreInputs"></div>
                     
@@ -1454,6 +1466,58 @@
                 const select = document.getElementById('newLeaguePlayer' + i);
                 if(select) select.innerHTML = html;
             }
+            
+            // 入力タブのリーグ戦クイック選択も更新
+            updateLeagueQuickSelect();
+        }
+        
+        // 入力タブのリーグ戦クイック選択を更新
+        function updateLeagueQuickSelect() {
+            const select = document.getElementById('leagueQuickSelect');
+            if(!select) return;
+            
+            let html = '<option value="">-- リーグ戦を選択 --</option>';
+            
+            if(leagues && Object.keys(leagues).length > 0) {
+                Object.entries(leagues).forEach(([leagueId, league]) => {
+                    html += `<option value="${leagueId}">${escapeHtml(league.name)}</option>`;
+                });
+            }
+            
+            select.innerHTML = html;
+        }
+        
+        // リーグ戦メンバーを入力欄に適用
+        function applyLeagueMembers() {
+            const select = document.getElementById('leagueQuickSelect');
+            if(!select || !select.value) return;
+            
+            const leagueId = select.value;
+            const league = leagues[leagueId];
+            
+            if(!league || !league.players || league.players.length !== 4) {
+                alert('リーグ戦データが見つかりません');
+                return;
+            }
+            
+            // データを取得
+            const d = getData();
+            
+            // 4人麻雀に設定
+            const gameTypeSelect = document.getElementById('gameType');
+            if(gameTypeSelect && gameTypeSelect.value !== '4') {
+                gameTypeSelect.value = '4';
+                gameTypeChanged();
+            }
+            
+            // プレイヤーを設定
+            d.players = [...league.players];
+            
+            // 画面を更新
+            render();
+            
+            // 通知
+            showNotification(`🏆 リーグ戦「${league.name}」のメンバーを設定しました`);
         }
 
         // リーグ戦を作成
@@ -1497,6 +1561,7 @@
                     leagues[leagueId] = leagueData;
                     hideLeagueCreateForm();
                     renderLeagues();
+                    updateLeagueQuickSelect(); // 入力タブのドロップダウンも更新
                     showNotification('✅ リーグ戦「' + name + '」を作成しました');
                 })
                 .catch(error => {
@@ -1512,6 +1577,7 @@
                     leagues = snapshot.val() || {};
                     console.log('リーグ戦を読み込みました:', Object.keys(leagues).length + '件');
                     renderLeagues();
+                    updateLeagueQuickSelect(); // 入力タブのドロップダウンも更新
                 })
                 .catch(error => {
                     console.error('リーグ戦の読み込みに失敗:', error);
@@ -1603,6 +1669,7 @@
                     }
                     
                     renderLeagues();
+                    updateLeagueQuickSelect(); // 入力タブのドロップダウンも更新
                     showNotification('🗑️ リーグ戦を削除しました');
                 })
                 .catch(error => {
