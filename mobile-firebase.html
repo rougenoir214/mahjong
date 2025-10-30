@@ -1812,6 +1812,86 @@
                 </div>`;
             });
 
+            // 日別成績を追加
+            html += `
+                <div class="mt-4 bg-white rounded-lg p-4 border-2 border-gray-300">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">📅 日別成績</h3>
+            `;
+            
+            // 日付ごとにグループ化
+            const gamesByDate = {};
+            games.forEach(game => {
+                if(!gamesByDate[game.date]) {
+                    gamesByDate[game.date] = [];
+                }
+                gamesByDate[game.date].push(game);
+            });
+            
+            // 日付を降順でソート
+            const sortedDates = Object.keys(gamesByDate).sort().reverse();
+            
+            if(sortedDates.length === 0) {
+                html += '<div class="text-center py-4 text-gray-400">データなし</div>';
+            } else {
+                sortedDates.forEach(date => {
+                    const dateGames = gamesByDate[date];
+                    html += `
+                        <div class="mb-4 bg-gray-50 rounded-lg p-3 border border-gray-200">
+                            <div class="font-bold text-sm mb-2">${new Date(date).toLocaleDateString('ja-JP', {year: 'numeric', month: 'long', day: 'numeric'})}</div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-xs">
+                                    <thead>
+                                        <tr class="border-b-2 border-gray-300 bg-gray-100">
+                                            <th class="text-left py-2 px-2 font-bold">半荘</th>
+                                            ${players.map(p => `<th class="text-center py-2 px-2 font-bold">${escapeHtml(p)}</th>`).join('')}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                    `;
+                    
+                    dateGames.forEach((game, idx) => {
+                        html += `<tr class="border-b border-gray-200">
+                            <td class="py-2 px-2">${idx + 1}</td>`;
+                        
+                        players.forEach(playerName => {
+                            const playerIndex = game.players.indexOf(playerName);
+                            const score = game.scores[playerIndex];
+                            const colorClass = score > 0 ? 'text-green-600' : score < 0 ? 'text-red-600' : 'text-gray-600';
+                            html += `<td class="text-center py-2 px-2 font-bold ${colorClass}">
+                                ${score > 0 ? '+' : ''}${Number(score).toFixed(1)}
+                            </td>`;
+                        });
+                        
+                        html += `</tr>`;
+                    });
+                    
+                    // 日ごとの合計を表示
+                    html += `<tr class="border-t-2 border-gray-300 bg-gray-100 font-bold">
+                        <td class="py-2 px-2">合計</td>`;
+                    
+                    players.forEach(playerName => {
+                        let dayTotal = 0;
+                        dateGames.forEach(game => {
+                            const playerIndex = game.players.indexOf(playerName);
+                            dayTotal += game.scores[playerIndex];
+                        });
+                        const colorClass = dayTotal > 0 ? 'text-green-600' : dayTotal < 0 ? 'text-red-600' : 'text-gray-600';
+                        html += `<td class="text-center py-2 px-2 ${colorClass}">
+                            ${dayTotal > 0 ? '+' : ''}${Number(dayTotal).toFixed(1)}
+                        </td>`;
+                    });
+                    
+                    html += `</tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            html += '</div>';
+
             document.getElementById('leagueResults').innerHTML = html;
         }
     </script>
