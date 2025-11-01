@@ -1691,14 +1691,17 @@
             Object.entries(data.dates).forEach(([date, dateData]) => {
                 if(!dateData || !dateData.games || !dateData.players) return;
                 
-                // この日のプレイヤーがリーグ戦メンバーと完全一致するか確認
+                // この日のプレイヤーがリーグ戦メンバーと完全一致するか確認（順序は無視）
                 const dayPlayers = dateData.players.filter(p => p); // 空文字を除外
                 if(dayPlayers.length !== 4) return;
                 
-                const isLeagueMatch = dayPlayers.every(p => selectedPlayers.includes(p)) && 
-                                     selectedPlayers.every(p => dayPlayers.includes(p));
+                // ソートして比較することで、順序に関係なく同じメンバーかを判定
+                const sortedDayPlayers = [...dayPlayers].sort();
+                const sortedSelectedPlayers = [...selectedPlayers].sort();
+                const isLeagueMatch = JSON.stringify(sortedDayPlayers) === JSON.stringify(sortedSelectedPlayers);
                 
                 if(isLeagueMatch) {
+                    console.log('リーグ戦の試合を発見:', date, 'プレイヤー順序:', dayPlayers);
                     dateData.games.forEach((game, gameIndex) => {
                         leagueGames.push({
                             date: date,
