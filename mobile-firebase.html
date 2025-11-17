@@ -1309,23 +1309,25 @@
                             <thead><tr class="border-b-2 border-cyan-300">
                                 <th class="text-left py-2 px-1 font-bold sticky left-0 bg-cyan-50">半荘</th>
                                 ${d.players.map(p => `<th class="text-center py-2 px-1 font-bold">${p}</th>`).join('')}
+                                <th class="text-center py-2 px-1 font-bold">操作</th>
                             </tr></thead>
                             <tbody>
                                 ${d.games.map((g,gi) => `<tr class="border-b border-gray-200">
                                     <td class="py-2 px-1 sticky left-0 bg-cyan-50">
-                                        <div class="flex items-center gap-1">
-                                            <span class="font-medium">${gi+1}</span>
-                                            <button onclick="removeGame('${date}',${gi})" class="bg-red-500 text-white rounded px-2 py-1 text-xs font-bold active:bg-red-600" style="min-width:44px;min-height:32px;">削除</button>
-                                        </div>
+                                        <span class="font-medium">${gi+1}</span>
                                     </td>
                                     ${g.map((s,pi) => `<td class="text-center py-2 px-1">
                                         <input type="number" step="0.1" value="${Number(s).toFixed(1)}" onchange="updateScore('${date}',${gi},${pi},this.value)" 
                                             class="w-16 text-center px-1 py-1 border rounded ${s>0?'text-green-600':s<0?'text-red-600':'text-gray-600'}">
                                     </td>`).join('')}
+                                    <td class="text-center py-2 px-1">
+                                        <button onclick="removeGame('${date}',${gi})" class="bg-red-500 text-white rounded px-2 py-1 text-xs font-bold active:bg-red-600" style="min-width:44px;min-height:32px;">削除</button>
+                                    </td>
                                 </tr>`).join('')}
                                 <tr class="border-t-2 border-cyan-300 bg-cyan-100 font-bold">
                                     <td class="py-2 px-1 sticky left-0 bg-cyan-100">合計</td>
                                     ${totals.map(t => `<td class="text-center py-2 px-1 ${t>0?'text-green-600':t<0?'text-red-600':'text-gray-600'}">${t>0?'+':''}${Number(t).toFixed(1)}</td>`).join('')}
+                                    <td class="py-2 px-1"></td>
                                 </tr>
                             </tbody>
                         </table>
