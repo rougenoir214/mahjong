@@ -155,10 +155,10 @@
                 </div>
                 <div id="content-players" class="p-4" style="display:none;">
                     <!-- 年選択 -->
-                    <div class="mb-4 bg-blue-50 rounded-lg p-3 border-2 border-blue-300">
-                        <label class="block text-sm font-medium mb-1 text-blue-800">📅 集計期間</label>
-                        <select id="playerYearSelect" onchange="renderPlayers()" class="w-full px-3 py-2 border-2 border-blue-300 rounded-lg bg-white">
-                            <option value="all">通算</option>
+                    <div class="mb-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-3 border-2 border-purple-300">
+                        <label class="block text-sm font-medium mb-2 text-purple-800">📊 表示期間</label>
+                        <select id="playerYearSelect" onchange="changePlayerYear()" class="w-full px-3 py-2 border-2 border-purple-300 rounded-lg bg-white">
+                            <option value="all">通算成績</option>
                         </select>
                     </div>
                     <div id="playerStats"></div>
@@ -211,14 +211,6 @@
                                 キャンセル
                             </button>
                         </div>
-                    </div>
-                    
-                    <!-- 年選択 -->
-                    <div class="mb-4 bg-purple-50 rounded-lg p-3 border-2 border-purple-300">
-                        <label class="block text-sm font-medium mb-1 text-purple-800">📅 集計期間</label>
-                        <select id="leagueYearSelect" onchange="onLeagueYearChange()" class="w-full px-3 py-2 border-2 border-purple-300 rounded-lg bg-white">
-                            <option value="all">通算</option>
-                        </select>
                     </div>
                     
                     <!-- リーグ戦一覧 -->
@@ -1065,20 +1057,6 @@
                 // デフォルトは今年（なければ通算）
                 if(years.includes(currentYear)) {
                     playerYearSelect.value = currentYear.toString();
-                }
-            }
-            
-            // リーグ戦の年選択
-            const leagueYearSelect = document.getElementById('leagueYearSelect');
-            if(leagueYearSelect) {
-                let html = '<option value="all">通算</option>';
-                years.forEach(year => {
-                    html += `<option value="${year}">${year}年</option>`;
-                });
-                leagueYearSelect.innerHTML = html;
-                // デフォルトは今年（なければ通算）
-                if(years.includes(currentYear)) {
-                    leagueYearSelect.value = currentYear.toString();
                 }
             }
         }
