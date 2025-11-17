@@ -154,9 +154,24 @@
                     <div id="dailyList"></div>
                 </div>
                 <div id="content-players" class="p-4" style="display:none;">
+                    <!-- 年選択 -->
+                    <div class="mb-4 bg-blue-50 rounded-lg p-3 border-2 border-blue-300">
+                        <label class="block text-sm font-medium mb-1 text-blue-800">📅 集計期間</label>
+                        <select id="playerYearSelect" onchange="renderPlayers()" class="w-full px-3 py-2 border-2 border-blue-300 rounded-lg bg-white">
+                            <option value="all">通算</option>
+                        </select>
+                    </div>
                     <div id="playerStats"></div>
                 </div>
                 <div id="content-league" class="p-4" style="display:none;">
+                    <!-- 年選択 -->
+                    <div class="mb-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-3 border-2 border-purple-300">
+                        <label class="block text-sm font-medium mb-2 text-purple-800">📊 表示期間</label>
+                        <select id="leagueYearSelect" onchange="changeLeagueYear()" class="w-full px-3 py-2 border-2 border-purple-300 rounded-lg bg-white">
+                            <option value="all">通算成績</option>
+                        </select>
+                    </div>
+                    
                     <!-- 新規リーグ戦作成ボタン -->
                     <button onclick="showLeagueCreateForm()" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white py-3 rounded-lg font-bold mb-4 active:opacity-80 flex items-center justify-center gap-2">
                         <span class="text-xl">➕</span> 新しいリーグ戦を作成
@@ -196,6 +211,14 @@
                                 キャンセル
                             </button>
                         </div>
+                    </div>
+                    
+                    <!-- 年選択 -->
+                    <div class="mb-4 bg-purple-50 rounded-lg p-3 border-2 border-purple-300">
+                        <label class="block text-sm font-medium mb-1 text-purple-800">📅 集計期間</label>
+                        <select id="leagueYearSelect" onchange="onLeagueYearChange()" class="w-full px-3 py-2 border-2 border-purple-300 rounded-lg bg-white">
+                            <option value="all">通算</option>
+                        </select>
                     </div>
                     
                     <!-- リーグ戦一覧 -->
@@ -238,6 +261,7 @@
         let allPlayers = [];
         let leagues = {}; // リーグ戦データ { leagueId: { name, players: [], createdAt } }
         let selectedLeagueId = null; // 現在選択されているリーグ戦ID
+        let selectedYear = 'all'; // 選択された年（'all', '2025', '2024'など）
         let currentTab = 'input';
         let isLoggedIn = false;
 
@@ -446,6 +470,16 @@
                         dateInput.valueAsDate = new Date();
                         dateChanged();
                     }
+                    
+                    // デフォルトの年を今年に設定
+                    const currentYear = new Date().getFullYear().toString();
+                    const availableYears = getAvailableYears();
+                    if(availableYears.includes(currentYear)) {
+                        selectedYear = currentYear;
+                    } else if(availableYears.length > 0) {
+                        selectedYear = availableYears[0]; // 最新の年
+                    }
+                    
                     render();
                     updateSyncStatus('synced');
                 })
@@ -587,8 +621,12 @@
                 }
             });
             if(tab==='daily') renderDaily();
-            if(tab==='players') renderPlayers();
+            if(tab==='players') {
+                updateYearSelects(); // 年選択を更新
+                renderPlayers();
+            }
             if(tab==='league') {
+                updateYearSelects(); // 年選択を更新
                 updateLeaguePlayerSelects();
                 renderLeagues();
             }
@@ -997,6 +1035,114 @@
             e.target.value = '';
         }
 
+        // データから利用可能な年のリストを取得
+        function getAvailableYears() {
+            const years = new Set();
+            if(data && data.dates) {
+                Object.keys(data.dates).forEach(dateStr => {
+                    const year = new Date(dateStr).getFullYear();
+                    if(!isNaN(year)) {
+                        years.add(year);
+                    }
+                });
+            }
+            return Array.from(years).sort((a, b) => b - a); // 降順
+        }
+
+        // 年選択ドロップダウンを更新
+        function updateYearSelects() {
+            const years = getAvailableYears();
+            const currentYear = new Date().getFullYear();
+            
+            // プレイヤー統計の年選択
+            const playerYearSelect = document.getElementById('playerYearSelect');
+            if(playerYearSelect) {
+                let html = '<option value="all">通算</option>';
+                years.forEach(year => {
+                    html += `<option value="${year}">${year}年</option>`;
+                });
+                playerYearSelect.innerHTML = html;
+                // デフォルトは今年（なければ通算）
+                if(years.includes(currentYear)) {
+                    playerYearSelect.value = currentYear.toString();
+                }
+            }
+            
+            // リーグ戦の年選択
+            const leagueYearSelect = document.getElementById('leagueYearSelect');
+            if(leagueYearSelect) {
+                let html = '<option value="all">通算</option>';
+                years.forEach(year => {
+                    html += `<option value="${year}">${year}年</option>`;
+                });
+                leagueYearSelect.innerHTML = html;
+                // デフォルトは今年（なければ通算）
+                if(years.includes(currentYear)) {
+                    leagueYearSelect.value = currentYear.toString();
+                }
+            }
+        }
+
+        // データから年のリストを取得
+        function getAvailableYears() {
+            const years = new Set();
+            if(data && data.dates) {
+                Object.keys(data.dates).forEach(dateStr => {
+                    const year = dateStr.split('-')[0];
+                    years.add(year);
+                });
+            }
+            return Array.from(years).sort().reverse(); // 新しい年が上
+        }
+
+        // 年選択ドロップダウンを更新
+        function updateYearSelects() {
+            const years = getAvailableYears();
+            
+            // プレイヤータブの年選択
+            const playerYearSelect = document.getElementById('playerYearSelect');
+            if(playerYearSelect) {
+                let html = '<option value="all">通算成績</option>';
+                years.forEach(year => {
+                    html += `<option value="${year}" ${year === selectedYear ? 'selected' : ''}>${year}年</option>`;
+                });
+                playerYearSelect.innerHTML = html;
+                playerYearSelect.value = selectedYear;
+            }
+            
+            // リーグ戦タブの年選択
+            const leagueYearSelect = document.getElementById('leagueYearSelect');
+            if(leagueYearSelect) {
+                let html = '<option value="all">通算成績</option>';
+                years.forEach(year => {
+                    html += `<option value="${year}" ${year === selectedYear ? 'selected' : ''}>${year}年</option>`;
+                });
+                leagueYearSelect.innerHTML = html;
+                leagueYearSelect.value = selectedYear;
+            }
+        }
+
+        // プレイヤータブで年を変更
+        function changePlayerYear() {
+            const select = document.getElementById('playerYearSelect');
+            if(select) {
+                selectedYear = select.value;
+                renderPlayers();
+            }
+        }
+
+        // リーグ戦タブで年を変更
+        function changeLeagueYear() {
+            const select = document.getElementById('leagueYearSelect');
+            if(select) {
+                selectedYear = select.value;
+                // 現在選択中のリーグ戦を再計算
+                if(selectedLeagueId) {
+                    calculateLeagueById(selectedLeagueId);
+                }
+            }
+        }
+
         // レンダリング
         function render() {
             console.log('render() 呼び出し - allPlayers:', allPlayers);
@@ -1005,6 +1151,7 @@
             if(gameTypeElement) {
                 gameTypeElement.value = d.type;
             }
+            updateYearSelects(); // 年選択を更新
             renderStats();
             renderPlayerSelectors();
             renderScoreInputs();
@@ -1355,10 +1502,21 @@
                     return;
                 }
                 
-                Object.values(data.dates).forEach(d => {
+                // 選択された年を取得
+                const yearSelect = document.getElementById('playerYearSelect');
+                const selectedYear = yearSelect ? yearSelect.value : 'all';
+                
+                // 年でフィルタリング
+                Object.entries(data.dates).forEach(([dateStr, d]) => {
                     if(!d || typeof d !== 'object') return;
                     if(!d.games || !Array.isArray(d.games)) return;
                     if(!d.players || !Array.isArray(d.players)) return;
+                    
+                    // 年フィルタ
+                    if(selectedYear !== 'all') {
+                        const year = new Date(dateStr).getFullYear();
+                        if(year.toString() !== selectedYear) return;
+                    }
                     
                     d.games.forEach(g => {
                         if(!g || !Array.isArray(g)) return;
@@ -1687,11 +1845,21 @@
 
             const selectedPlayers = league.players;
             console.log('リーグ戦メンバー:', selectedPlayers);
+            
+            // 選択された年を取得
+            const yearSelect = document.getElementById('leagueYearSelect');
+            const selectedYear = yearSelect ? yearSelect.value : 'all';
 
             // このメンバーで行われた試合を抽出
             const leagueGames = [];
             Object.entries(data.dates).forEach(([date, dateData]) => {
                 if(!dateData || !dateData.games || !dateData.players) return;
+                
+                // 年フィルタ
+                if(selectedYear !== 'all') {
+                    const year = new Date(date).getFullYear();
+                    if(year.toString() !== selectedYear) return;
+                }
                 
                 // この日のプレイヤーがリーグ戦メンバーと完全一致するか確認（順序は無視）
                 const dayPlayers = dateData.players.filter(p => p); // 空文字を除外
