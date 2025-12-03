@@ -145,13 +145,21 @@
             log('既存データの確認を開始します...', 'info');
             
             try {
-                // パスワードデータ
-                const passwordsSnapshot = await database.ref('passwords').once('value');
-                const passwords = passwordsSnapshot.val();
-                console.log('パスワードデータ:', passwords);
+                // パスワードデータ（/passwords または /settings/passwords を確認）
+                let passwordsSnapshot = await database.ref('passwords').once('value');
+                let passwords = passwordsSnapshot.val();
                 
-                // 麻雀データ
-                const mahjongSnapshot = await database.ref('mahjongData').once('value');
+                // /passwords にない場合は /settings/passwords を確認
+                if (!passwords) {
+                    passwordsSnapshot = await database.ref('settings/passwords').once('value');
+                    passwords = passwordsSnapshot.val();
+                    console.log('パスワードデータ（/settings/passwords）:', passwords);
+                } else {
+                    console.log('パスワードデータ（/passwords）:', passwords);
+                }
+                
+                // 麻雀データ（正しいパスは /mahjong）
+                const mahjongSnapshot = await database.ref('mahjong').once('value');
                 const mahjongData = mahjongSnapshot.val();
                 console.log('麻雀データ:', mahjongData);
                 console.log('麻雀データ構造:', {
@@ -352,7 +360,7 @@
 
         // 元のデータを削除
         async function deleteOldData() {
-            if (!confirm('⚠️ 警告\n\n元のデータ（/passwords, /mahjongData, /leagues）を削除します。\n\nこの操作は取り消せません。新しいグループでデータが正常に表示されることを確認しましたか？')) {
+            if (!confirm('⚠️ 警告\n\n元のデータ（/mahjong, /leagues, /passwords, /settings）を削除します。\n\nこの操作は取り消せません。新しいグループでデータが正常に表示されることを確認しましたか？')) {
                 return;
             }
 
@@ -364,11 +372,23 @@
             log('元のデータを削除中...', 'warning');
 
             try {
-                await database.ref('passwords').remove();
-                log('✓ /passwords を削除しました', 'success');
+                // パスワード削除
+                const passwordsExists = await database.ref('passwords').once('value');
+                if (passwordsExists.val()) {
+                    await database.ref('passwords').remove();
+                    log('✓ /passwords を削除しました', 'success');
+                }
 
-                await database.ref('mahjongData').remove();
-                log('✓ /mahjongData を削除しました', 'success');
+                // settings削除
+                const settingsExists = await database.ref('settings').once('value');
+                if (settingsExists.val()) {
+                    await database.ref('settings').remove();
+                    log('✓ /settings を削除しました', 'success');
+                }
+
+                // 麻雀データ削除（正しいパスは /mahjong）
+                await database.ref('mahjong').remove();
+                log('✓ /mahjong を削除しました', 'success');
 
                 await database.ref('leagues').remove();
                 log('✓ /leagues を削除しました', 'success');
