@@ -148,14 +148,25 @@
                 // パスワードデータ
                 const passwordsSnapshot = await database.ref('passwords').once('value');
                 const passwords = passwordsSnapshot.val();
+                console.log('パスワードデータ:', passwords);
                 
                 // 麻雀データ
                 const mahjongSnapshot = await database.ref('mahjongData').once('value');
                 const mahjongData = mahjongSnapshot.val();
+                console.log('麻雀データ:', mahjongData);
+                console.log('麻雀データ構造:', {
+                    hasData: !!mahjongData,
+                    hasDataProperty: mahjongData?.data ? true : false,
+                    hasDates: mahjongData?.data?.dates ? true : false,
+                    hasAllPlayers: mahjongData?.allPlayers ? true : false,
+                    dateCount: mahjongData?.data?.dates ? Object.keys(mahjongData.data.dates).length : 0,
+                    playerCount: mahjongData?.allPlayers ? mahjongData.allPlayers.length : 0
+                });
                 
                 // リーグデータ
                 const leaguesSnapshot = await database.ref('leagues').once('value');
                 const leagues = leaguesSnapshot.val();
+                console.log('リーグデータ:', leagues);
 
                 existingData = {
                     passwords: passwords,
@@ -295,12 +306,23 @@
                 // 3. 麻雀データの移行
                 if (existingData.mahjongData) {
                     log('対局データを移行中...', 'info');
+                    console.log('移行する麻雀データ:', existingData.mahjongData);
+                    
                     await database.ref(`groups/${targetGroupId}/mahjong`).set(existingData.mahjongData);
                     log('✓ 対局データを移行しました', 'success');
                     
                     const dates = existingData.mahjongData.data?.dates || {};
                     log(`  - ${Object.keys(dates).length}日分のデータ`, 'info');
                     log(`  - ${existingData.mahjongData.allPlayers?.length || 0}人のプレイヤー`, 'info');
+                    
+                    // 移行後の確認
+                    const verifySnapshot = await database.ref(`groups/${targetGroupId}/mahjong`).once('value');
+                    const verifiedData = verifySnapshot.val();
+                    console.log('移行後の確認:', verifiedData);
+                    log('✓ 移行データを確認しました', 'success');
+                } else {
+                    log('⚠️ 麻雀データが見つかりませんでした', 'warning');
+                    console.log('existingData.mahjongData is:', existingData.mahjongData);
                 }
 
                 // 4. リーグデータの移行
