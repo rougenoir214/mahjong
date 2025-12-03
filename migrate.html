@@ -146,35 +146,55 @@
             
             try {
                 // パスワードデータ（/passwords または /settings/passwords を確認）
-                let passwordsSnapshot = await database.ref('passwords').once('value');
-                let passwords = passwordsSnapshot.val();
+                let passwords = null;
+                try {
+                    const passwordsSnapshot = await database.ref('passwords').once('value');
+                    passwords = passwordsSnapshot.val();
+                    console.log('パスワードデータ（/passwords）:', passwords);
+                } catch (error) {
+                    console.log('/passwords にアクセスできません:', error.message);
+                }
                 
                 // /passwords にない場合は /settings/passwords を確認
                 if (!passwords) {
-                    passwordsSnapshot = await database.ref('settings/passwords').once('value');
-                    passwords = passwordsSnapshot.val();
-                    console.log('パスワードデータ（/settings/passwords）:', passwords);
-                } else {
-                    console.log('パスワードデータ（/passwords）:', passwords);
+                    try {
+                        const settingsPasswordsSnapshot = await database.ref('settings/passwords').once('value');
+                        passwords = settingsPasswordsSnapshot.val();
+                        console.log('パスワードデータ（/settings/passwords）:', passwords);
+                    } catch (error) {
+                        console.log('/settings/passwords にアクセスできません:', error.message);
+                    }
                 }
                 
                 // 麻雀データ（正しいパスは /mahjong）
-                const mahjongSnapshot = await database.ref('mahjong').once('value');
-                const mahjongData = mahjongSnapshot.val();
-                console.log('麻雀データ:', mahjongData);
-                console.log('麻雀データ構造:', {
-                    hasData: !!mahjongData,
-                    hasDataProperty: mahjongData?.data ? true : false,
-                    hasDates: mahjongData?.data?.dates ? true : false,
-                    hasAllPlayers: mahjongData?.allPlayers ? true : false,
-                    dateCount: mahjongData?.data?.dates ? Object.keys(mahjongData.data.dates).length : 0,
-                    playerCount: mahjongData?.allPlayers ? mahjongData.allPlayers.length : 0
-                });
+                let mahjongData = null;
+                try {
+                    const mahjongSnapshot = await database.ref('mahjong').once('value');
+                    mahjongData = mahjongSnapshot.val();
+                    console.log('麻雀データ:', mahjongData);
+                    console.log('麻雀データ構造:', {
+                        hasData: !!mahjongData,
+                        hasDataProperty: mahjongData?.data ? true : false,
+                        hasDates: mahjongData?.data?.dates ? true : false,
+                        hasAllPlayers: mahjongData?.allPlayers ? true : false,
+                        dateCount: mahjongData?.data?.dates ? Object.keys(mahjongData.data.dates).length : 0,
+                        playerCount: mahjongData?.allPlayers ? mahjongData.allPlayers.length : 0
+                    });
+                } catch (error) {
+                    console.log('/mahjong にアクセスできません:', error.message);
+                    log('⚠️ /mahjong の読み取りでエラー: ' + error.message, 'warning');
+                }
                 
                 // リーグデータ
-                const leaguesSnapshot = await database.ref('leagues').once('value');
-                const leagues = leaguesSnapshot.val();
-                console.log('リーグデータ:', leagues);
+                let leagues = null;
+                try {
+                    const leaguesSnapshot = await database.ref('leagues').once('value');
+                    leagues = leaguesSnapshot.val();
+                    console.log('リーグデータ:', leagues);
+                } catch (error) {
+                    console.log('/leagues にアクセスできません:', error.message);
+                    log('⚠️ /leagues の読み取りでエラー: ' + error.message, 'warning');
+                }
 
                 existingData = {
                     passwords: passwords,
