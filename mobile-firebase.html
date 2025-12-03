@@ -356,7 +356,7 @@
 
         // Firebaseからパスワードを読み込む
         function loadPasswords() {
-            return database.ref(`groups/${groupId}/settings/passwords`).once('value')
+            return database.ref(`groups/${groupId}/passwords`).once('value')
                 .then((snapshot) => {
                     const passwords = snapshot.val();
                     if (passwords) {
@@ -364,7 +364,7 @@
                         console.log('パスワード設定を読み込みました');
                     } else {
                         // 初回起動時：デフォルトパスワードをFirebaseに保存
-                        database.ref(`groups/${groupId}/settings/passwords`).set(appPasswords);
+                        database.ref(`groups/${groupId}/passwords`).set(appPasswords);
                         console.log('デフォルトパスワードを設定しました');
                     }
                 })
