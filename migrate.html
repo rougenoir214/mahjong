@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>データ移行ツール</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+        body { font-family: 'Noto Sans JP', sans-serif; }
+        .log-area {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            padding: 16px;
+            border-radius: 8px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .log-success { color: #4ade80; }
+        .log-error { color: #f87171; }
+        .log-info { color: #60a5fa; }
+        .log-warning { color: #fbbf24; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 min-h-screen p-8">
+
+    <div class="container mx-auto max-w-4xl">
+        <div class="bg-white rounded-xl shadow-2xl p-8">
+            <div class="text-center mb-8">
+                <div class="text-6xl mb-4">🔄</div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">データ移行ツール</h1>
+                <p class="text-gray-600">既存データを新しいグループシステムに移行します</p>
+            </div>
+
+            <!-- ステップ1: 既存データ確認 -->
+            <div class="mb-8 p-6 bg-blue-50 rounded-lg">
+                <h2 class="text-xl font-bold mb-4 text-blue-800">📊 ステップ1: 既存データの確認</h2>
+                <button onclick="checkExistingData()" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold transition">
+                    既存データを確認する
+                </button>
+                <div id="existingDataInfo" class="mt-4 text-sm"></div>
+            </div>
+
+            <!-- ステップ2: 移行先グループID指定 -->
+            <div class="mb-8 p-6 bg-green-50 rounded-lg">
+                <h2 class="text-xl font-bold mb-4 text-green-800">🎯 ステップ2: 移行先グループの指定</h2>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2 text-gray-700">移行先グループID</label>
+                    <input type="text" id="targetGroupId" 
+                           class="w-full px-4 py-2 border rounded-lg focus:border-green-500 focus:outline-none"
+                           placeholder="例: main, legacy, 2024-history"
+                           pattern="[a-zA-Z0-9-]+"
+                           value="main">
+                    <p class="text-xs text-gray-500 mt-1">※ 英数字とハイフンのみ使用可能</p>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2 text-gray-700">グループ名（表示用）</label>
+                    <input type="text" id="targetGroupName" 
+                           class="w-full px-4 py-2 border rounded-lg focus:border-green-500 focus:outline-none"
+                           placeholder="例: メイングループ, 過去データ"
+                           value="メイングループ">
+                </div>
+            </div>
+
+            <!-- ステップ3: 移行実行 -->
+            <div class="mb-8 p-6 bg-purple-50 rounded-lg">
+                <h2 class="text-xl font-bold mb-4 text-purple-800">🚀 ステップ3: 移行の実行</h2>
+                <div class="mb-4 p-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700">
+                    <p class="font-bold">⚠️ 注意事項</p>
+                    <ul class="list-disc list-inside text-sm mt-2">
+                        <li>この操作は既存データをコピーします（元データは削除されません）</li>
+                        <li>移行後、元データを削除するかはご自身で判断してください</li>
+                        <li>移行は取り消せません。確認してから実行してください</li>
+                    </ul>
+                </div>
+                <button onclick="migrateData()" 
+                        class="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-bold transition">
+                    データを移行する
+                </button>
+            </div>
+
+            <!-- ログ表示 -->
+            <div class="mb-4">
+                <h2 class="text-xl font-bold mb-4 text-gray-800">📝 実行ログ</h2>
+                <div id="logArea" class="log-area"></div>
+            </div>
+
+            <!-- 移行後の操作 -->
+            <div id="afterMigration" style="display: none;" class="p-6 bg-green-100 border-l-4 border-green-500 rounded">
+                <h3 class="font-bold text-green-800 mb-2">✅ 移行完了後の操作</h3>
+                <ol class="list-decimal list-inside text-sm text-green-700 space-y-1">
+                    <li>admin.htmlでグループ一覧を確認してください</li>
+                    <li>移行したグループのURLでアクセスして、データを確認してください</li>
+                    <li>データが正常に移行されていることを確認したら、元のデータを削除できます</li>
+                </ol>
+                <div class="mt-4">
+                    <button onclick="deleteOldData()" 
+                            class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm">
+                        元のデータを削除する（任意）
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase設定
+        const firebaseConfig = {
+            apiKey: "AIzaSyA7bkfPDgs3iSNFC2MOxjs1aakbHbMi-jM",
+            authDomain: "mahjong-337a9.firebaseapp.com",
+            databaseURL: "https://mahjong-337a9-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "mahjong-337a9",
+            storageBucket: "mahjong-337a9.firebasestorage.app",
+            messagingSenderId: "605742422445",
+            appId: "1:605742422445:web:e207ae05cba0a67f7b2924",
+            measurementId: "G-2VDY4LKSPP"
+        };
+
+        // Firebase初期化
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        let existingData = null;
+
+        // ログ出力
+        function log(message, type = 'info') {
+            const logArea = document.getElementById('logArea');
+            const timestamp = new Date().toLocaleTimeString('ja-JP');
+            const className = `log-${type}`;
+            logArea.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            logArea.scrollTop = logArea.scrollHeight;
+            console.log(`[${type}] ${message}`);
+        }
+
+        // 既存データの確認
+        async function checkExistingData() {
+            log('既存データの確認を開始します...', 'info');
+            
+            try {
+                // パスワードデータ
+                const passwordsSnapshot = await database.ref('passwords').once('value');
+                const passwords = passwordsSnapshot.val();
+                
+                // 麻雀データ
+                const mahjongSnapshot = await database.ref('mahjongData').once('value');
+                const mahjongData = mahjongSnapshot.val();
+                
+                // リーグデータ
+                const leaguesSnapshot = await database.ref('leagues').once('value');
+                const leagues = leaguesSnapshot.val();
+
+                existingData = {
+                    passwords: passwords,
+                    mahjongData: mahjongData,
+                    leagues: leagues
+                };
+
+                // データの統計を表示
+                let infoHtml = '<div class="mt-4 p-4 bg-white rounded border">';
+                infoHtml += '<h3 class="font-bold mb-2">既存データの内容:</h3>';
+                infoHtml += '<ul class="text-sm space-y-1">';
+                
+                if (passwords) {
+                    infoHtml += `<li>✅ パスワード設定: あり</li>`;
+                } else {
+                    infoHtml += `<li>❌ パスワード設定: なし</li>`;
+                }
+                
+                if (mahjongData) {
+                    const dates = mahjongData.data?.dates || {};
+                    const dateCount = Object.keys(dates).length;
+                    const players = mahjongData.allPlayers || [];
+                    infoHtml += `<li>✅ 対局データ: ${dateCount}日分</li>`;
+                    infoHtml += `<li>✅ プレイヤー数: ${players.length}人</li>`;
+                    
+                    // ゲーム総数を計算
+                    let totalGames = 0;
+                    Object.values(dates).forEach(dateData => {
+                        if (dateData.games) {
+                            totalGames += dateData.games.length;
+                        }
+                    });
+                    infoHtml += `<li>✅ 総ゲーム数: ${totalGames}局</li>`;
+                } else {
+                    infoHtml += `<li>❌ 対局データ: なし</li>`;
+                }
+                
+                if (leagues) {
+                    const leagueCount = Object.keys(leagues).length;
+                    infoHtml += `<li>✅ リーグ戦: ${leagueCount}件</li>`;
+                } else {
+                    infoHtml += `<li>❌ リーグ戦: なし</li>`;
+                }
+                
+                infoHtml += '</ul></div>';
+                
+                document.getElementById('existingDataInfo').innerHTML = infoHtml;
+                
+                log('既存データの確認が完了しました', 'success');
+                log(`対局データ: ${mahjongData ? '有' : '無'}`, 'info');
+                log(`リーグデータ: ${leagues ? Object.keys(leagues).length + '件' : '無'}`, 'info');
+
+                if (!passwords && !mahjongData && !leagues) {
+                    log('移行する既存データが見つかりませんでした', 'warning');
+                }
+
+            } catch (error) {
+                log('エラー: ' + error.message, 'error');
+                console.error(error);
+            }
+        }
+
+        // データ移行の実行
+        async function migrateData() {
+            const targetGroupId = document.getElementById('targetGroupId').value.trim();
+            const targetGroupName = document.getElementById('targetGroupName').value.trim();
+
+            // バリデーション
+            if (!targetGroupId) {
+                alert('移行先グループIDを入力してください');
+                return;
+            }
+            if (!/^[a-zA-Z0-9-]+$/.test(targetGroupId)) {
+                alert('グループIDには英数字とハイフンのみ使用できます');
+                return;
+            }
+            if (!targetGroupName) {
+                alert('グループ名を入力してください');
+                return;
+            }
+
+            // 既存データの確認
+            if (!existingData) {
+                log('先に「既存データを確認する」を実行してください', 'warning');
+                alert('先にステップ1で既存データを確認してください');
+                return;
+            }
+
+            // 最終確認
+            if (!confirm(`以下の内容で移行を実行します。よろしいですか？\n\n移行先グループID: ${targetGroupId}\nグループ名: ${targetGroupName}`)) {
+                log('移行がキャンセルされました', 'info');
+                return;
+            }
+
+            log('==================================', 'info');
+            log('データ移行を開始します...', 'info');
+            log(`移行先: groups/${targetGroupId}/`, 'info');
+            log('==================================', 'info');
+
+            try {
+                // グループが既に存在するかチェック
+                const groupSnapshot = await database.ref(`groups/${targetGroupId}`).once('value');
+                if (groupSnapshot.exists()) {
+                    if (!confirm('このグループIDは既に存在します。上書きしますか？')) {
+                        log('移行がキャンセルされました', 'warning');
+                        return;
+                    }
+                    log('既存グループに上書きします', 'warning');
+                }
+
+                // 1. グループ情報の作成
+                log('グループ情報を作成中...', 'info');
+                await database.ref(`groups/${targetGroupId}/info`).set({
+                    groupId: targetGroupId,
+                    name: targetGroupName,
+                    description: '既存データから移行',
+                    createdAt: new Date().toISOString(),
+                    migratedAt: new Date().toISOString(),
+                    migratedFrom: 'legacy'
+                });
+                log('✓ グループ情報を作成しました', 'success');
+
+                // 2. パスワードの移行
+                if (existingData.passwords) {
+                    log('パスワードを移行中...', 'info');
+                    await database.ref(`groups/${targetGroupId}/passwords`).set(existingData.passwords);
+                    log('✓ パスワードを移行しました', 'success');
+                } else {
+                    log('デフォルトパスワードを設定中...', 'info');
+                    await database.ref(`groups/${targetGroupId}/passwords`).set({
+                        login: 'mahjong2024',
+                        delete: 'mahjong1234'
+                    });
+                    log('✓ デフォルトパスワードを設定しました', 'success');
+                }
+
+                // 3. 麻雀データの移行
+                if (existingData.mahjongData) {
+                    log('対局データを移行中...', 'info');
+                    await database.ref(`groups/${targetGroupId}/mahjong`).set(existingData.mahjongData);
+                    log('✓ 対局データを移行しました', 'success');
+                    
+                    const dates = existingData.mahjongData.data?.dates || {};
+                    log(`  - ${Object.keys(dates).length}日分のデータ`, 'info');
+                    log(`  - ${existingData.mahjongData.allPlayers?.length || 0}人のプレイヤー`, 'info');
+                }
+
+                // 4. リーグデータの移行
+                if (existingData.leagues) {
+                    log('リーグ戦データを移行中...', 'info');
+                    await database.ref(`groups/${targetGroupId}/leagues`).set(existingData.leagues);
+                    log('✓ リーグ戦データを移行しました', 'success');
+                    log(`  - ${Object.keys(existingData.leagues).length}件のリーグ`, 'info');
+                }
+
+                log('==================================', 'success');
+                log('✅ データ移行が完了しました！', 'success');
+                log('==================================', 'success');
+                log(`アクセスURL: mobile-firebase.html?group=${targetGroupId}`, 'info');
+
+                // 移行後の操作セクションを表示
+                document.getElementById('afterMigration').style.display = 'block';
+
+                alert('データ移行が完了しました！\n\nadmin.htmlでグループ一覧を確認してください。');
+
+            } catch (error) {
+                log('❌ エラーが発生しました: ' + error.message, 'error');
+                console.error(error);
+                alert('データ移行に失敗しました: ' + error.message);
+            }
+        }
+
+        // 元のデータを削除
+        async function deleteOldData() {
+            if (!confirm('⚠️ 警告\n\n元のデータ（/passwords, /mahjongData, /leagues）を削除します。\n\nこの操作は取り消せません。新しいグループでデータが正常に表示されることを確認しましたか？')) {
+                return;
+            }
+
+            if (!confirm('本当に削除しますか？（最終確認）')) {
+                return;
+            }
+
+            log('==================================', 'warning');
+            log('元のデータを削除中...', 'warning');
+
+            try {
+                await database.ref('passwords').remove();
+                log('✓ /passwords を削除しました', 'success');
+
+                await database.ref('mahjongData').remove();
+                log('✓ /mahjongData を削除しました', 'success');
+
+                await database.ref('leagues').remove();
+                log('✓ /leagues を削除しました', 'success');
+
+                log('==================================', 'success');
+                log('✅ 元のデータを削除しました', 'success');
+                log('これで完全に新しいグループシステムに移行されました', 'success');
+
+                alert('元のデータを削除しました。\n\n今後は新しいグループシステムのみを使用してください。');
+
+            } catch (error) {
+                log('❌ 削除エラー: ' + error.message, 'error');
+                console.error(error);
+                alert('削除に失敗しました: ' + error.message);
+            }
+        }
+
+        // ページ読み込み時
+        window.onload = function() {
+            log('データ移行ツールを起動しました', 'success');
+            log('ステップ1から順番に実行してください', 'info');
+        };
+    </script>
+</body>
+</html>

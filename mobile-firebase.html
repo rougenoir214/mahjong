@@ -248,6 +248,23 @@
             delete: 'mahjong1234'      // デフォルト（初回用）
         };
         
+        // URLパラメータからグループIDを取得
+        function getGroupId() {
+            const params = new URLSearchParams(window.location.search);
+            const groupId = params.get('group');
+            if (!groupId) {
+                alert('グループIDが指定されていません。\n\nURLに ?group=グループ名 を追加してください。');
+                return null;
+            }
+            return groupId;
+        }
+
+        const groupId = getGroupId();
+        if (!groupId) {
+            document.body.innerHTML = '<div style="padding:20px;text-align:center;"><h2>グループIDが指定されていません</h2><p>URLに ?group=グループ名 を追加してください</p></div>';
+            throw new Error('グループIDが必要です');
+        }
+
         // アプリの状態
         let data = { dates: {} };
         let allPlayers = [];
@@ -339,7 +356,7 @@
 
         // Firebaseからパスワードを読み込む
         function loadPasswords() {
-            return database.ref('settings/passwords').once('value')
+            return database.ref(`groups/${groupId}/settings/passwords`).once('value')
                 .then((snapshot) => {
                     const passwords = snapshot.val();
                     if (passwords) {
@@ -347,7 +364,7 @@
                         console.log('パスワード設定を読み込みました');
                     } else {
                         // 初回起動時：デフォルトパスワードをFirebaseに保存
-                        database.ref('settings/passwords').set(appPasswords);
+                        database.ref(`groups/${groupId}/settings/passwords`).set(appPasswords);
                         console.log('デフォルトパスワードを設定しました');
                     }
                 })
@@ -410,7 +427,7 @@
         function loadFromFirebase() {
             updateSyncStatus('loading');
             
-            database.ref('mahjong').once('value')
+            database.ref(`groups/${groupId}/mahjong`).once('value')
                 .then((snapshot) => {
                     const firebaseData = snapshot.val();
                     
@@ -500,7 +517,7 @@
 
         // リアルタイム監視の設定
         function setupRealtimeListener() {
-            database.ref('mahjong').on('value', (snapshot) => {
+            database.ref(`groups/${groupId}/mahjong`).on('value', (snapshot) => {
                 try {
                     const firebaseData = snapshot.val();
                     if (firebaseData) {
@@ -543,7 +560,7 @@
         function saveToFirebase() {
             updateSyncStatus('saving');
             
-            database.ref('mahjong').set({
+            database.ref(`groups/${groupId}/mahjong`).set({
                 data: data,
                 allPlayers: allPlayers,
                 lastUpdated: new Date().toISOString()
@@ -773,7 +790,7 @@
                 allPlayers = [];
                 
                 // Firebaseから削除
-                database.ref('mahjong').set({
+                database.ref(`groups/${groupId}/mahjong`).set({
                     data: { dates: {} },
                     allPlayers: [],
                     lastUpdated: new Date().toISOString(),
@@ -1693,7 +1710,7 @@
             };
 
             // Firebaseに保存
-            database.ref('leagues/' + leagueId).set(leagueData)
+            database.ref(`groups/${groupId}/leagues/${leagueId}`).set(leagueData)
                 .then(() => {
                     console.log('リーグ戦を作成しました:', leagueId, leagueData);
                     leagues[leagueId] = leagueData;
@@ -1710,7 +1727,7 @@
 
         // Firebaseからリーグ戦一覧を読み込み
         function loadLeagues() {
-            return database.ref('leagues').once('value')
+            return database.ref(`groups/${groupId}/leagues`).once('value')
                 .then(snapshot => {
                     leagues = snapshot.val() || {};
                     console.log('リーグ戦を読み込みました:', Object.keys(leagues).length + '件');
@@ -1796,7 +1813,7 @@
                 return;
             }
 
-            database.ref('leagues/' + leagueId).remove()
+            database.ref(`groups/${groupId}/leagues/${leagueId}`).remove()
                 .then(() => {
                     console.log('リーグ戦を削除しました:', leagueId);
                     delete leagues[leagueId];
