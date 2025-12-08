@@ -784,24 +784,32 @@
             }
             
             // パスワードが正しい場合のみ続行
-            if(confirm('⚠️ 最終確認\n\nパスワードが確認されました。\n\n全てのデータ（プレイヤー、半荘記録など）が完全に削除されます。\n\n本当に削除を実行しますか？')) {
+            if(confirm('⚠️ 最終確認\n\nパスワードが確認されました。\n\n全てのデータ（プレイヤー、半荘記録、リーグ戦）が完全に削除されます。\n\n本当に削除を実行しますか？')) {
                 // データを初期化
                 data = { dates: {} };
                 allPlayers = [];
+                leagues = {};
                 
-                // Firebaseから削除
-                database.ref(`groups/${groupId}/mahjong`).set({
+                // Firebaseから削除（麻雀データ）
+                const mahjongDelete = database.ref(`groups/${groupId}/mahjong`).set({
                     data: { dates: {} },
                     allPlayers: [],
                     lastUpdated: new Date().toISOString(),
                     deletedAt: new Date().toISOString()
-                })
+                });
+                
+                // Firebaseから削除（リーグ戦データ）
+                const leaguesDelete = database.ref(`groups/${groupId}/leagues`).remove();
+                
+                // 両方の削除を待つ
+                Promise.all([mahjongDelete, leaguesDelete])
                 .then(() => {
                     render();
                     if(currentTab === 'daily') renderDaily();
                     if(currentTab === 'players') renderPlayers();
+                    if(currentTab === 'league') renderLeagues();
                     notify('全データを削除しました');
-                    console.log('全データ削除完了');
+                    console.log('全データ削除完了（麻雀データ＋リーグ戦）');
                 })
                 .catch((error) => {
                     console.error('削除エラー:', error);
