@@ -21,13 +21,41 @@
         .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         table { border-collapse: collapse; min-width: 100%; }
         
+        /* 日別タブのテーブルコンテナ */
+        .daily-table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            overflow-x: auto;
+            position: relative;
+            -webkit-overflow-scrolling: touch;
+        }
+        
         /* 日別タブのヘッダー固定 */
-        #dailyList table thead th {
+        .daily-table-container table thead th {
             position: sticky;
             top: 0;
             z-index: 10;
             background-color: #ecfeff; /* bg-cyan-50 */
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* 左端の「半荘」列のヘッダーは最優先で固定 */
+        .daily-table-container table thead th:first-child {
+            z-index: 20;
+        }
+        
+        /* 日別タブの合計行固定 */
+        .daily-table-container table tbody tr:last-child td {
+            position: sticky;
+            bottom: 0;
+            z-index: 9;
+            background-color: #cffafe; /* bg-cyan-100 */
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* 合計行の左端列も高いz-index */
+        .daily-table-container table tbody tr:last-child td:first-child {
+            z-index: 19;
         }
         
         .login-screen { 
@@ -1464,7 +1492,7 @@
                         <div class="text-sm font-bold">${new Date(date).toLocaleDateString('ja-JP',{month:'long',day:'numeric'})}</div>
                         <div class="inline-block bg-cyan-600 text-white px-2 py-1 rounded-full text-xs mt-1">${d.type}人麻雀 | ${d.games.length}半荘</div>
                     </div>
-                    <div class="table-scroll">
+                    <div class="daily-table-container">
                         <table class="w-full text-xs">
                             <thead><tr class="border-b-2 border-cyan-300">
                                 <th class="text-left py-2 px-1 font-bold sticky left-0 bg-cyan-50">半荘</th>
