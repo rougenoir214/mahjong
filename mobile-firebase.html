@@ -20,6 +20,16 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         table { border-collapse: collapse; min-width: 100%; }
+        
+        /* 日別タブのヘッダー固定 */
+        #dailyList table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: #ecfeff; /* bg-cyan-50 */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
         .login-screen { 
             position: fixed; 
             inset: 0; 
