@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>麻雀成績管理 Firebase版</title>
+    <title>麻雀成績管理</title>
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Firebase SDKs -->
@@ -1304,7 +1304,23 @@
         // プレイヤー削除
         function removePlayer(index) {
             const playerName = allPlayers[index];
-            if(confirm(`プレイヤー「${playerName}」を削除しますか？\n\n注意: 過去の記録からは削除されません。`)) {
+            
+            // まず削除用パスワードを要求
+            const deletePassword = prompt(`⚠️ プレイヤー削除（管理者のみ）\n\nプレイヤー「${playerName}」を削除します。\n削除用パスワードを入力してください:`);
+            
+            if (!deletePassword) {
+                notify('削除がキャンセルされました');
+                return;
+            }
+            
+            // パスワード確認
+            if (deletePassword !== appPasswords.delete) {
+                alert('❌ パスワードが間違っています。\n\n削除用パスワードを管理者に確認してください。');
+                return;
+            }
+            
+            // パスワードが正しい場合のみ削除を実行
+            if(confirm(`パスワードが確認されました。\n\nプレイヤー「${playerName}」を削除しますか？\n\n注意: 過去の記録からは削除されません。`)) {
                 allPlayers.splice(index, 1);
                 saveToFirebase();
                 render();
@@ -1593,12 +1609,10 @@
                         const colors = ['bg-yellow-500 text-yellow-700 bg-yellow-50','bg-gray-400 text-gray-700 bg-gray-50','bg-orange-500 text-orange-700 bg-orange-50','bg-red-500 text-red-700 bg-red-50'][r-1].split(' ');
                         ranks += `<div class="flex items-center gap-2 mb-2">
                             <span class="text-xs font-bold w-8 ${colors[1]}">${r}位</span>
-                            <div class="flex-1 ${colors[2]} rounded-full h-6 overflow-hidden">
-                                <div class="${colors[0]} h-full flex items-center justify-end px-2 text-white text-xs font-bold" style="width:${pct}%">
-                                    ${pct>15?pct+'%':''}
-                                </div>
+                            <div class="flex-1 ${colors[2]} rounded-full h-7 overflow-visible relative">
+                                <div class="${colors[0]} h-full rounded-full" style="width:${pct}%"></div>
                             </div>
-                            <span class="text-xs font-bold ${colors[1]} w-12">${pct}%</span>
+                            <span class="text-xs font-bold ${colors[1]} w-12 text-right">${pct}%</span>
                             <span class="text-xs text-gray-500 w-10 text-right">${count}回</span>
                         </div>`;
                     }
@@ -1993,12 +2007,10 @@
                     const colors = ['bg-yellow-500 text-yellow-700 bg-yellow-50','bg-gray-400 text-gray-700 bg-gray-50','bg-orange-500 text-orange-700 bg-orange-50','bg-red-500 text-red-700 bg-red-50'][r-1].split(' ');
                     ranks += `<div class="flex items-center gap-2 mb-2">
                         <span class="text-xs font-bold w-8 ${colors[1]}">${r}位</span>
-                        <div class="flex-1 ${colors[2]} rounded-full h-6 overflow-hidden">
-                            <div class="${colors[0]} h-full flex items-center justify-end px-2 text-white text-xs font-bold" style="width:${pct}%">
-                                ${pct>15?pct+'%':''}
-                            </div>
+                        <div class="flex-1 ${colors[2]} rounded-full h-7 overflow-visible relative">
+                            <div class="${colors[0]} h-full rounded-full" style="width:${pct}%"></div>
                         </div>
-                        <span class="text-xs font-bold ${colors[1]} w-12">${pct}%</span>
+                        <span class="text-xs font-bold ${colors[1]} w-12 text-right">${pct}%</span>
                         <span class="text-xs text-gray-500 w-10 text-right">${count}回</span>
                     </div>`;
                 }
