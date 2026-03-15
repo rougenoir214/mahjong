@@ -24,7 +24,13 @@
         body { font-family: 'Noto Sans JP', sans-serif; -webkit-font-smoothing: antialiased; }
         * { -webkit-tap-highlight-color: transparent; }
         input, select, button { font-size: 16px !important; }
-        input[type="date"] { box-sizing: border-box; max-width: 100%; }
+        input[type="date"] { 
+            box-sizing: border-box; 
+            width: 100%; 
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
         .animate-fade { animation: fadeIn 0.5s ease-in; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -118,8 +124,7 @@
         <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 animate-fade">
             <div class="text-center mb-8">
                 <div class="text-6xl mb-4">🀄</div>
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">麻雀成績管理</h1>
-                <p class="text-gray-600">Firebase版</p>
+                <h1 class="text-3xl font-bold text-gray-800">麻雀成績管理</h1>
             </div>
             <div class="mb-6">
                 <label class="block text-gray-700 font-semibold mb-2">パスワード</label>
@@ -190,7 +195,7 @@
                 <div id="content-input" class="p-4">
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">日付</label>
-                        <input type="date" id="selectedDate" onchange="dateChanged()" class="w-full px-2 py-2 border rounded-lg">
+                        <input type="date" id="selectedDate" onchange="dateChanged()" class="w-full px-3 py-2 border rounded-lg">
                     </div>
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">麻雀の種類</label>
