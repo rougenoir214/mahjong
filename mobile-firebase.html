@@ -189,7 +189,7 @@
                 <div id="content-input" class="p-4">
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">日付</label>
-                        <input type="date" id="selectedDate" onchange="dateChanged()" class="w-full px-3 py-2 border rounded-lg">
+                        <input type="date" id="selectedDate" onchange="dateChanged()" class="w-full px-2 py-2 border rounded-lg">
                     </div>
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">麻雀の種類</label>
@@ -228,10 +228,10 @@
                         <h3 class="text-sm font-bold mb-2 text-gray-700">プレイヤー管理</h3>
                         <div class="flex gap-2 mb-3">
                             <input type="text" id="newPlayer" placeholder="新しいプレイヤー名" 
-                                   class="flex-1 px-3 py-2 border rounded-lg text-sm"
+                                   class="flex-1 px-2 py-2 border rounded-lg text-sm min-w-0"
                                    onkeypress="if(event.key==='Enter') addPlayer()">
-                            <button onclick="addPlayer()" class="bg-green-500 text-white px-4 py-2 rounded-lg active:bg-green-600 text-sm font-bold">
-                                ➕ 追加
+                            <button onclick="addPlayer()" class="bg-green-500 text-white px-3 py-2 rounded-lg active:bg-green-600 text-sm font-bold flex-shrink-0">
+                                ➕
                             </button>
                         </div>
                         <div id="playerList" class="text-xs text-gray-600"></div>
