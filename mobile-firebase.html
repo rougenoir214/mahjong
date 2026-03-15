@@ -77,6 +77,37 @@
         }
         .pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+        
+        /* モダンなメニュー */
+        .menu-container { position: relative; }
+        .menu-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            margin-top: 8px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            min-width: 160px;
+            z-index: 1000;
+        }
+        .menu-dropdown.show { display: block; }
+        .menu-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #374151;
+        }
+        .menu-item:first-child { border-radius: 12px 12px 0 0; }
+        .menu-item:last-child { border-radius: 0 0 12px 12px; }
+        .menu-item:hover { background: #f3f4f6; }
+        .menu-item.danger { color: #dc2626; }
+        .menu-item.danger:hover { background: #fee2e2; }
     </style>
 </head>
 <body class="bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-50 min-h-screen">
@@ -109,23 +140,37 @@
 
     <!-- メインアプリ（ログイン後に表示） -->
     <div id="mainApp" style="display: none;">
-        <header class="bg-gradient-to-r from-cyan-600 to-teal-600 text-white shadow-lg sticky top-0 z-50">
-            <div class="px-3 py-3">
-                <div class="flex items-center justify-between mb-2">
-                    <h1 class="text-xl font-bold">🀄 麻雀成績管理</h1>
-                    <div class="flex items-center gap-2">
-                        <div id="syncStatus" class="text-xs px-2 py-1 bg-white/20 rounded">
-                            <span class="pulse">🔄</span> 同期中...
-                        </div>
-                        <button onclick="logout()" class="bg-white/20 active:bg-white/30 px-3 py-2 rounded text-xs">
-                            🚪 ログアウト
-                        </button>
+        <header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+            <div class="px-4 py-3 flex items-center justify-between">
+                <h1 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <span class="text-2xl">🀄</span>
+                    <span>麻雀成績</span>
+                </h1>
+                <div class="flex items-center gap-3">
+                    <div id="syncStatus" class="text-xs text-gray-500 flex items-center gap-1">
+                        <span class="pulse text-sm">🔄</span>
                     </div>
-                </div>
-                <div class="flex gap-2 justify-center">
-                    <button onclick="exportData()" class="bg-white/20 active:bg-white/30 px-3 py-2 rounded text-xs">📥 エクスポート</button>
-                    <button onclick="document.getElementById('fileInput').click()" class="bg-white/20 active:bg-white/30 px-3 py-2 rounded text-xs">📤 インポート</button>
-                    <button onclick="clearAllData()" class="bg-red-500/80 active:bg-red-600 px-3 py-2 rounded text-xs">🗑️ 全削除</button>
+                    <div class="menu-container">
+                        <button onclick="toggleMenu()" class="p-2 hover:bg-gray-100 rounded-lg transition active:bg-gray-200">
+                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                            </svg>
+                        </button>
+                        <div id="menuDropdown" class="menu-dropdown">
+                            <div class="menu-item" onclick="exportData(); toggleMenu();">
+                                <span>📥</span> エクスポート
+                            </div>
+                            <div class="menu-item" onclick="document.getElementById('fileInput').click(); toggleMenu();">
+                                <span>📤</span> インポート
+                            </div>
+                            <div class="menu-item" onclick="logout(); toggleMenu();">
+                                <span>🚪</span> ログアウト
+                            </div>
+                            <div class="menu-item danger" onclick="clearAllData(); toggleMenu();">
+                                <span>🗑️</span> 全削除
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </header>
@@ -2171,6 +2216,21 @@
         
         // PWA設定を初期化
         setupDynamicManifest();
+
+        // メニューの開閉制御
+        function toggleMenu() {
+            const menu = document.getElementById('menuDropdown');
+            menu.classList.toggle('show');
+        }
+        
+        // メニュー外をクリックしたら閉じる
+        document.addEventListener('click', (e) => {
+            const menu = document.getElementById('menuDropdown');
+            const menuContainer = document.querySelector('.menu-container');
+            if (menu && menuContainer && !menuContainer.contains(e.target)) {
+                menu.classList.remove('show');
+            }
+        });
 
         // Service Worker登録（PWA対応）
         if ('serviceWorker' in navigator) {
