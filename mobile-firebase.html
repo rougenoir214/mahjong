@@ -24,6 +24,7 @@
         body { font-family: 'Noto Sans JP', sans-serif; -webkit-font-smoothing: antialiased; }
         * { -webkit-tap-highlight-color: transparent; }
         input, select, button { font-size: 16px !important; }
+        input[type="date"] { box-sizing: border-box; max-width: 100%; }
         .animate-fade { animation: fadeIn 0.5s ease-in; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
@@ -174,11 +175,11 @@
                         </div>
                     </div>
                 </div>
-                <div class="flex gap-1 overflow-x-auto">
-                    <button onclick="switchTab('input')" id="tab-input" class="px-4 py-2 text-sm font-medium bg-white text-gray-800 rounded-t-lg whitespace-nowrap border-b-2 border-cyan-500">入力</button>
-                    <button onclick="switchTab('daily')" id="tab-daily" class="px-4 py-2 text-sm font-medium text-gray-600 rounded-t-lg whitespace-nowrap hover:bg-sky-50">日別</button>
-                    <button onclick="switchTab('players')" id="tab-players" class="px-4 py-2 text-sm font-medium text-gray-600 rounded-t-lg whitespace-nowrap hover:bg-sky-50">統計</button>
-                    <button onclick="switchTab('league')" id="tab-league" class="px-4 py-2 text-sm font-medium text-gray-600 rounded-t-lg whitespace-nowrap hover:bg-sky-50">リーグ戦</button>
+                <div class="flex gap-1">
+                    <button onclick="switchTab('input')" id="tab-input" class="flex-1 py-2 text-sm font-medium bg-white text-gray-800 rounded-t-lg whitespace-nowrap border-b-2 border-cyan-500">入力</button>
+                    <button onclick="switchTab('daily')" id="tab-daily" class="flex-1 py-2 text-sm font-medium text-gray-600 rounded-t-lg whitespace-nowrap hover:bg-sky-50">日別</button>
+                    <button onclick="switchTab('players')" id="tab-players" class="flex-1 py-2 text-sm font-medium text-gray-600 rounded-t-lg whitespace-nowrap hover:bg-sky-50">統計</button>
+                    <button onclick="switchTab('league')" id="tab-league" class="flex-1 py-2 text-sm font-medium text-gray-600 rounded-t-lg whitespace-nowrap hover:bg-sky-50">リーグ戦</button>
                 </div>
             </div>
         </header>
