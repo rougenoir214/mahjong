@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>アイコン生成</title>
+</head>
+<body>
+    <h2>PWAアイコン生成ツール</h2>
+    <canvas id="icon192" width="192" height="192"></canvas>
+    <canvas id="icon512" width="512" height="512"></canvas>
+    <br>
+    <button onclick="downloadIcon(192)">192x192をダウンロード</button>
+    <button onclick="downloadIcon(512)">512x512をダウンロード</button>
+
+    <script>
+        function drawIcon(size) {
+            const canvas = document.getElementById(`icon${size}`);
+            const ctx = canvas.getContext('2d');
+            
+            // 背景グラデーション
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#0891b2');
+            gradient.addColorStop(1, '#14b8a6');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // 麻雀牌
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${size * 0.6}px serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🀄', size / 2, size / 2);
+        }
+
+        function downloadIcon(size) {
+            const canvas = document.getElementById(`icon${size}`);
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `icon-${size}.png`;
+                a.click();
+            });
+        }
+
+        // 初期描画
+        drawIcon(192);
+        drawIcon(512);
+    </script>
+</body>
+</html>
