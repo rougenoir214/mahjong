@@ -7,7 +7,7 @@
     <title>麻雀成績管理</title>
     
     <!-- PWA設定 -->
-    <link rel="manifest" href="./manifest.json">
+    <link rel="manifest" id="manifest-placeholder">
     <meta name="theme-color" content="#0891b2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -2128,6 +2128,49 @@
 
             document.getElementById('leagueResults').innerHTML = html;
         }
+
+        // 動的manifest.json生成（グループID付き）
+        function setupDynamicManifest() {
+            const params = new URLSearchParams(window.location.search);
+            const groupId = params.get('group') || '';
+            const startUrl = groupId ? `./mobile-firebase.html?group=${groupId}` : './mobile-firebase.html';
+            
+            const manifest = {
+                name: "麻雀成績管理",
+                short_name: "麻雀成績",
+                description: "麻雀の成績を記録・管理するアプリ",
+                start_url: startUrl,
+                display: "standalone",
+                background_color: "#ffffff",
+                theme_color: "#0891b2",
+                orientation: "portrait",
+                icons: [
+                    {
+                        src: "icon-192.png",
+                        sizes: "192x192",
+                        type: "image/png",
+                        purpose: "any maskable"
+                    },
+                    {
+                        src: "icon-512.png",
+                        sizes: "512x512",
+                        type: "image/png",
+                        purpose: "any maskable"
+                    }
+                ]
+            };
+            
+            const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+            const manifestURL = URL.createObjectURL(manifestBlob);
+            
+            const manifestLink = document.getElementById('manifest-placeholder');
+            if (manifestLink) {
+                manifestLink.setAttribute('href', manifestURL);
+            }
+        }
+        
+        // PWA設定を初期化
+        setupDynamicManifest();
 
         // Service Worker登録（PWA対応）
         if ('serviceWorker' in navigator) {
