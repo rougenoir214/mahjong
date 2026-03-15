@@ -141,50 +141,51 @@
     <!-- メインアプリ（ログイン後に表示） -->
     <div id="mainApp" style="display: none;">
         <header class="bg-sky-100 border-b border-sky-200 sticky top-0 z-50 shadow-sm">
-            <div class="px-4 py-3 flex items-center justify-between">
-                <h1 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <span class="text-2xl">🀄</span>
-                    <span>麻雀成績</span>
-                </h1>
-                <div class="flex items-center gap-3">
-                    <div id="syncStatus" class="text-xs text-gray-500 flex items-center gap-1">
-                        <span class="pulse text-sm">🔄</span>
-                    </div>
-                    <div class="menu-container">
-                        <button onclick="toggleMenu()" class="p-2 hover:bg-gray-100 rounded-lg transition active:bg-gray-200">
-                            <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
-                            </svg>
-                        </button>
-                        <div id="menuDropdown" class="menu-dropdown">
-                            <div class="menu-item" onclick="exportData(); toggleMenu();">
-                                <span>📥</span> エクスポート
-                            </div>
-                            <div class="menu-item" onclick="document.getElementById('fileInput').click(); toggleMenu();">
-                                <span>📤</span> インポート
-                            </div>
-                            <div class="menu-item" onclick="logout(); toggleMenu();">
-                                <span>🚪</span> ログアウト
-                            </div>
-                            <div class="menu-item danger" onclick="clearAllData(); toggleMenu();">
-                                <span>🗑️</span> 全削除
+            <div class="px-4 py-2">
+                <div class="flex items-center justify-between mb-2">
+                    <h1 class="text-base font-bold text-gray-800 flex items-center gap-1">
+                        <span class="text-xl">🀄</span>
+                        <span>麻雀成績管理</span>
+                    </h1>
+                    <div class="flex items-center gap-2">
+                        <div id="syncStatus" class="text-xs text-gray-500">
+                            <span class="pulse">🔄</span>
+                        </div>
+                        <div class="menu-container">
+                            <button onclick="toggleMenu()" class="p-1.5 hover:bg-sky-200 rounded-lg transition active:bg-sky-300">
+                                <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path>
+                                </svg>
+                            </button>
+                            <div id="menuDropdown" class="menu-dropdown">
+                                <div class="menu-item" onclick="exportData(); toggleMenu();">
+                                    <span>📥</span> エクスポート
+                                </div>
+                                <div class="menu-item" onclick="document.getElementById('fileInput').click(); toggleMenu();">
+                                    <span>📤</span> インポート
+                                </div>
+                                <div class="menu-item" onclick="logout(); toggleMenu();">
+                                    <span>🚪</span> ログアウト
+                                </div>
+                                <div class="menu-item danger" onclick="clearAllData(); toggleMenu();">
+                                    <span>🗑️</span> 全削除
+                                </div>
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="flex gap-1 overflow-x-auto">
+                    <button onclick="switchTab('input')" id="tab-input" class="px-4 py-2 text-sm font-medium bg-white text-gray-800 rounded-t-lg whitespace-nowrap border-b-2 border-cyan-500">入力</button>
+                    <button onclick="switchTab('daily')" id="tab-daily" class="px-4 py-2 text-sm font-medium text-gray-600 rounded-t-lg whitespace-nowrap hover:bg-sky-50">日別</button>
+                    <button onclick="switchTab('players')" id="tab-players" class="px-4 py-2 text-sm font-medium text-gray-600 rounded-t-lg whitespace-nowrap hover:bg-sky-50">統計</button>
+                    <button onclick="switchTab('league')" id="tab-league" class="px-4 py-2 text-sm font-medium text-gray-600 rounded-t-lg whitespace-nowrap hover:bg-sky-50">リーグ戦</button>
                 </div>
             </div>
         </header>
         <input type="file" id="fileInput" accept=".json" style="display:none" onchange="importData(event)">
 
         <div class="px-3 py-4">
-            <div id="stats" class="grid grid-cols-2 gap-2 mb-4"></div>
             <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-4 animate-fade">
-                <div class="flex border-b overflow-x-auto">
-                    <button onclick="switchTab('input')" id="tab-input" class="flex-1 px-3 py-3 text-sm font-medium bg-gradient-to-r from-cyan-500 to-teal-500 text-white whitespace-nowrap">入力</button>
-                    <button onclick="switchTab('daily')" id="tab-daily" class="flex-1 px-3 py-3 text-sm font-medium text-gray-600 whitespace-nowrap">日別</button>
-                    <button onclick="switchTab('players')" id="tab-players" class="flex-1 px-3 py-3 text-sm font-medium text-gray-600 whitespace-nowrap">統計</button>
-                    <button onclick="switchTab('league')" id="tab-league" class="flex-1 px-3 py-3 text-sm font-medium text-gray-600 whitespace-nowrap">🏆 リーグ戦</button>
-                </div>
                 <div id="content-input" class="p-4">
                     <div class="mb-3">
                         <label class="block text-sm font-medium mb-1">日付</label>
@@ -252,6 +253,10 @@
                             <option value="all">通算成績</option>
                         </select>
                     </div>
+                    
+                    <!-- 総半荘数・プレイヤー数 -->
+                    <div id="statsOverview" class="grid grid-cols-2 gap-2 mb-4"></div>
+                    
                     <div id="playerStats"></div>
                 </div>
                 <div id="content-league" class="p-4" style="display:none;">
@@ -1601,14 +1606,18 @@
         // プレイヤー統計表示
         function renderPlayers() {
             const playerStatsElement = document.getElementById('playerStats');
+            const statsOverviewElement = document.getElementById('statsOverview');
             if(!playerStatsElement) return;
             
             try {
                 const stats = {};
+                let totalGames = 0;
+                const uniquePlayers = new Set();
                 
                 // データの存在チェック
                 if(!data || !data.dates || typeof data.dates !== 'object') {
                     playerStatsElement.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">データなし</div>';
+                    if(statsOverviewElement) statsOverviewElement.innerHTML = '';
                     return;
                 }
                 
@@ -1630,11 +1639,13 @@
                     
                     d.games.forEach(g => {
                         if(!g || !Array.isArray(g)) return;
+                        totalGames++;
                     g.forEach((s,i) => {
                         const name = d.players[i];
                         if(!name) return;
                         if(typeof s !== 'number') return;
                         
+                        uniquePlayers.add(name);
                         if(!stats[name]) stats[name] = {name, totalGames:0, totalScore:0, ranks:{1:0,2:0,3:0,4:0}};
                         stats[name].totalGames++;
                         stats[name].totalScore += s;
@@ -1648,7 +1659,22 @@
                 const list = Object.values(stats).sort((a,b) => b.totalScore - a.totalScore);
                 if(!list.length) {
                     playerStatsElement.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">データなし</div>';
+                    if(statsOverviewElement) statsOverviewElement.innerHTML = '';
                     return;
+                }
+                
+                // 総半荘数とプレイヤー数を表示
+                if(statsOverviewElement) {
+                    statsOverviewElement.innerHTML = `
+                        <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-3 border border-blue-200">
+                            <div class="text-xs text-blue-600 font-medium mb-1">総半荘数</div>
+                            <div class="text-2xl font-bold text-blue-800">${totalGames}<span class="text-sm ml-1">半荘</span></div>
+                        </div>
+                        <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-3 border border-purple-200">
+                            <div class="text-xs text-purple-600 font-medium mb-1">プレイヤー数</div>
+                            <div class="text-2xl font-bold text-purple-800">${uniquePlayers.size}<span class="text-sm ml-1">人</span></div>
+                        </div>
+                    `;
                 }
                 
                 let html = '';
