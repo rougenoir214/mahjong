@@ -226,7 +226,24 @@
                         <div id="scoreTotalRemaining" class="text-sm text-gray-600 mt-1"></div>
                     </div>
                     
-                    <button onclick="addGame()" class="w-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white py-3 rounded-lg font-bold mt-3 active:opacity-80">半荘を追加</button>
+                    <!-- 通常モード：半荘追加ボタン -->
+                    <div id="normalAddGameBtn">
+                        <button onclick="addGame()" class="w-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white py-3 rounded-lg font-bold mt-3 active:opacity-80">半荘を追加</button>
+                    </div>
+
+                    <!-- 多人数リーグモード：インライン半荘記録UI -->
+                    <div id="multiInputSection" style="display:none;" class="mt-3 bg-purple-50 rounded-xl p-3 border-2 border-purple-300">
+                        <p class="text-sm font-bold text-purple-800 mb-2">👥 今回参加の4人を選択</p>
+                        <div id="multiInputPlayerChecks" class="grid grid-cols-2 gap-1 mb-2"></div>
+                        <div class="text-xs text-purple-600 mb-3">選択数: <span id="multiInputSelectedCount">0</span>/4人</div>
+                        <div id="multiInputScoreSection" style="display:none;">
+                            <p class="text-sm font-bold text-purple-800 mb-2">📝 スコア入力</p>
+                            <div id="multiInputScoreInputs" class="space-y-2 mb-2"></div>
+                            <div class="text-xs text-gray-500 mb-3">合計: <span id="multiInputScoreTotal" class="font-bold">0</span></div>
+                            <button onclick="addMultiGameFromInput()" class="w-full bg-purple-500 text-white py-3 rounded-lg font-bold active:bg-purple-600">半荘を追加</button>
+                        </div>
+                    </div>
+
                     <div id="gamesList"></div>
                     
                     <!-- プレイヤー管理セクション -->
@@ -249,7 +266,29 @@
                     </button>
                 </div>
                 <div id="content-daily" class="p-4" style="display:none;">
-                    <div id="dailyList"></div>
+                    <!-- 日別モード切り替え -->
+                    <div class="flex gap-2 mb-3">
+                        <button id="dailyModeNormal" onclick="switchDailyMode('normal')"
+                                class="flex-1 py-2 text-sm font-bold rounded-lg bg-cyan-500 text-white">
+                            通常モード
+                        </button>
+                        <button id="dailyModeMulti" onclick="switchDailyMode('multi')"
+                                class="flex-1 py-2 text-sm font-bold rounded-lg bg-gray-200 text-gray-600">
+                            多人数リーグ
+                        </button>
+                    </div>
+                    <!-- 通常モード -->
+                    <div id="dailyNormalSection">
+                        <div id="dailyList"></div>
+                    </div>
+                    <!-- 多人数リーグ -->
+                    <div id="dailyMultiSection" style="display:none;">
+                        <select id="dailyMultiLeagueSelect" onchange="renderDailyMulti()"
+                                class="w-full px-3 py-2 border-2 border-purple-300 rounded-lg mb-3 bg-white text-sm">
+                            <option value="">-- リーグ戦を選択 --</option>
+                        </select>
+                        <div id="dailyMultiList"></div>
+                    </div>
                 </div>
                 <div id="content-players" class="p-4" style="display:none;">
                     <!-- 年選択 -->
@@ -289,20 +328,53 @@
                                    class="w-full px-3 py-2 border-2 border-blue-300 rounded-lg text-sm">
                         </div>
                         
-                        <label class="block text-sm font-medium text-blue-800 mb-2">参加プレイヤー（4人）</label>
-                        <div class="grid grid-cols-2 gap-2 mb-3">
-                            <select id="newLeaguePlayer1" class="px-3 py-2 border-2 border-blue-300 rounded-lg text-sm">
-                                <option value="">プレイヤー1</option>
-                            </select>
-                            <select id="newLeaguePlayer2" class="px-3 py-2 border-2 border-blue-300 rounded-lg text-sm">
-                                <option value="">プレイヤー2</option>
-                            </select>
-                            <select id="newLeaguePlayer3" class="px-3 py-2 border-2 border-blue-300 rounded-lg text-sm">
-                                <option value="">プレイヤー3</option>
-                            </select>
-                            <select id="newLeaguePlayer4" class="px-3 py-2 border-2 border-blue-300 rounded-lg text-sm">
-                                <option value="">プレイヤー4</option>
-                            </select>
+                        <!-- モード選択 -->
+                        <div class="mb-3 bg-white rounded-lg p-3 border border-blue-200">
+                            <label class="block text-sm font-medium text-blue-800 mb-2">モード選択</label>
+                            <div class="flex gap-2">
+                                <label class="flex-1 flex items-center gap-2 p-2 border-2 border-blue-300 rounded-lg cursor-pointer hover:bg-blue-50">
+                                    <input type="radio" name="leagueMode" value="fixed" checked onchange="toggleLeagueMode()" class="w-4 h-4">
+                                    <div>
+                                        <div class="text-sm font-bold">通常モード</div>
+                                        <div class="text-xs text-gray-600">4人固定</div>
+                                    </div>
+                                </label>
+                                <label class="flex-1 flex items-center gap-2 p-2 border-2 border-blue-300 rounded-lg cursor-pointer hover:bg-blue-50">
+                                    <input type="radio" name="leagueMode" value="multi" onchange="toggleLeagueMode()" class="w-4 h-4">
+                                    <div>
+                                        <div class="text-sm font-bold">多人数モード</div>
+                                        <div class="text-xs text-gray-600">5人以上</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- 通常モード: 4人固定選択 -->
+                        <div id="fixedModeSection">
+                            <label class="block text-sm font-medium text-blue-800 mb-2">参加プレイヤー（4人）</label>
+                            <div class="grid grid-cols-2 gap-2 mb-3">
+                                <select id="newLeaguePlayer1" class="px-3 py-2 border-2 border-blue-300 rounded-lg text-sm">
+                                    <option value="">プレイヤー1</option>
+                                </select>
+                                <select id="newLeaguePlayer2" class="px-3 py-2 border-2 border-blue-300 rounded-lg text-sm">
+                                    <option value="">プレイヤー2</option>
+                                </select>
+                                <select id="newLeaguePlayer3" class="px-3 py-2 border-2 border-blue-300 rounded-lg text-sm">
+                                    <option value="">プレイヤー3</option>
+                                </select>
+                                <select id="newLeaguePlayer4" class="px-3 py-2 border-2 border-blue-300 rounded-lg text-sm">
+                                    <option value="">プレイヤー4</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <!-- 多人数モード: メンバー選択 -->
+                        <div id="multiModeSection" style="display:none;">
+                            <label class="block text-sm font-medium text-blue-800 mb-2">メンバー選択（5人以上）</label>
+                            <div id="multiPlayerList" class="bg-white rounded-lg p-3 border border-blue-200 mb-3 max-h-60 overflow-y-auto">
+                                <!-- チェックボックスリストが動的に生成される -->
+                            </div>
+                            <div class="text-xs text-blue-600">選択人数: <span id="selectedMemberCount">0</span>人</div>
                         </div>
                         
                         <div class="flex gap-2">
@@ -320,6 +392,51 @@
                     
                     <!-- 選択されたリーグ戦の成績表示 -->
                     <div id="leagueResults"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 多人数リーグ メンバー追加モーダル -->
+        <div id="addMemberModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end justify-center" style="display:none!important;">
+            <div class="bg-white rounded-t-2xl w-full max-w-lg p-4 pb-8">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-lg font-bold text-purple-800">👤 メンバーを追加</h3>
+                    <button onclick="hideAddMemberForm()" class="text-gray-400 text-2xl leading-none">×</button>
+                </div>
+                <p class="text-sm text-gray-500 mb-3" id="addMemberLeagueName"></p>
+                <p class="text-xs text-gray-400 mb-2">現在のメンバー: <span id="currentMemberList" class="text-purple-700 font-medium"></span></p>
+                <label class="block text-sm font-bold text-purple-700 mb-2">追加するプレイヤーを選択</label>
+                <div id="addMemberPlayerList" class="bg-purple-50 rounded-lg p-3 border border-purple-200 max-h-60 overflow-y-auto mb-4"></div>
+                <button onclick="saveAddMember()" class="w-full bg-purple-500 text-white py-3 rounded-lg font-bold active:bg-purple-600">
+                    💾 追加する
+                </button>
+            </div>
+        </div>
+
+        <!-- 多人数リーグ 半荘記録モーダル -->
+        <div id="multiGameModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end justify-center" style="display:none!important;">
+            <div class="bg-white rounded-t-2xl w-full max-w-lg p-4 pb-8 max-h-screen overflow-y-auto">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-lg font-bold text-purple-800">➕ 半荘を記録</h3>
+                    <button onclick="hideMultiGameForm()" class="text-gray-400 text-2xl leading-none">×</button>
+                </div>
+                <p class="text-sm text-gray-600 mb-3" id="multiGameLeagueName"></p>
+
+                <!-- 今回の4人選択 -->
+                <div class="mb-4">
+                    <label class="block text-sm font-bold text-purple-700 mb-2">今回参加の4人を選択</label>
+                    <div id="multiGamePlayerChecks" class="bg-purple-50 rounded-lg p-3 border border-purple-200 grid grid-cols-2 gap-1"></div>
+                    <div class="text-xs text-purple-600 mt-1">選択数: <span id="multiGameSelectedCount">0</span>/4人</div>
+                </div>
+
+                <!-- スコア入力 -->
+                <div id="multiGameScoreSection" style="display:none;">
+                    <label class="block text-sm font-bold text-purple-700 mb-2">スコア入力</label>
+                    <div id="multiGameScoreInputs" class="space-y-2 mb-3"></div>
+                    <div class="text-xs text-gray-500 mb-3">合計: <span id="multiGameScoreTotal" class="font-bold">0</span></div>
+                    <button onclick="saveMultiGame()" class="w-full bg-purple-500 text-white py-3 rounded-lg font-bold active:bg-purple-600">
+                        💾 この半荘を保存
+                    </button>
                 </div>
             </div>
         </div>
@@ -1154,40 +1271,6 @@
             e.target.value = '';
         }
 
-        // データから利用可能な年のリストを取得
-        function getAvailableYears() {
-            const years = new Set();
-            if(data && data.dates) {
-                Object.keys(data.dates).forEach(dateStr => {
-                    const year = new Date(dateStr).getFullYear();
-                    if(!isNaN(year)) {
-                        years.add(year);
-                    }
-                });
-            }
-            return Array.from(years).sort((a, b) => b - a); // 降順
-        }
-
-        // 年選択ドロップダウンを更新
-        function updateYearSelects() {
-            const years = getAvailableYears();
-            const currentYear = new Date().getFullYear();
-            
-            // プレイヤー統計の年選択
-            const playerYearSelect = document.getElementById('playerYearSelect');
-            if(playerYearSelect) {
-                let html = '<option value="all">通算</option>';
-                years.forEach(year => {
-                    html += `<option value="${year}">${year}年</option>`;
-                });
-                playerYearSelect.innerHTML = html;
-                // デフォルトは今年（なければ通算）
-                if(years.includes(currentYear)) {
-                    playerYearSelect.value = currentYear.toString();
-                }
-            }
-        }
-
         // データから年のリストを取得
         function getAvailableYears() {
             const years = new Set();
@@ -1534,6 +1617,172 @@
             }
         }
 
+        // ===== 日別タブ モード切り替え =====
+        let currentDailyMode = 'normal';
+
+        function switchDailyMode(mode) {
+            currentDailyMode = mode;
+            const isMulti = mode === 'multi';
+
+            document.getElementById('dailyModeNormal').className =
+                'flex-1 py-2 text-sm font-bold rounded-lg ' + (isMulti ? 'bg-gray-200 text-gray-600' : 'bg-cyan-500 text-white');
+            document.getElementById('dailyModeMulti').className =
+                'flex-1 py-2 text-sm font-bold rounded-lg ' + (isMulti ? 'bg-purple-500 text-white' : 'bg-gray-200 text-gray-600');
+
+            document.getElementById('dailyNormalSection').style.display = isMulti ? 'none' : '';
+            document.getElementById('dailyMultiSection').style.display = isMulti ? '' : 'none';
+
+            if(isMulti) {
+                updateDailyMultiLeagueSelect();
+                renderDailyMulti();
+            }
+        }
+
+        // 多人数リーグのセレクトを更新
+        function updateDailyMultiLeagueSelect() {
+            const sel = document.getElementById('dailyMultiLeagueSelect');
+            if(!sel) return;
+            const multiLeagues = Object.entries(leagues).filter(([,l]) => l.mode === 'multi');
+            sel.innerHTML = '<option value="">-- リーグ戦を選択 --</option>' +
+                multiLeagues.map(([id, l]) => `<option value="${id}">${escapeHtml(l.name)}</option>`).join('');
+            // 1つしかなければ自動選択
+            if(multiLeagues.length === 1) sel.value = multiLeagues[0][0];
+        }
+
+        // 多人数リーグ 日別一覧を表示
+        function renderDailyMulti() {
+            const sel = document.getElementById('dailyMultiLeagueSelect');
+            const container = document.getElementById('dailyMultiList');
+            if(!sel || !container) return;
+
+            const leagueId = sel.value;
+            if(!leagueId) {
+                container.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">リーグ戦を選択してください</div>';
+                return;
+            }
+
+            const league = leagues[leagueId];
+            const games = Array.isArray(league.games) ? league.games : Object.values(league.games || {});
+
+            if(games.length === 0) {
+                container.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">記録がありません</div>';
+                return;
+            }
+
+            // 日付ごとにグループ化
+            const byDate = {};
+            games.forEach((game, idx) => {
+                const d = game.date || '不明';
+                if(!byDate[d]) byDate[d] = [];
+                byDate[d].push({ ...game, globalIndex: idx + 1 });
+            });
+
+            const sortedDates = Object.keys(byDate).sort((a, b) => b.localeCompare(a));
+            let html = '';
+
+            sortedDates.forEach(date => {
+                const dayGames = byDate[date];
+
+                // 当日の全員累積スコアを計算
+                const dayTotals = {};
+                dayGames.forEach(game => {
+                    (game.players || []).forEach((p, i) => {
+                        if(!dayTotals[p]) dayTotals[p] = { score: 0, games: 0 };
+                        dayTotals[p].score += (game.scores || [])[i] || 0;
+                        dayTotals[p].games++;
+                    });
+                });
+                const dayRanking = Object.entries(dayTotals)
+                    .sort((a, b) => b[1].score - a[1].score);
+
+                html += `
+                <div class="bg-purple-50 rounded-xl border border-purple-200 mb-4 overflow-hidden">
+                    <!-- 日付ヘッダー -->
+                    <div class="bg-purple-500 text-white px-3 py-2 flex items-center justify-between">
+                        <span class="font-bold text-sm">${new Date(date + 'T00:00:00').toLocaleDateString('ja-JP',{month:'long',day:'numeric'})}</span>
+                        <span class="text-xs bg-purple-300 bg-opacity-50 px-2 py-0.5 rounded-full">${dayGames.length}半荘</span>
+                    </div>
+
+                    <!-- 半荘一覧 -->
+                    <div class="p-3">
+                        <p class="text-xs font-bold text-purple-700 mb-2">📋 半荘一覧</p>
+                        <div class="overflow-x-auto mb-3">
+                            <table class="text-xs border-collapse" style="min-width:100%">
+                                <thead>
+                                    <tr class="bg-purple-100 text-purple-800">
+                                        <th class="py-2 px-2 text-left font-bold whitespace-nowrap border border-purple-200 sticky left-0 bg-purple-100">半荘</th>
+                                        ${Object.keys(dayTotals).map(p => `
+                                            <th class="py-2 px-2 text-center font-bold whitespace-nowrap border border-purple-200">${escapeHtml(p)}</th>
+                                        `).join('')}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${dayGames.map((game, i) => {
+                                        // このゲームのプレイヤー→スコアのマップ
+                                        const scoreMap = {};
+                                        (game.players || []).forEach((p, idx) => {
+                                            scoreMap[p] = (game.scores || [])[idx];
+                                        });
+                                        return `
+                                        <tr class="${i % 2 === 0 ? 'bg-white' : 'bg-purple-50'}">
+                                            <td class="py-2 px-2 font-medium text-gray-500 border border-purple-100 sticky left-0 ${i % 2 === 0 ? 'bg-white' : 'bg-purple-50'}">
+                                                ${i+1}
+                                            </td>
+                                            ${Object.keys(dayTotals).map(p => {
+                                                const s = scoreMap[p];
+                                                if(s === undefined) return `<td class="py-2 px-2 text-center text-gray-300 border border-purple-100">-</td>`;
+                                                return `<td class="py-2 px-2 text-center font-bold border border-purple-100 ${s > 0 ? 'text-blue-600' : s < 0 ? 'text-red-500' : 'text-gray-500'}">
+                                                    ${s > 0 ? '+' : ''}${s}
+                                                </td>`;
+                                            }).join('')}
+                                        </tr>`;
+                                    }).join('')}
+                                    <!-- 合計行 -->
+                                    <tr class="bg-purple-200 font-bold border-t-2 border-purple-400">
+                                        <td class="py-2 px-2 text-purple-800 border border-purple-300 sticky left-0 bg-purple-200">合計</td>
+                                        ${Object.entries(dayTotals).map(([p, info]) => `
+                                            <td class="py-2 px-2 text-center border border-purple-300 ${info.score > 0 ? 'text-blue-700' : info.score < 0 ? 'text-red-600' : 'text-gray-600'}">
+                                                ${info.score > 0 ? '+' : ''}${info.score}
+                                            </td>
+                                        `).join('')}
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                `;
+
+                html += `<p class="text-xs font-bold text-purple-700 mb-2">🏆 当日累積ランキング</p>
+                        <div class="bg-white rounded-lg border border-purple-100 overflow-hidden">
+                            <table class="w-full text-xs">
+                                <thead>
+                                    <tr class="bg-purple-100 text-purple-800">
+                                        <th class="py-2 px-2 text-left font-bold">順位</th>
+                                        <th class="py-2 px-2 text-left font-bold">プレイヤー</th>
+                                        <th class="py-2 px-2 text-center font-bold">参加</th>
+                                        <th class="py-2 px-2 text-right font-bold">合計</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${dayRanking.map(([p, info], i) => `
+                                        <tr class="border-t border-purple-50 ${i === 0 ? 'bg-yellow-50' : ''}">
+                                            <td class="py-2 px-2">${['🥇','🥈','🥉'][i] || (i+1)+'位'}</td>
+                                            <td class="py-2 px-2 font-medium">${escapeHtml(p)}</td>
+                                            <td class="py-2 px-2 text-center text-gray-400">${info.games}半荘</td>
+                                            <td class="py-2 px-2 text-right font-bold ${info.score >= 0 ? 'text-blue-600' : 'text-red-500'}">
+                                                ${info.score > 0 ? '+' : ''}${info.score}
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>`;
+            });
+
+            container.innerHTML = html;
+        }
+
         // 日別データ表示
         function renderDaily() {
             const dailyListElement = document.getElementById('dailyList');
@@ -1613,59 +1862,86 @@
         function renderPlayers() {
             const playerStatsElement = document.getElementById('playerStats');
             const statsOverviewElement = document.getElementById('statsOverview');
-            if(!playerStatsElement) return;
+            if(!playerStatsElement) {
+                console.error('playerStats要素が見つかりません');
+                return;
+            }
+
+            // データがまだ読み込まれていない場合
+            if(!data) {
+                playerStatsElement.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">データ読み込み中...</div>';
+                return;
+            }
             
             try {
                 const stats = {};
                 let totalGames = 0;
                 const uniquePlayers = new Set();
-                
-                // データの存在チェック
-                if(!data || !data.dates || typeof data.dates !== 'object') {
-                    playerStatsElement.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">データなし</div>';
-                    if(statsOverviewElement) statsOverviewElement.innerHTML = '';
-                    return;
-                }
-                
+
                 // 選択された年を取得
                 const yearSelect = document.getElementById('playerYearSelect');
                 const selectedYear = yearSelect ? yearSelect.value : 'all';
-                
-                // 年でフィルタリング
-                Object.entries(data.dates).forEach(([dateStr, d]) => {
-                    if(!d || typeof d !== 'object') return;
-                    if(!d.games || !Array.isArray(d.games)) return;
-                    if(!d.players || !Array.isArray(d.players)) return;
-                    
-                    // 年フィルタ
-                    if(selectedYear !== 'all') {
-                        const year = new Date(dateStr).getFullYear();
-                        if(year.toString() !== selectedYear) return;
-                    }
-                    
-                    d.games.forEach(g => {
-                        if(!g || !Array.isArray(g)) return;
-                        totalGames++;
-                    g.forEach((s,i) => {
-                        const name = d.players[i];
-                        if(!name) return;
-                        if(typeof s !== 'number') return;
-                        
-                        uniquePlayers.add(name);
-                        if(!stats[name]) stats[name] = {name, totalGames:0, totalScore:0, ranks:{1:0,2:0,3:0,4:0}};
-                        stats[name].totalGames++;
-                        stats[name].totalScore += s;
-                        const sorted = [...g].sort((a,b)=>b-a);
-                        const rank = sorted.indexOf(s) + 1;
-                        stats[name].ranks[rank]++;
+
+                // ── 通常モードの集計 ──
+                if(data && data.dates && typeof data.dates === 'object') {
+                    Object.entries(data.dates).forEach(([dateStr, d]) => {
+                        if(!d || !Array.isArray(d.games) || !Array.isArray(d.players)) return;
+                        if(selectedYear !== 'all') {
+                            const year = new Date(dateStr).getFullYear();
+                            if(year.toString() !== selectedYear) return;
+                        }
+                        d.games.forEach(g => {
+                            if(!g || !Array.isArray(g)) return;
+                            totalGames++;
+                            g.forEach((s, i) => {
+                                const name = d.players[i];
+                                if(!name || typeof s !== 'number') return;
+                                uniquePlayers.add(name);
+                                if(!stats[name]) stats[name] = {name, totalGames:0, totalScore:0, ranks:{1:0,2:0,3:0,4:0}};
+                                stats[name].totalGames++;
+                                stats[name].totalScore += s;
+                                const rank = [...g].sort((a,b)=>b-a).indexOf(s) + 1;
+                                stats[name].ranks[rank]++;
+                            });
+                        });
                     });
+                }
+
+                // ── 多人数リーグの集計 ──
+                if(leagues && typeof leagues === 'object') {
+                    Object.values(leagues).forEach(league => {
+                        if(league.mode !== 'multi') return;
+                        const games = Array.isArray(league.games)
+                            ? league.games : Object.values(league.games || {});
+                        games.forEach(game => {
+                            const players = game.players || [];
+                            const scores = game.scores || [];
+                            if(players.length === 0) return;
+                            // 年フィルタ
+                            if(selectedYear !== 'all' && game.date) {
+                                const year = new Date(game.date).getFullYear();
+                                if(year.toString() !== selectedYear) return;
+                            }
+                            totalGames++;
+                            const sorted4 = [...scores].sort((a,b)=>b-a);
+                            players.forEach((name, i) => {
+                                if(!name || typeof scores[i] !== 'number') return;
+                                uniquePlayers.add(name);
+                                if(!stats[name]) stats[name] = {name, totalGames:0, totalScore:0, ranks:{1:0,2:0,3:0,4:0}};
+                                stats[name].totalGames++;
+                                stats[name].totalScore += scores[i];
+                                const rank = sorted4.indexOf(scores[i]) + 1;
+                                stats[name].ranks[rank]++;
+                            });
+                        });
                     });
-                });
-                
+                }
+
+                // データが何もない場合
                 const list = Object.values(stats).sort((a,b) => b.totalScore - a.totalScore);
                 if(!list.length) {
-                    playerStatsElement.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">データなし</div>';
                     if(statsOverviewElement) statsOverviewElement.innerHTML = '';
+                    playerStatsElement.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">🀄 対局記録がありません<br><span class="text-xs mt-1 block">入力タブから半荘を記録してください</span></div>';
                     return;
                 }
                 
@@ -1724,7 +2000,7 @@
                 playerStatsElement.innerHTML = html;
             } catch(error) {
                 console.error('プレイヤー統計表示エラー:', error);
-                playerStatsElement.innerHTML = '<div class="text-center py-8 text-red-400 text-sm">表示エラーが発生しました</div>';
+                playerStatsElement.innerHTML = `<div class="text-center py-8 text-red-400 text-sm">表示エラー: ${error.message}</div>`;
             }
         }
 
@@ -1749,12 +2025,259 @@
             document.getElementById('leagueCreateForm').style.display = 'block';
             document.getElementById('leagueName').value = '';
             updateLeaguePlayerSelects();
+            updateMultiPlayerList(); // 多人数モード用のリストを更新
             document.getElementById('leagueName').focus();
         }
 
         // リーグ戦作成フォームを非表示
         function hideLeagueCreateForm() {
             document.getElementById('leagueCreateForm').style.display = 'none';
+        }
+        
+        // リーグ戦モードを切り替え
+        function toggleLeagueMode() {
+            const mode = document.querySelector('input[name="leagueMode"]:checked').value;
+            const fixedSection = document.getElementById('fixedModeSection');
+            const multiSection = document.getElementById('multiModeSection');
+            
+            if(mode === 'fixed') {
+                fixedSection.style.display = 'block';
+                multiSection.style.display = 'none';
+            } else {
+                fixedSection.style.display = 'none';
+                multiSection.style.display = 'block';
+                updateMultiPlayerList();
+            }
+        }
+        
+        // 多人数モードのメンバーリストを更新
+        function updateMultiPlayerList() {
+            const listElement = document.getElementById('multiPlayerList');
+            if(!listElement) return;
+            
+            if(!allPlayers || allPlayers.length === 0) {
+                listElement.innerHTML = '<div class="text-center py-4 text-gray-400 text-sm">登録プレイヤーなし</div>';
+                return;
+            }
+            
+            let html = '';
+            allPlayers.forEach((player, idx) => {
+                html += `
+                    <label class="flex items-center gap-2 p-2 hover:bg-blue-50 rounded cursor-pointer">
+                        <input type="checkbox" 
+                               class="league-member-checkbox w-4 h-4" 
+                               value="${escapeHtml(player)}" 
+                               onchange="updateSelectedMemberCount()">
+                        <span class="text-sm">${escapeHtml(player)}</span>
+                    </label>
+                `;
+            });
+            listElement.innerHTML = html;
+            updateSelectedMemberCount();
+        }
+        
+        // 選択メンバー数を更新
+        function updateSelectedMemberCount() {
+            const checkboxes = document.querySelectorAll('.league-member-checkbox:checked');
+            const countElement = document.getElementById('selectedMemberCount');
+            if(countElement) {
+                countElement.textContent = checkboxes.length;
+            }
+        }
+
+        // ===== 多人数リーグ メンバー追加 =====
+
+        let currentAddMemberLeagueId = null;
+
+        function showAddMemberForm(leagueId) {
+            currentAddMemberLeagueId = leagueId;
+            const league = leagues[leagueId];
+            if(!league) return;
+
+            document.getElementById('addMemberLeagueName').textContent = '🏆 ' + league.name;
+            document.getElementById('currentMemberList').textContent = (league.members || []).join('、');
+
+            // 現在未登録のプレイヤーだけ選択肢に出す
+            const currentMembers = new Set(league.members || []);
+            const candidates = allPlayers.filter(p => !currentMembers.has(p));
+
+            const list = document.getElementById('addMemberPlayerList');
+            if(candidates.length === 0) {
+                list.innerHTML = '<p class="text-sm text-gray-400 text-center py-4">追加できるプレイヤーがいません<br><span class="text-xs">入力タブからプレイヤーを先に登録してください</span></p>';
+            } else {
+                list.innerHTML = candidates.map(p => `
+                    <label class="flex items-center gap-2 p-2 bg-white rounded-lg border border-purple-100 mb-1 cursor-pointer hover:bg-purple-50">
+                        <input type="checkbox" class="add-member-check w-4 h-4 accent-purple-500" value="${escapeHtml(p)}">
+                        <span class="text-sm">${escapeHtml(p)}</span>
+                    </label>
+                `).join('');
+            }
+
+            const modal = document.getElementById('addMemberModal');
+            modal.style.removeProperty('display');
+            modal.style.display = 'flex';
+        }
+
+        function hideAddMemberForm() {
+            document.getElementById('addMemberModal').style.display = 'none';
+            currentAddMemberLeagueId = null;
+        }
+
+        function saveAddMember() {
+            if(!currentAddMemberLeagueId) return;
+            const checked = Array.from(document.querySelectorAll('.add-member-check:checked'));
+            if(checked.length === 0) {
+                alert('追加するプレイヤーを選択してください');
+                return;
+            }
+
+            const league = leagues[currentAddMemberLeagueId];
+            const newMembers = [...(league.members || []), ...checked.map(cb => cb.value)];
+
+            database.ref(`groups/${groupId}/leagues/${currentAddMemberLeagueId}/members`).set(newMembers)
+                .then(() => {
+                    leagues[currentAddMemberLeagueId].members = newMembers;
+                    hideAddMemberForm();
+                    renderLeagues();
+                    // 成績表示中なら更新
+                    if(selectedLeagueId === currentAddMemberLeagueId) {
+                        calculateLeagueById(currentAddMemberLeagueId);
+                    }
+                    showNotification('✅ ' + checked.map(cb => cb.value).join('・') + ' を追加しました');
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('保存に失敗しました');
+                });
+        }
+
+        // ===== 多人数リーグ 半荘記録 =====
+
+        let currentMultiLeagueId = null;
+
+        // 半荘記録モーダルを開く
+        function showMultiGameForm(leagueId) {
+            currentMultiLeagueId = leagueId;
+            const league = leagues[leagueId];
+            if(!league) return;
+
+            document.getElementById('multiGameLeagueName').textContent = '🏆 ' + league.name;
+
+            // メンバーのチェックボックスを生成
+            const checks = document.getElementById('multiGamePlayerChecks');
+            checks.innerHTML = (league.members || []).map(p => `
+                <label class="flex items-center gap-2 p-2 bg-white rounded-lg border cursor-pointer">
+                    <input type="checkbox" class="multi-game-player w-4 h-4 accent-purple-500"
+                           value="${escapeHtml(p)}" onchange="onMultiPlayerCheck()">
+                    <span class="text-sm">${escapeHtml(p)}</span>
+                </label>
+            `).join('');
+
+            document.getElementById('multiGameSelectedCount').textContent = '0';
+            document.getElementById('multiGameScoreSection').style.display = 'none';
+            document.getElementById('multiGameScoreInputs').innerHTML = '';
+
+            const modal = document.getElementById('multiGameModal');
+            modal.style.removeProperty('display');
+            modal.style.display = 'flex';
+        }
+
+        // モーダルを閉じる
+        function hideMultiGameForm() {
+            document.getElementById('multiGameModal').style.display = 'none';
+            currentMultiLeagueId = null;
+        }
+
+        // チェックボックス変更時：4人ちょうどになったらスコア入力欄を表示
+        function onMultiPlayerCheck() {
+            const checked = Array.from(document.querySelectorAll('.multi-game-player:checked'));
+            document.getElementById('multiGameSelectedCount').textContent = checked.length;
+
+            // 4人超えたら最後のチェックを外す
+            if(checked.length > 4) {
+                checked[checked.length - 1].checked = false;
+                document.getElementById('multiGameSelectedCount').textContent = '4';
+                return;
+            }
+
+            if(checked.length === 4) {
+                // スコア入力欄を生成
+                const section = document.getElementById('multiGameScoreSection');
+                const inputs = document.getElementById('multiGameScoreInputs');
+                inputs.innerHTML = checked.map(cb => `
+                    <div class="flex items-center gap-2">
+                        <span class="w-20 text-sm font-medium text-gray-700">${escapeHtml(cb.value)}</span>
+                        <input type="number" class="multi-game-score flex-1 px-3 py-2 border-2 border-purple-300 rounded-lg text-sm"
+                               data-player="${escapeHtml(cb.value)}" placeholder="スコア"
+                               oninput="updateMultiScoreTotal()">
+                    </div>
+                `).join('');
+                document.getElementById('multiGameScoreTotal').textContent = '0';
+                section.style.display = 'block';
+            } else {
+                document.getElementById('multiGameScoreSection').style.display = 'none';
+            }
+        }
+
+        // 合計スコアをリアルタイム表示
+        function updateMultiScoreTotal() {
+            const inputs = document.querySelectorAll('.multi-game-score');
+            const total = Array.from(inputs).reduce((sum, el) => sum + (parseFloat(el.value) || 0), 0);
+            document.getElementById('multiGameScoreTotal').textContent = total;
+        }
+
+        // 半荘を保存
+        function saveMultiGame() {
+            if(!currentMultiLeagueId) return;
+
+            const inputs = document.querySelectorAll('.multi-game-score');
+            const players = [];
+            const scores = [];
+            let hasEmpty = false;
+
+            inputs.forEach(el => {
+                if(el.value === '') { hasEmpty = true; return; }
+                players.push(el.dataset.player);
+                scores.push(parseFloat(el.value));
+            });
+
+            if(hasEmpty || players.length !== 4) {
+                alert('4人全員のスコアを入力してください');
+                return;
+            }
+
+            const total = scores.reduce((a, b) => a + b, 0);
+            if(Math.abs(total) > 0.5) {
+                if(!confirm(`スコアの合計が ${total} です。\n通常は0になります。このまま保存しますか？`)) return;
+            }
+
+            const league = leagues[currentMultiLeagueId];
+            const games = Array.isArray(league.games) ? league.games : Object.values(league.games || {});
+
+            const newGame = {
+                players: players,
+                scores: scores,
+                date: new Date().toISOString().slice(0, 10),
+                createdAt: Date.now()
+            };
+
+            games.push(newGame);
+
+            database.ref(`groups/${groupId}/leagues/${currentMultiLeagueId}/games`).set(games)
+                .then(() => {
+                    leagues[currentMultiLeagueId].games = games;
+                    hideMultiGameForm();
+                    renderLeagues();
+                    // 選択中のリーグなら成績も更新
+                    if(selectedLeagueId === currentMultiLeagueId) {
+                        calculateLeagueById(currentMultiLeagueId);
+                    }
+                    showNotification('✅ 半荘を記録しました（' + players.join('・') + '）');
+                })
+                .catch(err => {
+                    console.error('半荘保存エラー:', err);
+                    alert('保存に失敗しました');
+                });
         }
 
         // リーグ戦作成用のプレイヤー選択肢を更新
@@ -1779,9 +2302,24 @@
             let html = '<option value="">-- リーグ戦を選択 --</option>';
             
             if(leagues && Object.keys(leagues).length > 0) {
-                Object.entries(leagues).forEach(([leagueId, league]) => {
-                    html += `<option value="${leagueId}">${escapeHtml(league.name)}</option>`;
-                });
+                // 通常モード
+                const normalLeagues = Object.entries(leagues).filter(([,l]) => l.mode !== 'multi');
+                if(normalLeagues.length > 0) {
+                    html += '<optgroup label="通常モード">';
+                    normalLeagues.forEach(([leagueId, league]) => {
+                        html += `<option value="${leagueId}">${escapeHtml(league.name)}</option>`;
+                    });
+                    html += '</optgroup>';
+                }
+                // 多人数モード
+                const multiLeagues = Object.entries(leagues).filter(([,l]) => l.mode === 'multi');
+                if(multiLeagues.length > 0) {
+                    html += '<optgroup label="多人数モード">';
+                    multiLeagues.forEach(([leagueId, league]) => {
+                        html += `<option value="${leagueId}" data-multi="true">${escapeHtml(league.name)}</option>`;
+                    });
+                    html += '</optgroup>';
+                }
             }
             
             select.innerHTML = html;
@@ -1790,34 +2328,147 @@
         // リーグ戦メンバーを入力欄に適用
         function applyLeagueMembers() {
             const select = document.getElementById('leagueQuickSelect');
-            if(!select || !select.value) return;
-            
-            const leagueId = select.value;
-            const league = leagues[leagueId];
-            
-            if(!league || !league.players || league.players.length !== 4) {
-                alert('リーグ戦データが見つかりません');
+            if(!select || !select.value) {
+                // 選択解除 → 通常UIに戻す
+                showNormalInputUI();
                 return;
             }
             
-            // データを取得
-            const d = getData();
+            const leagueId = select.value;
+            const league = leagues[leagueId];
+            if(!league) { showNormalInputUI(); return; }
             
-            // 4人麻雀に設定
-            const gameTypeSelect = document.getElementById('gameType');
-            if(gameTypeSelect && gameTypeSelect.value !== '4') {
-                gameTypeSelect.value = '4';
-                gameTypeChanged();
+            if(league.mode === 'multi') {
+                // 多人数モード → インラインUIを表示
+                showMultiInputUI(leagueId, league);
+            } else {
+                // 通常モード → 4人を自動設定
+                showNormalInputUI();
+                if(!league.players || league.players.length !== 4) {
+                    alert('リーグ戦データが見つかりません');
+                    return;
+                }
+                const d = getData();
+                const gameTypeSelect = document.getElementById('gameType');
+                if(gameTypeSelect && gameTypeSelect.value !== '4') {
+                    gameTypeSelect.value = '4';
+                    gameTypeChanged();
+                }
+                d.players = [...league.players];
+                render();
+                showNotification(`🏆 リーグ戦「${league.name}」のメンバーを設定しました`);
             }
-            
-            // プレイヤーを設定
-            d.players = [...league.players];
-            
-            // 画面を更新
-            render();
-            
-            // 通知
-            showNotification(`🏆 リーグ戦「${league.name}」のメンバーを設定しました`);
+        }
+
+        // 通常入力UIに切り替え
+        function showNormalInputUI() {
+            document.getElementById('playerSelectors').style.display = '';
+            document.getElementById('scoreInputs').style.display = '';
+            document.getElementById('scoreTotal').style.display = '';
+            document.getElementById('normalAddGameBtn').style.display = '';
+            document.getElementById('multiInputSection').style.display = 'none';
+        }
+
+        // 多人数リーグ インラインUIを表示
+        function showMultiInputUI(leagueId, league) {
+            document.getElementById('playerSelectors').style.display = 'none';
+            document.getElementById('scoreInputs').style.display = 'none';
+            document.getElementById('scoreTotal').style.display = 'none';
+            document.getElementById('normalAddGameBtn').style.display = 'none';
+
+            const section = document.getElementById('multiInputSection');
+            section.style.display = 'block';
+            section.dataset.leagueId = leagueId;
+
+            // メンバーのチェックボックスを生成
+            const checks = document.getElementById('multiInputPlayerChecks');
+            checks.innerHTML = (league.members || []).map(p => `
+                <label class="flex items-center gap-2 p-2 bg-white rounded-lg border cursor-pointer text-sm">
+                    <input type="checkbox" class="multi-input-player w-4 h-4 accent-purple-500"
+                           value="${escapeHtml(p)}" onchange="onMultiInputPlayerCheck()">
+                    <span>${escapeHtml(p)}</span>
+                </label>
+            `).join('');
+
+            document.getElementById('multiInputSelectedCount').textContent = '0';
+            document.getElementById('multiInputScoreSection').style.display = 'none';
+        }
+
+        // 入力タブ：4人選択チェック
+        function onMultiInputPlayerCheck() {
+            const checked = Array.from(document.querySelectorAll('.multi-input-player:checked'));
+            if(checked.length > 4) {
+                checked[checked.length - 1].checked = false;
+                return;
+            }
+            document.getElementById('multiInputSelectedCount').textContent = checked.length;
+
+            if(checked.length === 4) {
+                const inputs = document.getElementById('multiInputScoreInputs');
+                inputs.innerHTML = checked.map(cb => `
+                    <div class="flex items-center gap-2">
+                        <span class="w-20 text-sm font-medium">${escapeHtml(cb.value)}</span>
+                        <input type="number" class="multi-input-score flex-1 px-3 py-2 border-2 border-purple-300 rounded-lg text-sm"
+                               data-player="${escapeHtml(cb.value)}" placeholder="スコア"
+                               oninput="updateMultiInputTotal()">
+                    </div>
+                `).join('');
+                document.getElementById('multiInputScoreTotal').textContent = '0';
+                document.getElementById('multiInputScoreSection').style.display = 'block';
+            } else {
+                document.getElementById('multiInputScoreSection').style.display = 'none';
+            }
+        }
+
+        // 入力タブ：合計更新
+        function updateMultiInputTotal() {
+            const total = Array.from(document.querySelectorAll('.multi-input-score'))
+                .reduce((sum, el) => sum + (parseFloat(el.value) || 0), 0);
+            document.getElementById('multiInputScoreTotal').textContent = total;
+        }
+
+        // 入力タブ：多人数リーグの半荘を追加
+        function addMultiGameFromInput() {
+            const section = document.getElementById('multiInputSection');
+            const leagueId = section.dataset.leagueId;
+            if(!leagueId) return;
+
+            const inputs = document.querySelectorAll('.multi-input-score');
+            const players = [], scores = [];
+            let hasEmpty = false;
+            inputs.forEach(el => {
+                if(el.value === '') { hasEmpty = true; return; }
+                players.push(el.dataset.player);
+                scores.push(parseFloat(el.value));
+            });
+            if(hasEmpty || players.length !== 4) {
+                alert('4人全員のスコアを入力してください');
+                return;
+            }
+
+            const total = scores.reduce((a, b) => a + b, 0);
+            if(Math.abs(total) > 0.5) {
+                if(!confirm(`スコアの合計が ${total} です。このまま保存しますか？`)) return;
+            }
+
+            const league = leagues[leagueId];
+            const games = Array.isArray(league.games) ? [...league.games] : Object.values(league.games || {});
+            const date = document.getElementById('selectedDate').value || new Date().toISOString().slice(0,10);
+
+            games.push({ players, scores, date, createdAt: Date.now() });
+
+            database.ref(`groups/${groupId}/leagues/${leagueId}/games`).set(games)
+                .then(() => {
+                    leagues[leagueId].games = games;
+                    // チェックボックスをリセット
+                    document.querySelectorAll('.multi-input-player').forEach(cb => cb.checked = false);
+                    document.getElementById('multiInputSelectedCount').textContent = '0';
+                    document.getElementById('multiInputScoreSection').style.display = 'none';
+                    renderLeagues();
+                    if(selectedLeagueId === leagueId) calculateLeagueById(leagueId);
+                    showNotification('✅ 半荘を追加しました（' + players.join('・') + '）');
+                })
+                .catch(err => { console.error(err); alert('保存に失敗しました'); });
         }
 
         // リーグ戦を作成
@@ -1828,31 +2479,49 @@
                 return;
             }
 
-            // 4人のプレイヤーを取得
-            const selectedPlayers = [];
-            for(let i = 1; i <= 4; i++) {
-                const select = document.getElementById('newLeaguePlayer' + i);
-                const player = select ? select.value : '';
-                if(!player) {
-                    alert(`プレイヤー${i}を選択してください`);
-                    return;
-                }
-                if(selectedPlayers.includes(player)) {
-                    alert(`同じプレイヤーが複数選択されています: ${player}`);
-                    return;
-                }
-                selectedPlayers.push(player);
-            }
+            // モードを確認
+            const mode = document.querySelector('input[name="leagueMode"]:checked').value;
 
-            // リーグ戦IDを生成（タイムスタンプベース）
+            let leagueData;
             const leagueId = 'league_' + Date.now();
-            
-            // リーグ戦データ
-            const leagueData = {
-                name: name,
-                players: selectedPlayers,
-                createdAt: Date.now()
-            };
+
+            if(mode === 'multi') {
+                // 多人数モード：チェックボックスから選択
+                const checkboxes = document.querySelectorAll('.league-member-checkbox:checked');
+                const selectedMembers = Array.from(checkboxes).map(cb => cb.value);
+                if(selectedMembers.length < 5) {
+                    alert('多人数モードは5人以上選択してください');
+                    return;
+                }
+                leagueData = {
+                    name: name,
+                    mode: 'multi',
+                    members: selectedMembers,
+                    games: [],
+                    createdAt: Date.now()
+                };
+            } else {
+                // 通常モード：4人固定
+                const selectedPlayers = [];
+                for(let i = 1; i <= 4; i++) {
+                    const select = document.getElementById('newLeaguePlayer' + i);
+                    const player = select ? select.value : '';
+                    if(!player) {
+                        alert(`プレイヤー${i}を選択してください`);
+                        return;
+                    }
+                    if(selectedPlayers.includes(player)) {
+                        alert(`同じプレイヤーが複数選択されています: ${player}`);
+                        return;
+                    }
+                    selectedPlayers.push(player);
+                }
+                leagueData = {
+                    name: name,
+                    players: selectedPlayers,
+                    createdAt: Date.now()
+                };
+            }
 
             // Firebaseに保存
             database.ref(`groups/${groupId}/leagues/${leagueId}`).set(leagueData)
@@ -1877,7 +2546,8 @@
                     leagues = snapshot.val() || {};
                     console.log('リーグ戦を読み込みました:', Object.keys(leagues).length + '件');
                     renderLeagues();
-                    updateLeagueQuickSelect(); // 入力タブのドロップダウンも更新
+                    updateLeagueQuickSelect();
+                    updateDailyMultiLeagueSelect(); // 日別タブの多人数リーグセレクトも更新
                 })
                 .catch(error => {
                     console.error('リーグ戦の読み込みに失敗:', error);
@@ -1909,23 +2579,44 @@
                 const isSelected = leagueId === selectedLeagueId;
                 const borderColor = isSelected ? 'border-amber-400' : 'border-gray-200';
                 const bgColor = isSelected ? 'bg-amber-50' : 'bg-white';
+                const isMulti = league.mode === 'multi';
+                const memberList = isMulti
+                    ? (league.members || []).map(p => escapeHtml(p)).join(' / ')
+                    : (league.players || []).map(p => escapeHtml(p)).join(' / ');
+                const gameCount = isMulti
+                    ? (Array.isArray(league.games) ? league.games.length : Object.keys(league.games || {}).length)
+                    : '';
                 
                 html += `
                     <div class="mb-3 border-2 ${borderColor} ${bgColor} rounded-lg p-3 shadow-sm">
                         <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-bold text-gray-800 flex-1">${escapeHtml(league.name)}</h4>
+                            <div>
+                                <h4 class="font-bold text-gray-800">${escapeHtml(league.name)}</h4>
+                                ${isMulti ? '<span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">多人数</span>' : ''}
+                            </div>
                             <button onclick="deleteLeague('${leagueId}')" 
                                     class="text-red-500 text-sm px-2 py-1 hover:bg-red-50 rounded active:bg-red-100">
                                 🗑️
                             </button>
                         </div>
                         <div class="text-sm text-gray-600 mb-2">
-                            👥 ${league.players.map(p => escapeHtml(p)).join(' / ')}
+                            👥 ${memberList}
                         </div>
-                        <button onclick="selectLeague('${leagueId}')" 
-                                class="w-full ${isSelected ? 'bg-amber-500' : 'bg-blue-500'} text-white py-2 rounded-lg text-sm font-bold active:opacity-80">
-                            ${isSelected ? '✅ 選択中' : '📊 成績を表示'}
-                        </button>
+                        ${isMulti ? `<div class="text-xs text-purple-600 mb-2">📋 記録済み半荘: ${gameCount}回</div>` : ''}
+                        <div class="flex gap-2">
+                            ${isMulti ? `<button onclick="showMultiGameForm('${leagueId}')" 
+                                    class="flex-1 bg-purple-500 text-white py-2 rounded-lg text-sm font-bold active:opacity-80">
+                                ➕ 半荘を記録
+                            </button>
+                            <button onclick="showAddMemberForm('${leagueId}')"
+                                    class="bg-purple-100 text-purple-700 px-3 py-2 rounded-lg text-sm font-bold active:opacity-80 border border-purple-300">
+                                👤+
+                            </button>` : ''}
+                            <button onclick="selectLeague('${leagueId}')" 
+                                    class="flex-1 ${isSelected ? 'bg-amber-500' : 'bg-blue-500'} text-white py-2 rounded-lg text-sm font-bold active:opacity-80">
+                                ${isSelected ? '✅ 選択中' : '📊 成績を表示'}
+                            </button>
+                        </div>
                     </div>
                 `;
             });
@@ -1982,6 +2673,12 @@
         function calculateLeagueById(leagueId) {
             const league = leagues[leagueId];
             if(!league) return;
+
+            // 多人数モードは専用処理
+            if(league.mode === 'multi') {
+                calculateMultiLeague(leagueId, league);
+                return;
+            }
 
             const selectedPlayers = league.players;
             console.log('リーグ戦メンバー:', selectedPlayers);
@@ -2064,6 +2761,163 @@
 
             // 結果を表示
             renderLeagueResults(league.name, selectedPlayers, stats, leagueGames);
+        }
+
+        // 多人数リーグ：集計・表示
+        function calculateMultiLeague(leagueId, league) {
+            const members = league.members || [];
+            const games = Array.isArray(league.games) ? league.games : Object.values(league.games || {});
+
+            if(games.length === 0) {
+                document.getElementById('leagueResults').innerHTML = `
+                    <div class="text-center py-12 bg-gray-50 rounded-lg">
+                        <div class="text-4xl mb-3">📋</div>
+                        <p class="text-gray-600 font-semibold mb-2">半荘の記録がありません</p>
+                        <p class="text-sm text-gray-500">「➕ 半荘を記録」ボタンから記録してください</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // 統計を初期化
+            const stats = {};
+            members.forEach(p => {
+                stats[p] = { name: p, totalGames: 0, totalScore: 0, ranks: {1:0,2:0,3:0,4:0} };
+            });
+
+            games.forEach(game => {
+                const players = game.players || [];
+                const scores = game.scores || [];
+                const sorted = [...scores].sort((a,b) => b-a);
+
+                players.forEach((p, idx) => {
+                    if(!stats[p]) stats[p] = { name: p, totalGames:0, totalScore:0, ranks:{1:0,2:0,3:0,4:0} };
+                    stats[p].totalGames++;
+                    stats[p].totalScore += scores[idx];
+                    const rank = sorted.indexOf(scores[idx]) + 1;
+                    stats[p].ranks[rank]++;
+                });
+            });
+
+            renderMultiLeagueResults(league.name, members, stats, games);
+        }
+
+        // 多人数リーグ：結果HTML生成
+        function renderMultiLeagueResults(leagueName, members, stats, games) {
+            const sorted = members
+                .filter(p => stats[p] && stats[p].totalGames > 0)
+                .sort((a, b) => stats[b].totalScore - stats[a].totalScore);
+
+            const medals = ['🥇','🥈','🥉'];
+
+            let html = `
+                <div class="mt-4 bg-purple-50 rounded-xl p-4 border border-purple-200">
+                    <h3 class="text-lg font-bold text-purple-800 mb-1">📊 ${escapeHtml(leagueName)}</h3>
+                    <p class="text-xs text-purple-600 mb-3">多人数リーグ・総半荘数: ${games.length}回</p>
+
+                    <!-- 順位表 -->
+                    <div class="space-y-2 mb-4">
+            `;
+
+            sorted.forEach((p, i) => {
+                const s = stats[p];
+                const avg = s.totalGames > 0 ? (s.totalScore / s.totalGames).toFixed(1) : '-';
+                const firstRate = s.totalGames > 0 ? Math.round(s.ranks[1] / s.totalGames * 100) : 0;
+                html += `
+                    <div class="bg-white rounded-lg p-3 flex items-center gap-3 shadow-sm">
+                        <div class="text-2xl w-8 text-center">${medals[i] || (i+1)+'位'}</div>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-bold text-gray-800 truncate">${escapeHtml(p)}</div>
+                            <div class="text-xs text-gray-500">${s.totalGames}半荘 / 平均${avg}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-lg font-bold ${s.totalScore >= 0 ? 'text-blue-600' : 'text-red-500'}">${s.totalScore > 0 ? '+' : ''}${s.totalScore}</div>
+                            <div class="text-xs text-gray-400">1位率${firstRate}%</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+
+            // 参加回数0の人も表示
+            const noGames = members.filter(p => !stats[p] || stats[p].totalGames === 0);
+            if(noGames.length > 0) {
+                html += `<p class="text-xs text-gray-400 mb-3">未参加: ${noGames.map(p => escapeHtml(p)).join(', ')}</p>`;
+            }
+
+            // 日別一覧（日付でグループ化・テーブル形式）
+            html += `<h4 class="font-bold text-gray-700 mb-2 text-sm">📅 日別一覧</h4>`;
+
+            const byDate = {};
+            games.forEach((game, idx) => {
+                const d = game.date || '不明';
+                if(!byDate[d]) byDate[d] = [];
+                byDate[d].push({ ...game, globalIndex: idx + 1 });
+            });
+
+            const sortedDates = Object.keys(byDate).sort((a, b) => b.localeCompare(a));
+
+            sortedDates.forEach(date => {
+                const dayGames = byDate[date];
+
+                // 当日の全員累積スコアを計算
+                const dayTotals = {};
+                dayGames.forEach(game => {
+                    (game.players || []).forEach((p, i) => {
+                        if(!dayTotals[p]) dayTotals[p] = { score: 0, games: 0 };
+                        dayTotals[p].score += (game.scores || [])[i] || 0;
+                        dayTotals[p].games++;
+                    });
+                });
+
+                html += `
+                <div class="bg-purple-50 rounded-xl border border-purple-200 mb-4 overflow-hidden">
+                    <div class="bg-purple-500 text-white px-3 py-2 flex items-center justify-between">
+                        <span class="font-bold text-sm">${new Date(date + 'T00:00:00').toLocaleDateString('ja-JP',{month:'long',day:'numeric'})}</span>
+                        <span class="text-xs bg-purple-300 bg-opacity-50 px-2 py-0.5 rounded-full">${dayGames.length}半荘</span>
+                    </div>
+                    <div class="p-3">
+                        <p class="text-xs font-bold text-purple-700 mb-2">📋 半荘一覧</p>
+                        <div class="overflow-x-auto mb-3">
+                            <table class="text-xs border-collapse" style="min-width:100%">
+                                <thead>
+                                    <tr class="bg-purple-100 text-purple-800">
+                                        <th class="py-2 px-2 text-left font-bold whitespace-nowrap border border-purple-200 sticky left-0 bg-purple-100">半荘</th>
+                                        ${Object.keys(dayTotals).map(p => `
+                                            <th class="py-2 px-2 text-center font-bold whitespace-nowrap border border-purple-200">${escapeHtml(p)}</th>
+                                        `).join('')}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${dayGames.map((game, i) => {
+                                        const scoreMap = {};
+                                        (game.players || []).forEach((p, idx) => { scoreMap[p] = (game.scores || [])[idx]; });
+                                        return `
+                                        <tr class="${i % 2 === 0 ? 'bg-white' : 'bg-purple-50'}">
+                                            <td class="py-2 px-2 font-medium text-gray-500 border border-purple-100 sticky left-0 ${i % 2 === 0 ? 'bg-white' : 'bg-purple-50'}">${i+1}</td>
+                                            ${Object.keys(dayTotals).map(p => {
+                                                const s = scoreMap[p];
+                                                if(s === undefined) return `<td class="py-2 px-2 text-center text-gray-300 border border-purple-100">-</td>`;
+                                                return `<td class="py-2 px-2 text-center font-bold border border-purple-100 ${s > 0 ? 'text-blue-600' : s < 0 ? 'text-red-500' : 'text-gray-500'}">${s > 0 ? '+' : ''}${s}</td>`;
+                                            }).join('')}
+                                        </tr>`;
+                                    }).join('')}
+                                    <tr class="bg-purple-200 font-bold border-t-2 border-purple-400">
+                                        <td class="py-2 px-2 text-purple-800 border border-purple-300 sticky left-0 bg-purple-200">合計</td>
+                                        ${Object.entries(dayTotals).map(([p, info]) => `
+                                            <td class="py-2 px-2 text-center border border-purple-300 ${info.score > 0 ? 'text-blue-700' : info.score < 0 ? 'text-red-600' : 'text-gray-600'}">${info.score > 0 ? '+' : ''}${info.score}</td>
+                                        `).join('')}
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>`;
+            });
+
+            html += `</div>`;
+            document.getElementById('leagueResults').innerHTML = html;
         }
 
         // リーグ戦：結果表示（リーグ戦名を追加）
