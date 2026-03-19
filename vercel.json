@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/mobile-firebase.html" },
+    { "source": "/(.*)", "destination": "/mobile-firebase.html" }
+  ]
+}
