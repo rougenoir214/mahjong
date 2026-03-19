@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>麻雀成績管理</title>
+    <title>????????????/title>
     
-    <!-- PWA設定 -->
+    <!-- PWA????-->
     <link rel="manifest" id="manifest-placeholder">
     <meta name="theme-color" content="#0891b2">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="麻雀成績">
+    <meta name="apple-mobile-web-app-title" content="????????">
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -36,7 +36,7 @@
         .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         table { border-collapse: collapse; min-width: 100%; }
         
-        /* 日別タブのテーブルコンテナ */
+        /* ?????????????????????? */
         .daily-table-container {
             max-height: 400px;
             overflow-y: auto;
@@ -45,7 +45,7 @@
             -webkit-overflow-scrolling: touch;
         }
         
-        /* 日別タブのヘッダー固定 */
+        /* ????????????????????*/
         .daily-table-container table thead th {
             position: sticky;
             top: 0;
@@ -54,12 +54,12 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
-        /* 左端の「半荘」列のヘッダーは最優先で固定 */
+        /* ????????????????????????????????????*/
         .daily-table-container table thead th:first-child {
             z-index: 20;
         }
         
-        /* 日別タブの合計行固定 */
+        /* ??????????????????*/
         .daily-table-container table tbody tr:last-child td {
             position: sticky;
             bottom: 0;
@@ -68,7 +68,7 @@
             box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
         }
         
-        /* 合計行の左端列も高いz-index */
+        /* ?????????????????z-index */
         .daily-table-container table tbody tr:last-child td:first-child {
             z-index: 19;
         }
@@ -85,7 +85,7 @@
         .pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
         
-        /* モダンなメニュー */
+        /* ??????????????? */
         .menu-container { position: relative; }
         .menu-dropdown {
             display: none;
@@ -119,43 +119,43 @@
 </head>
 <body class="bg-gradient-to-br from-cyan-50 via-blue-50 to-teal-50 min-h-screen">
 
-    <!-- ログイン画面 -->
+    <!-- ???????????? -->
     <div id="loginScreen" class="login-screen">
         <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 animate-fade">
             <div class="text-center mb-8">
-                <div class="text-6xl mb-4">🀄</div>
-                <h1 class="text-3xl font-bold text-gray-800">麻雀成績管理</h1>
+                <div class="text-6xl mb-4">???/div>
+                <h1 class="text-3xl font-bold text-gray-800">????????????/h1>
             </div>
             <div class="mb-6">
-                <label class="block text-gray-700 font-semibold mb-2">パスワード</label>
+                <label class="block text-gray-700 font-semibold mb-2">?????????/label>
                 <input type="password" id="passwordInput" 
                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-cyan-500 focus:outline-none"
-                       placeholder="パスワードを入力"
+                       placeholder="??????????????
                        onkeypress="if(event.key==='Enter') login()">
             </div>
             <button onclick="login()" 
                     class="w-full bg-gradient-to-r from-cyan-600 to-teal-600 text-white py-3 rounded-lg font-bold hover:opacity-90 transition">
-                ログイン
+                ????????
             </button>
             <div id="loginError" class="mt-4 text-red-500 text-sm text-center hidden"></div>
             <div class="mt-6 text-center text-sm text-gray-500">
-                パスワードは管理者から取得してください
+                ???????????????????????????????
             </div>
         </div>
     </div>
 
-    <!-- メインアプリ（ログイン後に表示） -->
+    <!-- ?????????????????????????????-->
     <div id="mainApp" style="display: none;">
         <header class="bg-sky-100 border-b border-sky-200 sticky top-0 z-50 shadow-sm">
             <div class="px-4 py-2">
                 <div class="flex items-center justify-between mb-2">
                     <h1 class="text-base font-bold text-gray-800 flex items-center gap-1">
-                        <span class="text-xl">🀄</span>
-                        <span>麻雀成績管理</span>
+                        <span class="text-xl">???/span>
+                        <span>????????????/span>
                     </h1>
                     <div class="flex items-center gap-2">
                         <div id="syncStatus" class="text-xs text-gray-500">
-                            <span class="pulse">🔄</span>
+                            <span class="pulse">??</span>
                         </div>
                         <div class="menu-container">
                             <button onclick="toggleMenu()" class="p-1.5 hover:bg-sky-200 rounded-lg transition active:bg-sky-300">
@@ -165,26 +165,23 @@
                             </button>
                             <div id="menuDropdown" class="menu-dropdown">
                                 <div class="menu-item" onclick="exportData(); toggleMenu();">
-                                    <span>📥</span> エクスポート
-                                </div>
+                                    <span>??</span> ???????????                                </div>
                                 <div class="menu-item" onclick="document.getElementById('fileInput').click(); toggleMenu();">
-                                    <span>📤</span> インポート
-                                </div>
+                                    <span>??</span> ?????????                                </div>
                                 <div class="menu-item" onclick="logout(); toggleMenu();">
-                                    <span>🚪</span> ログアウト
-                                </div>
+                                    <span>??</span> ??????????                                </div>
                                 <div class="menu-item danger" onclick="clearAllData(); toggleMenu();">
-                                    <span>🗑️</span> 全削除
+                                    <span>????/span> ?????
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="flex gap-1">
-                    <button onclick="switchTab('input')" id="tab-input" class="flex-1 py-2 text-sm font-medium bg-white text-gray-800 rounded-t-lg whitespace-nowrap border-b-2 border-cyan-500">入力</button>
-                    <button onclick="switchTab('daily')" id="tab-daily" class="flex-1 py-2 text-sm font-medium text-gray-600 rounded-t-lg whitespace-nowrap hover:bg-sky-50">日別</button>
-                    <button onclick="switchTab('players')" id="tab-players" class="flex-1 py-2 text-sm font-medium text-gray-600 rounded-t-lg whitespace-nowrap hover:bg-sky-50">統計</button>
-                    <button onclick="switchTab('league')" id="tab-league" class="flex-1 py-2 text-sm font-medium text-gray-600 rounded-t-lg whitespace-nowrap hover:bg-sky-50">リーグ戦</button>
+                    <button onclick="switchTab('input')" id="tab-input" class="flex-1 py-2 text-sm font-medium bg-white text-gray-800 rounded-t-lg whitespace-nowrap border-b-2 border-cyan-500">????/button>
+                    <button onclick="switchTab('daily')" id="tab-daily" class="flex-1 py-2 text-sm font-medium text-gray-600 rounded-t-lg whitespace-nowrap hover:bg-sky-50">????</button>
+                    <button onclick="switchTab('players')" id="tab-players" class="flex-1 py-2 text-sm font-medium text-gray-600 rounded-t-lg whitespace-nowrap hover:bg-sky-50">????/button>
+                    <button onclick="switchTab('league')" id="tab-league" class="flex-1 py-2 text-sm font-medium text-gray-600 rounded-t-lg whitespace-nowrap hover:bg-sky-50">????????</button>
                 </div>
             </div>
         </header>
@@ -194,164 +191,129 @@
             <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-4 animate-fade">
                 <div id="content-input" class="p-4">
                     <div class="mb-3">
-                        <label class="block text-sm font-medium mb-1">日付</label>
+                        <label class="block text-sm font-medium mb-1">????/label>
                         <input type="date" id="selectedDate" onchange="dateChanged()" class="w-full px-3 py-2 border rounded-lg">
                     </div>
                     <div class="mb-3">
-                        <label class="block text-sm font-medium mb-1">麻雀の種類</label>
+                        <label class="block text-sm font-medium mb-1">??????????/label>
                         <select id="gameType" onchange="gameTypeChanged()" class="w-full px-3 py-2 border rounded-lg">
-                            <option value="4">4人麻雀</option>
-                            <option value="3">3人麻雀</option>
+                            <option value="4">4??????</option>
+                            <option value="3">3??????</option>
                         </select>
                     </div>
                     
-                    <!-- リーグ戦選択 -->
+                    <!-- ????????????-->
                     <div class="mb-3 bg-amber-50 rounded-lg p-3 border-2 border-amber-300">
                         <label class="block text-sm font-medium mb-1 text-amber-800">
-                            🏆 リーグ戦から選択
-                        </label>
+                            ?? ???????????????                        </label>
                         <select id="leagueQuickSelect" onchange="applyLeagueMembers()" class="w-full px-3 py-2 border-2 border-amber-300 rounded-lg bg-white">
-                            <option value="">-- リーグ戦を選択 --</option>
+                            <option value="">-- ?????????????--</option>
                         </select>
-                        <div class="text-xs text-amber-700 mt-1">リーグ戦を選択するとメンバーが自動設定されます</div>
+                        <div class="text-xs text-amber-700 mt-1">???????????????????????????????????????/div>
                     </div>
                     
                     <div id="playerSelectors"></div>
                     <div id="scoreInputs"></div>
                     
-                    <!-- スコア合計表示 -->
+                    <!-- ?????????????? -->
                     <div id="scoreTotal" class="mt-2 p-3 rounded-lg border-2 text-center font-bold" style="display:none;">
-                        <div class="text-sm text-gray-600">現在の合計</div>
+                        <div class="text-sm text-gray-600">??????????/div>
                         <div id="scoreTotalValue" class="text-2xl"></div>
                         <div id="scoreTotalRemaining" class="text-sm text-gray-600 mt-1"></div>
                     </div>
                     
-                    <button onclick="addGame()" class="w-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white py-3 rounded-lg font-bold mt-3 active:opacity-80">半荘を追加</button>
+                    <button onclick="addGame()" class="w-full bg-gradient-to-r from-cyan-500 to-teal-500 text-white py-3 rounded-lg font-bold mt-3 active:opacity-80">?????????</button>
                     <div id="gamesList"></div>
                     
-                    <!-- プレイヤー管理セクション -->
+                    <!-- ?????????????????????? -->
                     <div class="mt-4 bg-gray-50 rounded-lg p-3 border border-gray-200">
-                        <h3 class="text-sm font-bold mb-2 text-gray-700">プレイヤー管理</h3>
+                        <h3 class="text-sm font-bold mb-2 text-gray-700">?????????????/h3>
                         <div class="flex gap-2 mb-3">
-                            <input type="text" id="newPlayer" placeholder="新しいプレイヤー名" 
+                            <input type="text" id="newPlayer" placeholder="???????????????? 
                                    class="flex-1 px-2 py-2 border rounded-lg text-sm min-w-0"
                                    onkeypress="if(event.key==='Enter') addPlayer()">
                             <button onclick="addPlayer()" class="bg-green-500 text-white px-3 py-2 rounded-lg active:bg-green-600 text-sm font-bold flex-shrink-0">
-                                ➕
-                            </button>
+                                ??                            </button>
                         </div>
                         <div id="playerList" class="text-xs text-gray-600"></div>
                     </div>
                     
-                    <button onclick="if(confirm('本当に今日のデータを削除しますか？')) clearToday()" 
+                    <button onclick="if(confirm('????????????????????????????)) clearToday()" 
                             class="w-full bg-red-500 text-white py-2 rounded-lg mt-3 active:bg-red-600 text-sm">
-                        今日のデータを削除
+                        ???????????????
                     </button>
                 </div>
                 <div id="content-daily" class="p-4" style="display:none;">
                     <div id="dailyList"></div>
                 </div>
                 <div id="content-players" class="p-4" style="display:none;">
-                    <!-- 年選択 -->
+                    <!-- ??????-->
                     <div class="mb-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-3 border-2 border-purple-300">
-                        <label class="block text-sm font-medium mb-2 text-purple-800">📊 表示期間</label>
+                        <label class="block text-sm font-medium mb-2 text-purple-800">?? ???????</label>
                         <select id="playerYearSelect" onchange="changePlayerYear()" class="w-full px-3 py-2 border-2 border-purple-300 rounded-lg bg-white">
-                            <option value="all">通算成績</option>
+                            <option value="all">???????</option>
                         </select>
                     </div>
                     
-                    <!-- 総半荘数・プレイヤー数 -->
+                    <!-- ??????????????????? -->
                     <div id="statsOverview" class="grid grid-cols-2 gap-2 mb-4"></div>
                     
                     <div id="playerStats"></div>
                 </div>
                 <div id="content-league" class="p-4" style="display:none;">
-                    <!-- 年選択 -->
+                    <!-- ??????-->
                     <div class="mb-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-3 border-2 border-purple-300">
-                        <label class="block text-sm font-medium mb-2 text-purple-800">📊 表示期間</label>
+                        <label class="block text-sm font-medium mb-2 text-purple-800">?? ???????</label>
                         <select id="leagueYearSelect" onchange="changeLeagueYear()" class="w-full px-3 py-2 border-2 border-purple-300 rounded-lg bg-white">
-                            <option value="all">通算成績</option>
+                            <option value="all">???????</option>
                         </select>
                     </div>
                     
-                    <!-- 新規リーグ戦作成ボタン -->
+                    <!-- ??????????????????? -->
                     <button onclick="showLeagueCreateForm()" class="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white py-3 rounded-lg font-bold mb-4 active:opacity-80 flex items-center justify-center gap-2">
-                        <span class="text-xl">➕</span> 新しいリーグ戦を作成
+                        <span class="text-xl">??/span> ??????????????????
                     </button>
                     
-                    <!-- リーグ戦作成フォーム（初期は非表示） -->
+                    <!-- ????????????????????????????????-->
                     <div id="leagueCreateForm" class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 mb-4 border-2 border-blue-300" style="display:none;">
-                        <h3 class="text-lg font-bold text-blue-800 mb-3">🆕 リーグ戦を作成</h3>
+                        <h3 class="text-lg font-bold text-blue-800 mb-3">?? ?????????????</h3>
                         
                         <div class="mb-3">
-                            <label class="block text-sm font-medium text-blue-800 mb-1">リーグ戦名</label>
-                            <input type="text" id="leagueName" placeholder="例: 週末麻雀会" 
+                            <label class="block text-sm font-medium text-blue-800 mb-1">??????????/label>
+                            <input type="text" id="leagueName" placeholder="?? ?????????? 
                                    class="w-full px-3 py-2 border-2 border-blue-300 rounded-lg text-sm">
                         </div>
                         
-                        <!-- モード選択 -->
-                        <div class="mb-3 bg-white rounded-lg p-3 border border-blue-200">
-                            <label class="block text-sm font-medium text-blue-800 mb-2">モード選択</label>
-                            <div class="flex gap-2">
-                                <label class="flex-1 flex items-center gap-2 p-2 border-2 border-blue-300 rounded-lg cursor-pointer hover:bg-blue-50">
-                                    <input type="radio" name="leagueMode" value="fixed" checked onchange="toggleLeagueMode()" class="w-4 h-4">
-                                    <div>
-                                        <div class="text-sm font-bold">通常モード</div>
-                                        <div class="text-xs text-gray-600">4人固定</div>
-                                    </div>
-                                </label>
-                                <label class="flex-1 flex items-center gap-2 p-2 border-2 border-blue-300 rounded-lg cursor-pointer hover:bg-blue-50">
-                                    <input type="radio" name="leagueMode" value="multi" onchange="toggleLeagueMode()" class="w-4 h-4">
-                                    <div>
-                                        <div class="text-sm font-bold">多人数モード</div>
-                                        <div class="text-xs text-gray-600">5人以上</div>
-                                    </div>
-                                </label>
-                            </div>
-                        </div>
-                        
-                        <!-- 通常モード: 4人固定選択 -->
-                        <div id="fixedModeSection">
-                            <label class="block text-sm font-medium text-blue-800 mb-2">参加プレイヤー（4人）</label>
-                            <div class="grid grid-cols-2 gap-2 mb-3">
-                                <select id="newLeaguePlayer1" class="px-3 py-2 border-2 border-blue-300 rounded-lg text-sm">
-                                    <option value="">プレイヤー1</option>
-                                </select>
-                                <select id="newLeaguePlayer2" class="px-3 py-2 border-2 border-blue-300 rounded-lg text-sm">
-                                    <option value="">プレイヤー2</option>
-                                </select>
-                                <select id="newLeaguePlayer3" class="px-3 py-2 border-2 border-blue-300 rounded-lg text-sm">
-                                    <option value="">プレイヤー3</option>
-                                </select>
-                                <select id="newLeaguePlayer4" class="px-3 py-2 border-2 border-blue-300 rounded-lg text-sm">
-                                    <option value="">プレイヤー4</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <!-- 多人数モード: メンバー選択 -->
-                        <div id="multiModeSection" style="display:none;">
-                            <label class="block text-sm font-medium text-blue-800 mb-2">メンバー選択（5人以上）</label>
-                            <div id="multiPlayerList" class="bg-white rounded-lg p-3 border border-blue-200 mb-3 max-h-60 overflow-y-auto">
-                                <!-- チェックボックスリストが動的に生成される -->
-                            </div>
-                            <div class="text-xs text-blue-600">選択人数: <span id="selectedMemberCount">0</span>人</div>
+                        <label class="block text-sm font-medium text-blue-800 mb-2">??????????????????/label>
+                        <div class="grid grid-cols-2 gap-2 mb-3">
+                            <select id="newLeaguePlayer1" class="px-3 py-2 border-2 border-blue-300 rounded-lg text-sm">
+                                <option value="">?????????1</option>
+                            </select>
+                            <select id="newLeaguePlayer2" class="px-3 py-2 border-2 border-blue-300 rounded-lg text-sm">
+                                <option value="">?????????2</option>
+                            </select>
+                            <select id="newLeaguePlayer3" class="px-3 py-2 border-2 border-blue-300 rounded-lg text-sm">
+                                <option value="">?????????3</option>
+                            </select>
+                            <select id="newLeaguePlayer4" class="px-3 py-2 border-2 border-blue-300 rounded-lg text-sm">
+                                <option value="">?????????4</option>
+                            </select>
                         </div>
                         
                         <div class="flex gap-2">
                             <button onclick="createLeague()" class="flex-1 bg-blue-500 text-white py-2 rounded-lg font-bold active:bg-blue-600">
-                                💾 作成
+                                ?? ???
                             </button>
                             <button onclick="hideLeagueCreateForm()" class="flex-1 bg-gray-400 text-white py-2 rounded-lg font-bold active:bg-gray-500">
-                                キャンセル
+                                ??????????
                             </button>
                         </div>
                     </div>
                     
-                    <!-- リーグ戦一覧 -->
+                    <!-- ???????????? -->
                     <div id="leagueList"></div>
                     
-                    <!-- 選択されたリーグ戦の成績表示 -->
+                    <!-- ?????????????????????????? -->
                     <div id="leagueResults"></div>
                 </div>
             </div>
@@ -361,8 +323,7 @@
     </div>
 
     <script>
-        // Firebase設定
-        const firebaseConfig = {
+        // Firebase????        const firebaseConfig = {
             apiKey: "AIzaSyA7bkfPDgs3iSNFC2MOxjs1aakbHbMi-jM",
             authDomain: "mahjong-337a9.firebaseapp.com",
             databaseURL: "https://mahjong-337a9-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -373,22 +334,17 @@
             measurementId: "G-2VDY4LKSPP"
         };
 
-        // Firebase初期化
-        firebase.initializeApp(firebaseConfig);
+        // Firebase?????        firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // パスワード管理（Firebaseから取得）
-        let appPasswords = {
-            login: 'mahjong2024',      // デフォルト（初回用）
-            delete: 'mahjong1234'      // デフォルト（初回用）
-        };
+        // ???????????????irebase?????????        let appPasswords = {
+            login: 'mahjong2024',      // ?????????????????            delete: 'mahjong1234'      // ?????????????????        };
         
-        // URLパラメータからグループIDを取得
-        function getGroupId() {
+        // URL????????????????????D?????        function getGroupId() {
             const params = new URLSearchParams(window.location.search);
             const groupId = params.get('group');
             if (!groupId) {
-                alert('グループIDが指定されていません。\n\nURLに ?group=グループ名 を追加してください。');
+                alert('????????D?????????????????n\nURL?? ?group=????????? ?????????????????);
                 return null;
             }
             return groupId;
@@ -396,21 +352,18 @@
 
         const groupId = getGroupId();
         if (!groupId) {
-            document.body.innerHTML = '<div style="padding:20px;text-align:center;"><h2>グループIDが指定されていません</h2><p>URLに ?group=グループ名 を追加してください</p></div>';
-            throw new Error('グループIDが必要です');
+            document.body.innerHTML = '<div style="padding:20px;text-align:center;"><h2>????????D???????????????</h2><p>URL?? ?group=????????? ???????????????</p></div>';
+            throw new Error('????????D?????????);
         }
 
-        // アプリの状態
-        let data = { dates: {} };
+        // ???????????        let data = { dates: {} };
         let allPlayers = [];
-        let leagues = {}; // リーグ戦データ { leagueId: { name, players: [], createdAt } }
-        let selectedLeagueId = null; // 現在選択されているリーグ戦ID
-        let selectedYear = 'all'; // 選択された年（'all', '2025', '2024'など）
-        let currentTab = 'input';
+        let leagues = {}; // ????????????? { leagueId: { name, players: [], createdAt } }
+        let selectedLeagueId = null; // ???????????????????????ID
+        let selectedYear = 'all'; // ????????????all', '2025', '2024'??????        let currentTab = 'input';
         let isLoggedIn = false;
 
-        // HTMLエスケープ関数（XSS対策）
-        function escapeHtml(text) {
+        // HTML???????????????SS??????        function escapeHtml(text) {
             if (text == null) return '';
             return String(text)
                 .replace(/&/g, '&amp;')
@@ -420,15 +373,15 @@
                 .replace(/'/g, '&#039;');
         }
 
-        // 通知メッセージを表示
+        // ??????????????????
         function showNotification(message, duration = 3000) {
-            // 既存の通知があれば削除
+            // ?????????????????
             const existing = document.getElementById('notification');
             if (existing) {
                 existing.remove();
             }
 
-            // 通知要素を作成
+            // ????????????
             const notification = document.createElement('div');
             notification.id = 'notification';
             notification.innerHTML = message;
@@ -449,8 +402,7 @@
                 text-align: center;
             `;
 
-            // アニメーション用のスタイルを追加（まだなければ）
-            if (!document.getElementById('notificationStyles')) {
+            // ?????????????????????????????????????????????            if (!document.getElementById('notificationStyles')) {
                 const style = document.createElement('style');
                 style.id = 'notificationStyles';
                 style.textContent = `
@@ -480,7 +432,7 @@
 
             document.body.appendChild(notification);
 
-            // 指定時間後に削除
+            // ?????????????
             setTimeout(() => {
                 notification.style.animation = 'slideUp 0.3s ease-out';
                 setTimeout(() => {
@@ -489,32 +441,30 @@
             }, duration);
         }
 
-        // Firebaseからパスワードを読み込む
+        // Firebase?????????????????????
         function loadPasswords() {
             return database.ref(`groups/${groupId}/passwords`).once('value')
                 .then((snapshot) => {
                     const passwords = snapshot.val();
                     if (passwords) {
                         appPasswords = passwords;
-                        console.log('パスワード設定を読み込みました');
+                        console.log('???????????????????????????');
                     } else {
-                        // 初回起動時：デフォルトパスワードをFirebaseに保存
-                        database.ref(`groups/${groupId}/passwords`).set(appPasswords);
-                        console.log('デフォルトパスワードを設定しました');
+                        // ????????????????????????????Firebase??????                        database.ref(`groups/${groupId}/passwords`).set(appPasswords);
+                        console.log('?????????????????????????????');
                     }
                 })
                 .catch((error) => {
-                    console.error('パスワード読み込みエラー:', error);
-                    // エラーでもデフォルト値を使用
+                    console.error('???????????????????????:', error);
+                    // ??????????????????????????
                 });
         }
 
-        // ログイン処理
-        async function login() {
+        // ????????????        async function login() {
             const password = document.getElementById('passwordInput').value;
             const errorDiv = document.getElementById('loginError');
             
-            // まずパスワードを読み込む
+            // ??????????????????????
             await loadPasswords();
             
             if (password === appPasswords.login) {
@@ -524,18 +474,17 @@
                 document.getElementById('mainApp').style.display = 'block';
                 errorDiv.classList.add('hidden');
                 
-                // データ読み込み
+                // ?????????????
                 loadFromFirebase();
             } else {
-                errorDiv.textContent = 'パスワードが間違っています';
+                errorDiv.textContent = '??????????????????????;
                 errorDiv.classList.remove('hidden');
                 document.getElementById('passwordInput').value = '';
             }
         }
 
-        // ログアウト処理
-        function logout() {
-            if (confirm('ログアウトしますか？')) {
+        // ?????????????        function logout() {
+            if (confirm('??????????????????)) {
                 isLoggedIn = false;
                 localStorage.removeItem('mahjong_logged_in');
                 document.getElementById('loginScreen').style.display = 'flex';
@@ -544,9 +493,9 @@
             }
         }
 
-        // 初期化時のログイン状態チェック
+        // ??????????????????????????
         window.addEventListener('DOMContentLoaded', async () => {
-            // パスワードを読み込む
+            // ??????????????????
             await loadPasswords();
             
             const loggedIn = localStorage.getItem('mahjong_logged_in');
@@ -558,7 +507,7 @@
             }
         });
 
-        // Firebaseからデータ読み込み
+        // Firebase????????????????
         function loadFromFirebase() {
             updateSyncStatus('loading');
             
@@ -566,8 +515,7 @@
                 .then((snapshot) => {
                     const firebaseData = snapshot.val();
                     
-                    // データの初期化（存在しない場合）
-                    if (firebaseData && firebaseData.data) {
+                    // ????????????????????????????                    if (firebaseData && firebaseData.data) {
                         data = firebaseData.data;
                         if(!data.dates || typeof data.dates !== 'object') {
                             data.dates = {};
@@ -576,8 +524,7 @@
                         data = { dates: {} };
                     }
                     
-                    // データの整合性を確保（全ての日付データにplayers, gamesを追加）
-                    Object.keys(data.dates).forEach(date => {
+                    // ?????????????????????????????????????players, games????????                    Object.keys(data.dates).forEach(date => {
                         const d = data.dates[date];
                         if(!d.players || !Array.isArray(d.players)) {
                             d.players = [];
@@ -590,54 +537,50 @@
                         }
                     });
                     
-                    // プレイヤーデータの初期化
-                    if (firebaseData && Array.isArray(firebaseData.allPlayers)) {
+                    // ?????????????????????                    if (firebaseData && Array.isArray(firebaseData.allPlayers)) {
                         allPlayers = firebaseData.allPlayers;
                     } else {
                         allPlayers = [];
                     }
                     
-                    console.log('データ読み込み完了:', {
+                    console.log('?????????????????', {
                         dates: Object.keys(data.dates).length,
                         players: allPlayers.length
                     });
                     
-                    // リアルタイム監視を開始
-                    setupRealtimeListener();
+                    // ?????????????????????                    setupRealtimeListener();
                     
-                    // リーグ戦データを読み込み
+                    // ???????????????????????
                     loadLeagues();
                     
-                    // 初期表示
+                    // ???????
                     const dateInput = document.getElementById('selectedDate');
                     if(dateInput) {
                         dateInput.valueAsDate = new Date();
                         dateChanged();
                     }
                     
-                    // デフォルトの年を今年に設定
-                    const currentYear = new Date().getFullYear().toString();
+                    // ????????????????????????                    const currentYear = new Date().getFullYear().toString();
                     const availableYears = getAvailableYears();
                     if(availableYears.includes(currentYear)) {
                         selectedYear = currentYear;
                     } else if(availableYears.length > 0) {
-                        selectedYear = availableYears[0]; // 最新の年
+                        selectedYear = availableYears[0]; // ????????
                     }
                     
                     render();
                     updateSyncStatus('synced');
                 })
                 .catch((error) => {
-                    console.error('データ読み込みエラー:', error);
+                    console.error('???????????????????:', error);
                     
-                    // エラーでも初期化は行う
+                    // ???????????????????
                     data = { dates: {} };
                     allPlayers = [];
                     
-                    // リーグ戦データを読み込み（エラーでも試みる）
-                    loadLeagues().catch(e => console.error('リーグ戦読み込みエラー:', e));
+                    // ??????????????????????????????????????????                    loadLeagues().catch(e => console.error('??????????????????????:', e));
                     
-                    // 初期表示
+                    // ???????
                     const dateInput = document.getElementById('selectedDate');
                     if(dateInput) {
                         dateInput.valueAsDate = new Date();
@@ -645,23 +588,21 @@
                     }
                     render();
                     
-                    notify('データの読み込みに失敗しました。ローカルデータで起動します。', 'error');
+                    notify('??????????????????????????????????????????????????????, 'error');
                     updateSyncStatus('error');
                 });
         }
 
-        // リアルタイム監視の設定
-        function setupRealtimeListener() {
+        // ?????????????????????        function setupRealtimeListener() {
             database.ref(`groups/${groupId}/mahjong`).on('value', (snapshot) => {
                 try {
                     const firebaseData = snapshot.val();
                     if (firebaseData) {
-                        // データの更新
+                        // ???????????
                         if(firebaseData.data && firebaseData.data.dates) {
                             data = firebaseData.data;
                             
-                            // データの整合性を確保
-                            Object.keys(data.dates).forEach(date => {
+                            // ???????????????????                            Object.keys(data.dates).forEach(date => {
                                 const d = data.dates[date];
                                 if(!d.players || !Array.isArray(d.players)) {
                                     d.players = [];
@@ -678,21 +619,19 @@
                             allPlayers = firebaseData.allPlayers;
                         }
                         
-                        // 画面更新（現在のタブに応じて）
-                        render();
+                        // ???????????????????????????                        render();
                         if(currentTab === 'daily') renderDaily();
                         if(currentTab === 'players') renderPlayers();
                         
                         updateSyncStatus('synced');
                     }
                 } catch(error) {
-                    console.error('リアルタイム更新エラー:', error);
+                    console.error('??????????????????????:', error);
                 }
             });
         }
 
-        // Firebaseへデータ保存
-        function saveToFirebase() {
+        // Firebase???????????        function saveToFirebase() {
             updateSyncStatus('saving');
             
             database.ref(`groups/${groupId}/mahjong`).set({
@@ -704,42 +643,42 @@
                 updateSyncStatus('synced');
             })
             .catch((error) => {
-                console.error('保存エラー:', error);
-                notify('データの保存に失敗しました', 'error');
+                console.error('?????????:', error);
+                notify('??????????????????????', 'error');
                 updateSyncStatus('error');
             });
         }
 
-        // 同期ステータス更新
+        // ????????????????
         function updateSyncStatus(status) {
             const statusDiv = document.getElementById('syncStatus');
             if (!statusDiv) return;
             
             switch(status) {
                 case 'loading':
-                    statusDiv.innerHTML = '<span class="pulse">⏳</span> 読込中...';
+                    statusDiv.innerHTML = '<span class="pulse">??</span> ??????...';
                     statusDiv.className = 'text-xs px-2 py-1 bg-white/20 rounded';
                     break;
                 case 'saving':
-                    statusDiv.innerHTML = '<span class="pulse">💾</span> 保存中...';
+                    statusDiv.innerHTML = '<span class="pulse">??</span> ??????...';
                     statusDiv.className = 'text-xs px-2 py-1 bg-white/20 rounded';
                     break;
                 case 'synced':
-                    statusDiv.innerHTML = '✅ 同期完了';
+                    statusDiv.innerHTML = '?????????;
                     statusDiv.className = 'text-xs px-2 py-1 bg-green-500/80 rounded';
                     setTimeout(() => {
-                        statusDiv.innerHTML = '☁️ 同期済み';
+                        statusDiv.innerHTML = '??????????';
                         statusDiv.className = 'text-xs px-2 py-1 bg-white/20 rounded';
                     }, 2000);
                     break;
                 case 'error':
-                    statusDiv.innerHTML = '❌ エラー';
+                    statusDiv.innerHTML = '????????';
                     statusDiv.className = 'text-xs px-2 py-1 bg-red-500/80 rounded';
                     break;
             }
         }
 
-        // 通知表示
+        // ???????
         function notify(msg, type = 'success') {
             const n = document.getElementById('notification');
             if (!n) return;
@@ -752,8 +691,7 @@
             setTimeout(() => n.style.display = 'none', 3000);
         }
 
-        // タブ切り替え
-        function switchTab(tab) {
+        // ??????????        function switchTab(tab) {
             currentTab = tab;
             ['input','daily','players','league'].forEach(t => {
                 const contentEl = document.getElementById('content-'+t);
@@ -766,24 +704,24 @@
             });
             if(tab==='daily') renderDaily();
             if(tab==='players') {
-                updateYearSelects(); // 年選択を更新
+                updateYearSelects(); // ???????????
                 renderPlayers();
             }
             if(tab==='league') {
-                updateYearSelects(); // 年選択を更新
+                updateYearSelects(); // ???????????
                 updateLeaguePlayerSelects();
                 renderLeagues();
             }
         }
 
-        // 日付変更
+        // ???????
         let selectedDate = '';
         function dateChanged() {
             selectedDate = document.getElementById('selectedDate').value;
             render();
         }
 
-        // 麻雀の種類変更
+        // ?????????????
         function gameTypeChanged() {
             const d = getData();
             d.type = parseInt(document.getElementById('gameType').value);
@@ -794,12 +732,11 @@
             render();
         }
 
-        // データ取得
-        function getData() {
+        // ?????????        function getData() {
             if(!data.dates[selectedDate]) {
                 data.dates[selectedDate] = { type:4, players:[], games:[] };
             }
-            // 既存データの整合性チェック
+            // ???????????????????????
             const d = data.dates[selectedDate];
             if(!d.players) d.players = [];
             if(!d.games) d.games = [];
@@ -807,10 +744,10 @@
             return d;
         }
 
-        // プレイヤー変更
+        // ????????????
         function playerChanged(index, value) {
             if(value==='__new__') {
-                const name = prompt('新しいプレイヤー名');
+                const name = prompt('????????????????);
                 if(name && name.trim()) {
                     if(!allPlayers.includes(name.trim())) {
                         allPlayers.push(name.trim());
@@ -826,19 +763,19 @@
             }
         }
 
-        // プレイヤー追加
+        // ?????????????
         function addPlayer() {
             const input = document.getElementById('newPlayer');
             if(!input) return;
             
             const name = input.value.trim();
             if(!name) {
-                alert('プレイヤー名を入力してください');
+                alert('?????????????????????????');
                 return;
             }
             
             if(allPlayers.includes(name)) {
-                alert('このプレイヤーは既に登録されています');
+                alert('????????????????????????????????);
                 input.value = '';
                 return;
             }
@@ -847,130 +784,123 @@
             input.value = '';
             saveToFirebase();
             render();
-            notify('プレイヤー「' + name + '」を追加しました');
+            notify('??????????? + name + '?????????????');
         }
 
-        // 半荘追加
+        // ???????
         function addGame() {
             const d = getData();
             if(d.players.length < d.type) {
-                alert('全プレイヤーを選択してください');
+                alert('?????????????????????????');
                 return;
             }
             const scores = d.players.map((p,i) => parseFloat(document.getElementById('score'+i).value) || 0);
             
-            // スコア合計チェック
+            // ????????????????
             const total = scores.reduce((sum, s) => sum + s, 0);
-            // 小数点の誤差を考慮して、0.01未満なら0として扱う
-            if(Math.abs(total) >= 0.01) {
-                const confirmResult = window.confirm(`⚠️ スコアの合計が${total>0?'+':''}${total.toFixed(1)}です（0になっていません）\n\nこのまま登録しますか？\n\n【入力したスコア】\n${d.players.map((p,i) => `${p}: ${scores[i]>0?'+':''}${scores[i]}`).join('\n')}\n合計: ${total>0?'+':''}${total.toFixed(1)}`);
+            // ?????????????????????.01?????????????????            if(Math.abs(total) >= 0.01) {
+                const confirmResult = window.confirm(`?????????????????${total>0?'+':''}${total.toFixed(1)}??????????????????????n\n???????????????????n\n???????????????n${d.players.map((p,i) => `${p}: ${scores[i]>0?'+':''}${scores[i]}`).join('\n')}\n???? ${total>0?'+':''}${total.toFixed(1)}`);
                 if(!confirmResult) return;
             }
             
             d.games.push(scores);
             saveToFirebase();
             d.players.forEach((p,i) => document.getElementById('score'+i).value = '');
-            updateScoreTotal(); // 合計表示をクリア
+            updateScoreTotal(); // ???????????????
             render();
-            notify('半荘'+d.games.length+'を追加');
+            notify('???'+d.games.length+'??????');
         }
 
-        // 半荘削除
+        // ??????
         function removeGame(date, idx) {
-            if(confirm('この半荘を削除しますか？')) {
+            if(confirm('???????????????????)) {
                 data.dates[date].games.splice(idx, 1);
                 saveToFirebase();
                 render();
                 renderDaily();
-                notify('削除しました');
+                notify('?????????');
             }
         }
 
-        // スコア更新
+        // ??????????
         function updateScore(date, gIdx, pIdx, val) {
             data.dates[date].games[gIdx][pIdx] = parseFloat(val) || 0;
             saveToFirebase();
         }
 
-        // 今日のデータ削除
+        // ?????????????
         function clearToday() {
             if(data.dates[selectedDate]) {
                 delete data.dates[selectedDate];
                 saveToFirebase();
                 render();
-                notify('今日のデータを削除しました');
+                notify('?????????????????????');
             }
         }
 
-        // 全データ削除
+        // ??????????
         function clearAllData() {
-            // まず削除用パスワードを要求
-            const deletePassword = prompt('⚠️ 全データ削除\n\n全てのデータを完全に削除します。\nこの操作は取り消せません！\n\n削除用パスワードを入力してください:');
+            // ???????????????????????            const deletePassword = prompt('??????????????\n\n????????????????????????????n?????????????????????n\n????????????????????????????:');
             
             if (!deletePassword) {
-                notify('削除がキャンセルされました');
+                notify('??????????????????????');
                 return;
             }
             
-            // パスワード確認
-            if (deletePassword !== appPasswords.delete) {
-                alert('❌ パスワードが間違っています。\n\n削除用パスワードを管理者に確認してください。');
+            // ?????????????            if (deletePassword !== appPasswords.delete) {
+                alert('??????????????????????????n\n?????????????????????????????????????);
                 return;
             }
             
-            // パスワードが正しい場合のみ続行
-            if(confirm('⚠️ 最終確認\n\nパスワードが確認されました。\n\n全てのデータ（プレイヤー、半荘記録、リーグ戦）が完全に削除されます。\n\n本当に削除を実行しますか？')) {
-                // データを初期化
+            // ??????????????????????????            if(confirm('????????????n\n???????????????????????n\n???????????????????????????????????????????????????????????n\n??????????????????????)) {
+                // ???????????
                 data = { dates: {} };
                 allPlayers = [];
                 leagues = {};
                 
-                // Firebaseから削除（麻雀データ）
-                const mahjongDelete = database.ref(`groups/${groupId}/mahjong`).set({
+                // Firebase???????????????????                const mahjongDelete = database.ref(`groups/${groupId}/mahjong`).set({
                     data: { dates: {} },
                     allPlayers: [],
                     lastUpdated: new Date().toISOString(),
                     deletedAt: new Date().toISOString()
                 });
                 
-                // Firebaseから削除（リーグ戦データ）
-                const leaguesDelete = database.ref(`groups/${groupId}/leagues`).remove();
+                // Firebase??????????????????????                const leaguesDelete = database.ref(`groups/${groupId}/leagues`).remove();
                 
-                // 両方の削除を待つ
+                // ??????????????
                 Promise.all([mahjongDelete, leaguesDelete])
                 .then(() => {
                     render();
                     if(currentTab === 'daily') renderDaily();
                     if(currentTab === 'players') renderPlayers();
                     if(currentTab === 'league') renderLeagues();
-                    notify('全データを削除しました');
-                    console.log('全データ削除完了（麻雀データ＋リーグ戦）');
+                    notify('??????????????????');
+                    console.log('????????????????????????????????????);
                 })
                 .catch((error) => {
-                    console.error('削除エラー:', error);
-                    notify('削除に失敗しました', 'error');
+                    console.error('?????????:', error);
+                    notify('???????????????', 'error');
                 });
             } else {
-                notify('削除がキャンセルされました');
+                notify('??????????????????????');
             }
         }
 
-        // エクスポート機能
+        // ??????????????
         function exportData() {
             const exp = { data, allPlayers, exportDate: new Date().toISOString(), version: '1.0' };
             const jsonStr = JSON.stringify(exp, null, 2);
             const filename = 'mahjong_'+new Date().toISOString().split('T')[0]+'.json';
             
-            // iOSで共有シートを使う（Web Share API）
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            // iOS??????????????????eb Share API??            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
             if(isIOS && navigator.share) {
                 const file = new File([jsonStr], filename, { type: 'application/json' });
                 navigator.share({
                     files: [file],
-                    title: '麻雀成績データ',
-                    text: '麻雀成績管理のエクスポートデータ'
+                    title: '?????????????',
+                    text: '?????????????????????????????'
                 }).then(() => {
-                    notify('共有完了');
+                    notify('????????);
                 }).catch((err) => {
                     if(err.name !== 'AbortError') {
                         downloadFile(jsonStr, filename);
@@ -995,50 +925,49 @@
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
             if(isIOS) {
                 setTimeout(() => {
-                    alert('📥 ダウンロードが完了しました！\n\n【保存場所】\n1. Safariの「ダウンロード」ボタン（↓）をタップ\n2. または「ファイル」アプリの「ダウンロード」フォルダを確認\n\n保存場所を変更する場合は、ファイルアプリで移動できます。');
+                    alert('?? ?????????????????????????n\n????????????n1. Safari?????????????????????????????????\n2. ??????????????????????????????????????????????????n\n?????????????????????????????????????????????????);
                 }, 500);
             } else {
-                notify('エクスポート完了');
+                notify('???????????????);
             }
         }
 
-        // インポート機能
+        // ????????????
         function importData(e) {
             const file = e.target.files[0];
             if(!file) {
-                console.log('ファイルが選択されていません');
+                console.log('??????????????????????');
                 return;
             }
             
-            console.log('インポート開始:', file.name);
+            console.log('????????????', file.name);
             const reader = new FileReader();
             
             reader.onerror = (error) => {
-                console.error('ファイル読み込みエラー:', error);
-                alert('ファイルの読み込みに失敗しました');
+                console.error('?????????????????????:', error);
+                alert('?????????????????????????????');
             };
             
             reader.onload = (ev) => {
                 try {
-                    console.log('ファイル内容:', ev.target.result.substring(0, 200));
+                    console.log('???????????:', ev.target.result.substring(0, 200));
                     const imp = JSON.parse(ev.target.result);
-                    console.log('パース成功:', imp);
-                    console.log('インポートファイルのallPlayers:', imp.allPlayers);
-                    console.log('インポートファイルのdates:', Object.keys(imp.data.dates));
+                    console.log('????????:', imp);
+                    console.log('??????????????????allPlayers:', imp.allPlayers);
+                    console.log('??????????????????dates:', Object.keys(imp.data.dates));
                     
-                    // データ構造の検証
+                    // ???????????????
                     if(!imp.data || typeof imp.data !== 'object') {
-                        throw new Error('無効なファイル形式: data が見つかりません');
+                        throw new Error('????????????????? data ?????????????');
                     }
                     if(!imp.data.dates || typeof imp.data.dates !== 'object') {
-                        throw new Error('無効なファイル形式: data.dates が見つかりません');
+                        throw new Error('????????????????? data.dates ?????????????');
                     }
                     if(!imp.allPlayers || !Array.isArray(imp.allPlayers)) {
-                        throw new Error('無効なファイル形式: allPlayers が見つかりません');
+                        throw new Error('????????????????? allPlayers ?????????????');
                     }
                     
-                    // 現在のデータが未初期化の場合は初期化
-                    if(!data || typeof data !== 'object') {
+                    // ??????????????????????????????                    if(!data || typeof data !== 'object') {
                         data = { dates: {} };
                     }
                     if(!data.dates || typeof data.dates !== 'object') {
@@ -1048,12 +977,11 @@
                         allPlayers = [];
                     }
                     
-                    if(confirm('データを追加しますか？\n\nOK: 既存データに追加\nキャンセル: すべて上書き')) {
-                        // 追加モード
-                        let addedCount = 0;
+                    if(confirm('???????????????????n\nOK: ???????????????\n??????????: ??????????)) {
+                        // ??????????                        let addedCount = 0;
                         Object.entries(imp.data.dates).forEach(([d,v]) => {
                             if(data.dates[d]) {
-                                if(confirm(d+'のデータが既に存在します。上書きしますか？')) {
+                                if(confirm(d+'???????????????????????????????????)) {
                                     data.dates[d] = v;
                                     addedCount++;
                                 }
@@ -1063,75 +991,70 @@
                             }
                         });
                         
-                        // プレイヤーの追加（allPlayersから）
-                        let newPlayers = 0;
-                        console.log('インポート前のallPlayers:', allPlayers);
-                        console.log('追加予定のallPlayers:', imp.allPlayers);
+                        // ?????????????????llPlayers?????                        let newPlayers = 0;
+                        console.log('????????????allPlayers:', allPlayers);
+                        console.log('?????????allPlayers:', imp.allPlayers);
                         
                         imp.allPlayers.forEach(p => { 
-                            console.log('プレイヤー処理中:', p, '既存:', allPlayers.includes(p));
+                            console.log('???????????????:', p, '????', allPlayers.includes(p));
                             if(!allPlayers.includes(p)) {
                                 allPlayers.push(p);
                                 newPlayers++;
-                                console.log('✅ プレイヤー追加:', p);
+                                console.log('???????????????:', p);
                             } else {
-                                console.log('⏭️ プレイヤー既存:', p);
+                                console.log('?????????????????', p);
                             }
                         });
                         
-                        // データ内のプレイヤーも追加（念のため）
-                        console.log('データ内のプレイヤーをチェック...');
+                        // ??????????????????????????????????                        console.log('?????????????????????????...');
                         Object.entries(imp.data.dates).forEach(([date, dateData]) => {
-                            console.log('日付:', date, 'プレイヤー:', dateData.players);
+                            console.log('????', date, '?????????:', dateData.players);
                             if(dateData && dateData.players && Array.isArray(dateData.players)) {
                                 dateData.players.forEach(p => {
                                     if(p && !allPlayers.includes(p)) {
                                         allPlayers.push(p);
                                         newPlayers++;
-                                        console.log('✅ データ内から追加:', p);
+                                        console.log('????????????????:', p);
                                     }
                                 });
                             }
                         });
                         
-                        console.log('インポート後のallPlayers:', allPlayers);
-                        console.log(`追加完了: ${addedCount}日分のデータ, ${newPlayers}人の新規プレイヤー`);
-                        notify(`追加完了: ${addedCount}日分, ${newPlayers}人追加`);
+                        console.log('????????????allPlayers:', allPlayers);
+                        console.log(`???????? ${addedCount}??????????, ${newPlayers}?????????????????`);
+                        notify(`???????? ${addedCount}???? ${newPlayers}??????`);
                     } else {
-                        // 上書きモード
-                        console.log('上書きモード開始');
-                        console.log('インポート前のallPlayers:', allPlayers);
+                        // ??????????                        console.log('?????????????);
+                        console.log('????????????allPlayers:', allPlayers);
                         
-                        data = JSON.parse(JSON.stringify(imp.data)); // ディープコピー
-                        allPlayers = [...imp.allPlayers]; // コピー
+                        data = JSON.parse(JSON.stringify(imp.data)); // ???????????
+                        allPlayers = [...imp.allPlayers]; // ?????
                         
-                        console.log('allPlayersコピー後:', allPlayers);
+                        console.log('allPlayers???????', allPlayers);
                         
-                        // データ内のプレイヤーも確実に追加
+                        // ????????????????????????????
                         let dataPlayers = 0;
                         Object.entries(data.dates).forEach(([date, dateData]) => {
-                            console.log('日付:', date, 'プレイヤー:', dateData.players);
+                            console.log('????', date, '?????????:', dateData.players);
                             if(dateData && dateData.players && Array.isArray(dateData.players)) {
                                 dateData.players.forEach(p => {
                                     if(p && !allPlayers.includes(p)) {
                                         allPlayers.push(p);
                                         dataPlayers++;
-                                        console.log('✅ データ内から追加（上書きモード）:', p);
+                                        console.log('??????????????????????????????', p);
                                     }
                                 });
                             }
                         });
                         
-                        console.log('上書き完了 - 最終allPlayers:', allPlayers);
-                        console.log('データ内から追加したプレイヤー数:', dataPlayers);
-                        notify('データを上書きしました');
+                        console.log('?????????- ????llPlayers:', allPlayers);
+                        console.log('????????????????????????????:', dataPlayers);
+                        notify('??????????????????');
                     }
                     
-                    // データの整合性を確認
-                    if(!data.dates) data.dates = {};
+                    // ???????????????????                    if(!data.dates) data.dates = {};
                     
-                    // 全ての日付データの整合性を確保
-                    Object.keys(data.dates).forEach(date => {
+                    // ?????????????????????????????                    Object.keys(data.dates).forEach(date => {
                         const d = data.dates[date];
                         if(!d.players || !Array.isArray(d.players)) {
                             d.players = [];
@@ -1144,42 +1067,40 @@
                         }
                     });
                     
-                    // 最終的なプレイヤー数を確認
-                    const finalPlayerCount = allPlayers.length;
+                    // ????????????????????????                    const finalPlayerCount = allPlayers.length;
                     const dateCount = Object.keys(data.dates).length;
                     const gameCount = Object.values(data.dates).reduce((sum, d) => {
                         return sum + (d.games ? d.games.length : 0);
                     }, 0);
                     
                     console.log('========================================');
-                    console.log('インポート完了サマリー:');
-                    console.log('- 日付数:', dateCount);
-                    console.log('- 総半荘数:', gameCount);
-                    console.log('- プレイヤー数:', finalPlayerCount);
-                    console.log('- プレイヤー一覧:', allPlayers);
-                    console.log('- データ:', data);
+                    console.log('???????????????????:');
+                    console.log('- ?????:', dateCount);
+                    console.log('- ??????:', gameCount);
+                    console.log('- ???????????:', finalPlayerCount);
+                    console.log('- ?????????????:', allPlayers);
+                    console.log('- ?????:', data);
                     console.log('========================================');
                     
-                    // Firebaseに保存
-                    console.log('Firebaseに保存開始...');
+                    // Firebase??????                    console.log('Firebase?????????..');
                     saveToFirebase();
                     
-                    // 画面を更新
-                    console.log('画面更新開始...');
+                    // ?????????
+                    console.log('????????????..');
                     render();
                     if(currentTab === 'daily') renderDaily();
                     if(currentTab === 'players') renderPlayers();
-                    console.log('画面更新完了');
+                    console.log('????????????);
                     
-                    // 詳細な完了通知
+                    // ?????????????
                     setTimeout(() => {
-                        alert(`✅ インポート完了\n\n📊 データ概要:\n・日付: ${dateCount}日分\n・半荘: ${gameCount}回\n・プレイヤー: ${finalPlayerCount}人\n\nプレイヤー一覧:\n${allPlayers.join(', ')}`);
+                        alert(`???????????????n\n?? ?????????\n?????? ${dateCount}????n?????: ${gameCount}??n???????????: ${finalPlayerCount}??\n\n?????????????:\n${allPlayers.join(', ')}`);
                     }, 500);
                     
                 } catch(err) {
-                    console.error('インポートエラー:', err);
-                    console.error('スタック:', err.stack);
-                    alert('インポート失敗: ' + err.message + '\n\nコンソールで詳細を確認してください。');
+                    console.error('??????????????:', err);
+                    console.error('???????:', err.stack);
+                    alert('????????????? ' + err.message + '\n\n?????????????????????????????????);
                 }
             };
             
@@ -1187,8 +1108,7 @@
             e.target.value = '';
         }
 
-        // データから利用可能な年のリストを取得
-        function getAvailableYears() {
+        // ?????????????????????????????????        function getAvailableYears() {
             const years = new Set();
             if(data && data.dates) {
                 Object.keys(data.dates).forEach(dateStr => {
@@ -1198,31 +1118,27 @@
                     }
                 });
             }
-            return Array.from(years).sort((a, b) => b - a); // 降順
-        }
+            return Array.from(years).sort((a, b) => b - a); // ????        }
 
-        // 年選択ドロップダウンを更新
+        // ???????????????????????
         function updateYearSelects() {
             const years = getAvailableYears();
             const currentYear = new Date().getFullYear();
             
-            // プレイヤー統計の年選択
-            const playerYearSelect = document.getElementById('playerYearSelect');
+            // ????????????????????            const playerYearSelect = document.getElementById('playerYearSelect');
             if(playerYearSelect) {
-                let html = '<option value="all">通算</option>';
+                let html = '<option value="all">????/option>';
                 years.forEach(year => {
-                    html += `<option value="${year}">${year}年</option>`;
+                    html += `<option value="${year}">${year}??</option>`;
                 });
                 playerYearSelect.innerHTML = html;
-                // デフォルトは今年（なければ通算）
-                if(years.includes(currentYear)) {
+                // ????????????????????????????                if(years.includes(currentYear)) {
                     playerYearSelect.value = currentYear.toString();
                 }
             }
         }
 
-        // データから年のリストを取得
-        function getAvailableYears() {
+        // ???????????????????????        function getAvailableYears() {
             const years = new Set();
             if(data && data.dates) {
                 Object.keys(data.dates).forEach(dateStr => {
@@ -1230,37 +1146,34 @@
                     years.add(year);
                 });
             }
-            return Array.from(years).sort().reverse(); // 新しい年が上
-        }
+            return Array.from(years).sort().reverse(); // ???????????        }
 
-        // 年選択ドロップダウンを更新
+        // ???????????????????????
         function updateYearSelects() {
             const years = getAvailableYears();
             
-            // プレイヤータブの年選択
-            const playerYearSelect = document.getElementById('playerYearSelect');
+            // ????????????????????            const playerYearSelect = document.getElementById('playerYearSelect');
             if(playerYearSelect) {
-                let html = '<option value="all">通算成績</option>';
+                let html = '<option value="all">???????</option>';
                 years.forEach(year => {
-                    html += `<option value="${year}" ${year === selectedYear ? 'selected' : ''}>${year}年</option>`;
+                    html += `<option value="${year}" ${year === selectedYear ? 'selected' : ''}>${year}??</option>`;
                 });
                 playerYearSelect.innerHTML = html;
                 playerYearSelect.value = selectedYear;
             }
             
-            // リーグ戦タブの年選択
-            const leagueYearSelect = document.getElementById('leagueYearSelect');
+            // ???????????????????            const leagueYearSelect = document.getElementById('leagueYearSelect');
             if(leagueYearSelect) {
-                let html = '<option value="all">通算成績</option>';
+                let html = '<option value="all">???????</option>';
                 years.forEach(year => {
-                    html += `<option value="${year}" ${year === selectedYear ? 'selected' : ''}>${year}年</option>`;
+                    html += `<option value="${year}" ${year === selectedYear ? 'selected' : ''}>${year}??</option>`;
                 });
                 leagueYearSelect.innerHTML = html;
                 leagueYearSelect.value = selectedYear;
             }
         }
 
-        // プレイヤータブで年を変更
+        // ?????????????????????
         function changePlayerYear() {
             const select = document.getElementById('playerYearSelect');
             if(select) {
@@ -1269,55 +1182,53 @@
             }
         }
 
-        // リーグ戦タブで年を変更
+        // ????????????????????
         function changeLeagueYear() {
             const select = document.getElementById('leagueYearSelect');
             if(select) {
                 selectedYear = select.value;
-                // 現在選択中のリーグ戦を再計算
-                if(selectedLeagueId) {
+                // ???????????????????????????                if(selectedLeagueId) {
                     calculateLeagueById(selectedLeagueId);
                 }
             }
         }
 
-        // レンダリング
+        // ????????????
         function render() {
-            console.log('render() 呼び出し - allPlayers:', allPlayers);
+            console.log('render() ????????- allPlayers:', allPlayers);
             const d = getData();
             const gameTypeElement = document.getElementById('gameType');
             if(gameTypeElement) {
                 gameTypeElement.value = d.type;
             }
-            updateYearSelects(); // 年選択を更新
+            updateYearSelects(); // ???????????
             renderStats();
             renderPlayerSelectors();
             renderScoreInputs();
-            // renderGamesList(); // 入力タブには表示しない（日別タブのみ）
-            renderPlayerList();
-            updateLeaguePlayerSelects(); // リーグ戦のプレイヤー選択肢を更新
-            console.log('render() 完了');
+            // renderGamesList(); // ?????????????????????????????????            renderPlayerList();
+            updateLeaguePlayerSelects(); // ?????????????????????????????
+            console.log('render() ????);
         }
 
-        // 統計表示
+        // ????????
         function renderStats() {
             const statsElement = document.getElementById('stats');
             if(!statsElement) return;
             
             let games=0, players=new Set(), score=0;
             
-            // データの存在チェック
+            // ????????????????
             if(!data || !data.dates || typeof data.dates !== 'object') {
-                console.log('データが存在しません - 初期化します');
+                console.log('???????????????? - ??????????);
                 data = { dates: {} };
                 statsElement.innerHTML = `
                     <div class="bg-gradient-to-br from-cyan-500 to-teal-600 rounded-lg p-3 text-white">
                         <div class="text-2xl font-bold">0</div>
-                        <div class="text-xs">総半荘数</div>
+                        <div class="text-xs">??????</div>
                     </div>
                     <div class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg p-3 text-white">
                         <div class="text-2xl font-bold">0</div>
-                        <div class="text-xs">プレイヤー数</div>
+                        <div class="text-xs">???????????</div>
                     </div>
                 `;
                 return;
@@ -1325,21 +1236,21 @@
             
             try {
                 const dateValues = Object.values(data.dates);
-                console.log('処理する日付データ数:', dateValues.length);
+                console.log('?????????????????:', dateValues.length);
                 
                 dateValues.forEach(d => {
                     if(!d || typeof d !== 'object') {
-                        console.warn('無効な日付データ:', d);
+                        console.warn('???????????????:', d);
                         return;
                     }
                     if(!d.games || !Array.isArray(d.games)) {
-                        console.warn('games配列が存在しないか無効:', d);
+                        console.warn('games??????????????????:', d);
                         return;
                     }
                     
                     d.games.forEach(g => {
                         if(!g || !Array.isArray(g)) {
-                            console.warn('無効なゲームデータ:', g);
+                            console.warn('?????????????????:', g);
                             return;
                         }
                         games++;
@@ -1354,78 +1265,75 @@
                     });
                 });
             } catch(error) {
-                console.error('統計計算エラー:', error);
+                console.error('?????????????:', error);
             }
             
             statsElement.innerHTML = `
                 <div class="bg-gradient-to-br from-cyan-500 to-teal-600 rounded-lg p-3 text-white">
                     <div class="text-2xl font-bold">${games}</div>
-                    <div class="text-xs">総半荘数</div>
+                    <div class="text-xs">??????</div>
                 </div>
                 <div class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg p-3 text-white">
                     <div class="text-2xl font-bold">${players.size}</div>
-                    <div class="text-xs">プレイヤー数</div>
+                    <div class="text-xs">???????????</div>
                 </div>
             `;
         }
 
-        // プレイヤー一覧表示
+        // ?????????????????
         function renderPlayerList() {
             const playerListElement = document.getElementById('playerList');
             if(!playerListElement) {
-                console.warn('playerListElement が見つかりません');
+                console.warn('playerListElement ?????????????');
                 return;
             }
             
-            console.log('renderPlayerList 呼び出し - allPlayers:', allPlayers);
+            console.log('renderPlayerList ????????- allPlayers:', allPlayers);
             
             if(!allPlayers || allPlayers.length === 0) {
-                playerListElement.innerHTML = '<div class="text-center py-2 text-gray-400">登録プレイヤーなし</div>';
-                console.log('プレイヤーなし表示');
+                playerListElement.innerHTML = '<div class="text-center py-2 text-gray-400">?????????????????/div>';
+                console.log('?????????????????');
                 return;
             }
             
-            let html = '<div class="font-semibold mb-1">登録済みプレイヤー (' + allPlayers.length + '人)</div>';
+            let html = '<div class="font-semibold mb-1">???????????????? (' + allPlayers.length + '??)</div>';
             html += '<div class="flex flex-wrap gap-1">';
             allPlayers.forEach((p, idx) => {
                 html += `<span class="inline-block bg-cyan-100 text-cyan-700 px-2 py-1 rounded text-xs">
                     ${p}
-                    <button onclick="removePlayer(${idx})" class="ml-1 text-red-500 hover:text-red-700 font-bold">×</button>
+                    <button onclick="removePlayer(${idx})" class="ml-1 text-red-500 hover:text-red-700 font-bold">??/button>
                 </span>`;
             });
             html += '</div>';
             playerListElement.innerHTML = html;
-            console.log('プレイヤー一覧表示完了:', allPlayers.length + '人');
+            console.log('?????????????????????', allPlayers.length + '??');
         }
 
-        // プレイヤー削除
+        // ????????????
         function removePlayer(index) {
             const playerName = allPlayers[index];
             
-            // まず削除用パスワードを要求
-            const deletePassword = prompt(`⚠️ プレイヤー削除（管理者のみ）\n\nプレイヤー「${playerName}」を削除します。\n削除用パスワードを入力してください:`);
+            // ???????????????????????            const deletePassword = prompt(`?????????????????????????????n\n???????????{playerName}?????????????n????????????????????????????:`);
             
             if (!deletePassword) {
-                notify('削除がキャンセルされました');
+                notify('??????????????????????');
                 return;
             }
             
-            // パスワード確認
-            if (deletePassword !== appPasswords.delete) {
-                alert('❌ パスワードが間違っています。\n\n削除用パスワードを管理者に確認してください。');
+            // ?????????????            if (deletePassword !== appPasswords.delete) {
+                alert('??????????????????????????n\n?????????????????????????????????????);
                 return;
             }
             
-            // パスワードが正しい場合のみ削除を実行
-            if(confirm(`パスワードが確認されました。\n\nプレイヤー「${playerName}」を削除しますか？\n\n注意: 過去の記録からは削除されません。`)) {
+            // ???????????????????????????????            if(confirm(`???????????????????????n\n???????????{playerName}??????????????n\n???? ??????????????????????????)) {
                 allPlayers.splice(index, 1);
                 saveToFirebase();
                 render();
-                notify(`プレイヤー「${playerName}」を削除しました`);
+                notify(`???????????{playerName}????????????`);
             }
         }
 
-        // プレイヤー選択表示
+        // ?????????????????
         function renderPlayerSelectors() {
             const playerSelectorsElement = document.getElementById('playerSelectors');
             if(!playerSelectorsElement) return;
@@ -1439,22 +1347,22 @@
             for(let i=0; i<d.type; i++) {
                 const current = d.players[i] || '';
                 html += `<select onchange="playerChanged(${i}, this.value)" class="w-full px-3 py-2 border rounded-lg mb-2">
-                    <option value="">プレイヤー${i+1}を選択...</option>
+                    <option value="">?????????${i+1}?????..</option>
                     ${allPlayers.map(p => `<option value="${p}" ${p===current?'selected':''}>${p}</option>`).join('')}
-                    <option value="__new__">+ 新しいプレイヤー</option>
+                    <option value="__new__">+ ??????????????</option>
                 </select>`;
             }
             playerSelectorsElement.innerHTML = html;
         }
 
-        // スコア入力表示
+        // ??????????????
         function renderScoreInputs() {
             const d = getData();
             const scoreInputsElement = document.getElementById('scoreInputs');
             if(!scoreInputsElement) return;
             
             if(!d.players || d.players.length < d.type) {
-                scoreInputsElement.innerHTML = '<div class="text-gray-400 text-sm text-center py-2">全プレイヤーを選択してください</div>';
+                scoreInputsElement.innerHTML = '<div class="text-gray-400 text-sm text-center py-2">?????????????????????????</div>';
                 return;
             }
             
@@ -1463,12 +1371,12 @@
             d.players.forEach((p,i) => {
                 html += `<div class="flex items-center gap-2 mb-2 p-3 rounded-lg border-2 ${colors[i % colors.length]}">
                     <div class="flex-1">
-                        <div class="text-xs text-gray-600 mb-1">プレイヤー${i+1}</div>
+                        <div class="text-xs text-gray-600 mb-1">?????????${i+1}</div>
                         <div class="font-bold text-sm truncate">${p}</div>
                     </div>
                     <div class="flex-1">
-                        <div class="text-xs text-gray-600 mb-1">スコア</div>
-                        <input type="number" id="score${i}" placeholder="±0" 
+                        <div class="text-xs text-gray-600 mb-1">??????</div>
+                        <input type="number" id="score${i}" placeholder="??0" 
                                step="0.1"
                                class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-center font-bold"
                                oninput="updateScoreTotal()">
@@ -1478,7 +1386,7 @@
             scoreInputsElement.innerHTML = html;
         }
 
-        // スコア合計表示の更新
+        // ????????????????????
         function updateScoreTotal() {
             const d = getData();
             const totalElement = document.getElementById('scoreTotal');
@@ -1487,8 +1395,7 @@
             
             if (!totalElement || !totalValueElement || !totalRemainingElement) return;
             
-            // 全プレイヤーのスコアを合計
-            let sum = 0;
+            // ????????????????????????            let sum = 0;
             let filledCount = 0;
             
             for(let i = 0; i < d.type; i++) {
@@ -1499,15 +1406,14 @@
                 }
             }
             
-            // 小数点1桁に丸める
+            // ?????1????????
             sum = Math.round(sum * 10) / 10;
             
-            // 何か入力されている場合のみ表示
+            // ?????????????????????????
             if(filledCount > 0) {
                 totalElement.style.display = 'block';
                 
-                // 合計値の色を設定
-                if(sum === 0) {
+                // ????????????????                if(sum === 0) {
                     totalElement.className = 'mt-2 p-3 rounded-lg border-2 border-green-400 bg-green-50 text-center font-bold';
                     totalValueElement.className = 'text-2xl text-green-600';
                 } else if(sum > 0) {
@@ -1520,10 +1426,10 @@
                 
                 totalValueElement.textContent = (sum > 0 ? '+' : '') + sum;
                 
-                // 残りの値を表示
+                // ?????????????
                 if(filledCount < d.type) {
                     const remaining = -sum;
-                    totalRemainingElement.textContent = `残り${d.type - filledCount}人で: ${remaining > 0 ? '+' : ''}${remaining.toFixed(1)}`;
+                    totalRemainingElement.textContent = `???${d.type - filledCount}????: ${remaining > 0 ? '+' : ''}${remaining.toFixed(1)}`;
                     totalRemainingElement.style.display = 'block';
                 } else {
                     totalRemainingElement.style.display = 'none';
@@ -1533,7 +1439,7 @@
             }
         }
 
-        // ゲームリスト表示
+        // ????????????????
         function renderGamesList() {
             const gamesListElement = document.getElementById('gamesList');
             if(!gamesListElement) return;
@@ -1545,14 +1451,14 @@
                     return;
                 }
                 
-                let html = '<div class="mt-4"><h3 class="font-bold mb-2">今日の半荘</h3>';
+                let html = '<div class="mt-4"><h3 class="font-bold mb-2">????????</h3>';
                 d.games.forEach((g, idx) => {
                     if(!g || !Array.isArray(g)) return;
                     const totals = g.map((s,i) => s);
                     html += `<div class="bg-gray-50 rounded-lg p-2 mb-2 text-sm">
-                        <div class="font-bold mb-1">半荘${idx+1}</div>
+                        <div class="font-bold mb-1">???${idx+1}</div>
                         ${(d.players || []).map((p,i) => `<div class="flex justify-between">
-                            <span>${p || 'プレイヤー'+(i+1)}</span>
+                            <span>${p || '?????????'+(i+1)}</span>
                             <span class="${totals[i]>0?'text-green-600':totals[i]<0?'text-red-600':'text-gray-600'} font-bold">
                                 ${totals[i]>0?'+':''}${totals[i] || 0}
                             </span>
@@ -1562,26 +1468,26 @@
                 html += '</div>';
                 gamesListElement.innerHTML = html;
             } catch(error) {
-                console.error('ゲームリスト表示エラー:', error);
+                console.error('??????????????????????:', error);
                 gamesListElement.innerHTML = '';
             }
         }
 
-        // 日別データ表示
+        // ?????????????
         function renderDaily() {
             const dailyListElement = document.getElementById('dailyList');
             if(!dailyListElement) return;
             
             try {
-                // データの存在チェック
+                // ????????????????
                 if(!data || !data.dates || typeof data.dates !== 'object') {
-                    dailyListElement.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">データなし</div>';
+                    dailyListElement.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">?????????/div>';
                     return;
                 }
                 
                 const dates = Object.keys(data.dates).sort().reverse();
                 if(dates.length===0) {
-                    dailyListElement.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">データなし</div>';
+                    dailyListElement.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">?????????/div>';
                     return;
                 }
                 
@@ -1603,14 +1509,14 @@
                 html += `<div class="bg-cyan-50 rounded-lg p-3 border border-cyan-200 mb-3">
                     <div class="mb-2">
                         <div class="text-sm font-bold">${new Date(date).toLocaleDateString('ja-JP',{month:'long',day:'numeric'})}</div>
-                        <div class="inline-block bg-cyan-600 text-white px-2 py-1 rounded-full text-xs mt-1">${d.type}人麻雀 | ${d.games.length}半荘</div>
+                        <div class="inline-block bg-cyan-600 text-white px-2 py-1 rounded-full text-xs mt-1">${d.type}?????? | ${d.games.length}???</div>
                     </div>
                     <div class="daily-table-container">
                         <table class="w-full text-xs">
                             <thead><tr class="border-b-2 border-cyan-300">
-                                <th class="text-left py-2 px-1 font-bold sticky left-0 bg-cyan-50">半荘</th>
+                                <th class="text-left py-2 px-1 font-bold sticky left-0 bg-cyan-50">???</th>
                                 ${d.players.map(p => `<th class="text-center py-2 px-1 font-bold">${p}</th>`).join('')}
-                                <th class="text-center py-2 px-1 font-bold">操作</th>
+                                <th class="text-center py-2 px-1 font-bold">????/th>
                             </tr></thead>
                             <tbody>
                                 ${d.games.map((g,gi) => `<tr class="border-b border-gray-200">
@@ -1622,11 +1528,11 @@
                                             class="w-16 text-center px-1 py-1 border rounded ${s>0?'text-green-600':s<0?'text-red-600':'text-gray-600'}">
                                     </td>`).join('')}
                                     <td class="text-center py-2 px-1">
-                                        <button onclick="removeGame('${date}',${gi})" class="bg-red-500 text-white rounded px-2 py-1 text-xs font-bold active:bg-red-600" style="min-width:44px;min-height:32px;">削除</button>
+                                        <button onclick="removeGame('${date}',${gi})" class="bg-red-500 text-white rounded px-2 py-1 text-xs font-bold active:bg-red-600" style="min-width:44px;min-height:32px;">???</button>
                                     </td>
                                 </tr>`).join('')}
                                 <tr class="border-t-2 border-cyan-300 bg-cyan-100 font-bold">
-                                    <td class="py-2 px-1 sticky left-0 bg-cyan-100">合計</td>
+                                    <td class="py-2 px-1 sticky left-0 bg-cyan-100">????/td>
                                     ${totals.map(t => `<td class="text-center py-2 px-1 ${t>0?'text-green-600':t<0?'text-red-600':'text-gray-600'}">${t>0?'+':''}${Number(t).toFixed(1)}</td>`).join('')}
                                     <td class="py-2 px-1"></td>
                                 </tr>
@@ -1637,12 +1543,12 @@
                 });
                 dailyListElement.innerHTML = html;
             } catch(error) {
-                console.error('日別データ表示エラー:', error);
-                dailyListElement.innerHTML = '<div class="text-center py-8 text-red-400 text-sm">表示エラーが発生しました</div>';
+                console.error('???????????????????:', error);
+                dailyListElement.innerHTML = '<div class="text-center py-8 text-red-400 text-sm">?????????????????????</div>';
             }
         }
 
-        // プレイヤー統計表示
+        // ?????????????????
         function renderPlayers() {
             const playerStatsElement = document.getElementById('playerStats');
             const statsOverviewElement = document.getElementById('statsOverview');
@@ -1653,24 +1559,23 @@
                 let totalGames = 0;
                 const uniquePlayers = new Set();
                 
-                // データの存在チェック
+                // ????????????????
                 if(!data || !data.dates || typeof data.dates !== 'object') {
-                    playerStatsElement.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">データなし</div>';
+                    playerStatsElement.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">?????????/div>';
                     if(statsOverviewElement) statsOverviewElement.innerHTML = '';
                     return;
                 }
                 
-                // 選択された年を取得
-                const yearSelect = document.getElementById('playerYearSelect');
+                // ???????????????                const yearSelect = document.getElementById('playerYearSelect');
                 const selectedYear = yearSelect ? yearSelect.value : 'all';
                 
-                // 年でフィルタリング
+                // ?????????????????
                 Object.entries(data.dates).forEach(([dateStr, d]) => {
                     if(!d || typeof d !== 'object') return;
                     if(!d.games || !Array.isArray(d.games)) return;
                     if(!d.players || !Array.isArray(d.players)) return;
                     
-                    // 年フィルタ
+                    // ?????????
                     if(selectedYear !== 'all') {
                         const year = new Date(dateStr).getFullYear();
                         if(year.toString() !== selectedYear) return;
@@ -1697,21 +1602,21 @@
                 
                 const list = Object.values(stats).sort((a,b) => b.totalScore - a.totalScore);
                 if(!list.length) {
-                    playerStatsElement.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">データなし</div>';
+                    playerStatsElement.innerHTML = '<div class="text-center py-8 text-gray-400 text-sm">?????????/div>';
                     if(statsOverviewElement) statsOverviewElement.innerHTML = '';
                     return;
                 }
                 
-                // 総半荘数とプレイヤー数を表示
+                // ?????????????????????????
                 if(statsOverviewElement) {
                     statsOverviewElement.innerHTML = `
                         <div class="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg p-3 border border-blue-200">
-                            <div class="text-xs text-blue-600 font-medium mb-1">総半荘数</div>
-                            <div class="text-2xl font-bold text-blue-800">${totalGames}<span class="text-sm ml-1">半荘</span></div>
+                            <div class="text-xs text-blue-600 font-medium mb-1">??????</div>
+                            <div class="text-2xl font-bold text-blue-800">${totalGames}<span class="text-sm ml-1">???</span></div>
                         </div>
                         <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-3 border border-purple-200">
-                            <div class="text-xs text-purple-600 font-medium mb-1">プレイヤー数</div>
-                            <div class="text-2xl font-bold text-purple-800">${uniquePlayers.size}<span class="text-sm ml-1">人</span></div>
+                            <div class="text-xs text-purple-600 font-medium mb-1">???????????</div>
+                            <div class="text-2xl font-bold text-purple-800">${uniquePlayers.size}<span class="text-sm ml-1">??</span></div>
                         </div>
                     `;
                 }
@@ -1719,19 +1624,19 @@
                 let html = '';
                 list.forEach((p,idx) => {
                     const avg = (p.totalScore / p.totalGames).toFixed(1);
-                    const medal = ['👑','🥈','🥉'][idx] || '';
+                    const medal = ['??','???,'???][idx] || '';
                     let ranks = '';
                     for(let r=1; r<=4; r++) {
                         const count = p.ranks[r] || 0;
                         const pct = ((count/p.totalGames)*100).toFixed(1);
                         const colors = ['bg-yellow-500 text-yellow-700 bg-yellow-50','bg-gray-400 text-gray-700 bg-gray-50','bg-orange-500 text-orange-700 bg-orange-50','bg-red-500 text-red-700 bg-red-50'][r-1].split(' ');
                         ranks += `<div class="flex items-center gap-2 mb-2">
-                            <span class="text-xs font-bold w-8 ${colors[1]}">${r}位</span>
+                            <span class="text-xs font-bold w-8 ${colors[1]}">${r}??/span>
                             <div class="flex-1 ${colors[2]} rounded-full h-7 overflow-visible relative">
                                 <div class="${colors[0]} h-full rounded-full" style="width:${pct}%"></div>
                             </div>
                             <span class="text-xs font-bold ${colors[1]} w-12 text-right">${pct}%</span>
-                            <span class="text-xs text-gray-500 w-10 text-right">${count}回</span>
+                            <span class="text-xs text-gray-500 w-10 text-right">${count}??/span>
                         </div>`;
                     }
                     html += `<div class="bg-cyan-50 rounded-lg p-4 border border-cyan-200 mb-3">
@@ -1740,34 +1645,34 @@
                                 <div class="w-10 h-10 bg-gradient-to-r from-cyan-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold">${p.name[0].toUpperCase()}</div>
                                 <div>
                                     <h3 class="text-base font-bold">${medal} ${p.name}</h3>
-                                    <p class="text-xs text-gray-600">${p.totalGames}半荘</p>
+                                    <p class="text-xs text-gray-600">${p.totalGames}???</p>
                                 </div>
                             </div>
                             <div class="text-right">
                                 <div class="text-xl font-bold text-cyan-600">${p.totalScore>0?'+':''}${Number(p.totalScore).toFixed(1)}</div>
-                                <div class="text-xs text-gray-600">平均: ${avg>0?'+':''}${avg}</div>
+                                <div class="text-xs text-gray-600">???? ${avg>0?'+':''}${avg}</div>
                             </div>
                         </div>
                         <div class="border-t border-cyan-200 pt-3">
-                            <h4 class="text-xs font-bold mb-2">順位取得率</h4>
+                            <h4 class="text-xs font-bold mb-2">????????</h4>
                             ${ranks}
                         </div>
                     </div>`;
                 });
                 playerStatsElement.innerHTML = html;
             } catch(error) {
-                console.error('プレイヤー統計表示エラー:', error);
-                playerStatsElement.innerHTML = '<div class="text-center py-8 text-red-400 text-sm">表示エラーが発生しました</div>';
+                console.error('???????????????????????:', error);
+                playerStatsElement.innerHTML = '<div class="text-center py-8 text-red-400 text-sm">?????????????????????</div>';
             }
         }
 
-        // リーグ戦：プレイヤー選択肢を更新
+        // ?????????????????????????????
         function renderLeagueSelectors() {
             for(let i = 1; i <= 4; i++) {
                 const select = document.getElementById('leaguePlayer' + i);
                 if(!select) continue;
                 
-                let html = `<option value="">プレイヤー${i}を選択</option>`;
+                let html = `<option value="">?????????${i}?????/option>`;
                 allPlayers.forEach(p => {
                     html += `<option value="${p}">${p}</option>`;
                 });
@@ -1775,76 +1680,24 @@
             }
         }
 
-        // ========== リーグ戦管理機能 ==========
+        // ========== ??????????????? ==========
         
-        // リーグ戦作成フォームを表示
+        // ????????????????????????
         function showLeagueCreateForm() {
             document.getElementById('leagueCreateForm').style.display = 'block';
             document.getElementById('leagueName').value = '';
             updateLeaguePlayerSelects();
-            updateMultiPlayerList(); // 多人数モード用のリストを更新
             document.getElementById('leagueName').focus();
         }
 
-        // リーグ戦作成フォームを非表示
+        // ?????????????????????????
         function hideLeagueCreateForm() {
             document.getElementById('leagueCreateForm').style.display = 'none';
         }
-        
-        // リーグ戦モードを切り替え
-        function toggleLeagueMode() {
-            const mode = document.querySelector('input[name="leagueMode"]:checked').value;
-            const fixedSection = document.getElementById('fixedModeSection');
-            const multiSection = document.getElementById('multiModeSection');
-            
-            if(mode === 'fixed') {
-                fixedSection.style.display = 'block';
-                multiSection.style.display = 'none';
-            } else {
-                fixedSection.style.display = 'none';
-                multiSection.style.display = 'block';
-                updateMultiPlayerList();
-            }
-        }
-        
-        // 多人数モードのメンバーリストを更新
-        function updateMultiPlayerList() {
-            const listElement = document.getElementById('multiPlayerList');
-            if(!listElement) return;
-            
-            if(!allPlayers || allPlayers.length === 0) {
-                listElement.innerHTML = '<div class="text-center py-4 text-gray-400 text-sm">登録プレイヤーなし</div>';
-                return;
-            }
-            
-            let html = '';
-            allPlayers.forEach((player, idx) => {
-                html += `
-                    <label class="flex items-center gap-2 p-2 hover:bg-blue-50 rounded cursor-pointer">
-                        <input type="checkbox" 
-                               class="league-member-checkbox w-4 h-4" 
-                               value="${escapeHtml(player)}" 
-                               onchange="updateSelectedMemberCount()">
-                        <span class="text-sm">${escapeHtml(player)}</span>
-                    </label>
-                `;
-            });
-            listElement.innerHTML = html;
-            updateSelectedMemberCount();
-        }
-        
-        // 選択メンバー数を更新
-        function updateSelectedMemberCount() {
-            const checkboxes = document.querySelectorAll('.league-member-checkbox:checked');
-            const countElement = document.getElementById('selectedMemberCount');
-            if(countElement) {
-                countElement.textContent = checkboxes.length;
-            }
-        }
 
-        // リーグ戦作成用のプレイヤー選択肢を更新
+        // ??????????????????????????????????
         function updateLeaguePlayerSelects() {
-            const html = '<option value="">選択してください</option>' + 
+            const html = '<option value="">?????????????</option>' + 
                          allPlayers.map(p => `<option value="${p}">${p}</option>`).join('');
             
             for(let i = 1; i <= 4; i++) {
@@ -1852,16 +1705,16 @@
                 if(select) select.innerHTML = html;
             }
             
-            // 入力タブのリーグ戦クイック選択も更新
+            // ????????????????????????????????
             updateLeagueQuickSelect();
         }
         
-        // 入力タブのリーグ戦クイック選択を更新
+        // ????????????????????????????????
         function updateLeagueQuickSelect() {
             const select = document.getElementById('leagueQuickSelect');
             if(!select) return;
             
-            let html = '<option value="">-- リーグ戦を選択 --</option>';
+            let html = '<option value="">-- ?????????????--</option>';
             
             if(leagues && Object.keys(leagues).length > 0) {
                 Object.entries(leagues).forEach(([leagueId, league]) => {
@@ -1872,7 +1725,7 @@
             select.innerHTML = html;
         }
         
-        // リーグ戦メンバーを入力欄に適用
+        // ???????????????????????????
         function applyLeagueMembers() {
             const select = document.getElementById('leagueQuickSelect');
             if(!select || !select.value) return;
@@ -1881,95 +1734,89 @@
             const league = leagues[leagueId];
             
             if(!league || !league.players || league.players.length !== 4) {
-                alert('リーグ戦データが見つかりません');
+                alert('??????????????????????????');
                 return;
             }
             
-            // データを取得
-            const d = getData();
+            // ??????????            const d = getData();
             
-            // 4人麻雀に設定
-            const gameTypeSelect = document.getElementById('gameType');
+            // 4????????????            const gameTypeSelect = document.getElementById('gameType');
             if(gameTypeSelect && gameTypeSelect.value !== '4') {
                 gameTypeSelect.value = '4';
                 gameTypeChanged();
             }
             
-            // プレイヤーを設定
-            d.players = [...league.players];
+            // ???????????????            d.players = [...league.players];
             
-            // 画面を更新
+            // ?????????
             render();
             
-            // 通知
-            showNotification(`🏆 リーグ戦「${league.name}」のメンバーを設定しました`);
+            // ???
+            showNotification(`?? ??????????{league.name}??????????????????????`);
         }
 
-        // リーグ戦を作成
+        // ?????????????
         function createLeague() {
             const name = document.getElementById('leagueName').value.trim();
             if(!name) {
-                alert('リーグ戦名を入力してください');
+                alert('????????????????????????');
                 return;
             }
 
-            // 4人のプレイヤーを取得
-            const selectedPlayers = [];
+            // 4??????????????????            const selectedPlayers = [];
             for(let i = 1; i <= 4; i++) {
                 const select = document.getElementById('newLeaguePlayer' + i);
                 const player = select ? select.value : '';
                 if(!player) {
-                    alert(`プレイヤー${i}を選択してください`);
+                    alert(`?????????${i}??????????????`);
                     return;
                 }
                 if(selectedPlayers.includes(player)) {
-                    alert(`同じプレイヤーが複数選択されています: ${player}`);
+                    alert(`?????????????????????????????? ${player}`);
                     return;
                 }
                 selectedPlayers.push(player);
             }
 
-            // リーグ戦IDを生成（タイムスタンプベース）
-            const leagueId = 'league_' + Date.now();
+            // ????????ID???????????????????????????            const leagueId = 'league_' + Date.now();
             
-            // リーグ戦データ
+            // ?????????????
             const leagueData = {
                 name: name,
                 players: selectedPlayers,
                 createdAt: Date.now()
             };
 
-            // Firebaseに保存
-            database.ref(`groups/${groupId}/leagues/${leagueId}`).set(leagueData)
+            // Firebase??????            database.ref(`groups/${groupId}/leagues/${leagueId}`).set(leagueData)
                 .then(() => {
-                    console.log('リーグ戦を作成しました:', leagueId, leagueData);
+                    console.log('???????????????????:', leagueId, leagueData);
                     leagues[leagueId] = leagueData;
                     hideLeagueCreateForm();
                     renderLeagues();
-                    updateLeagueQuickSelect(); // 入力タブのドロップダウンも更新
-                    showNotification('✅ リーグ戦「' + name + '」を作成しました');
+                    updateLeagueQuickSelect(); // ?????????????????????????
+                    showNotification('???????????? + name + '????????????');
                 })
                 .catch(error => {
-                    console.error('リーグ戦の作成に失敗:', error);
-                    alert('リーグ戦の作成に失敗しました');
+                    console.error('???????????????????', error);
+                    alert('?????????????????????????');
                 });
         }
 
-        // Firebaseからリーグ戦一覧を読み込み
+        // Firebase?????????????????????????
         function loadLeagues() {
             return database.ref(`groups/${groupId}/leagues`).once('value')
                 .then(snapshot => {
                     leagues = snapshot.val() || {};
-                    console.log('リーグ戦を読み込みました:', Object.keys(leagues).length + '件');
+                    console.log('???????????????????????:', Object.keys(leagues).length + '??');
                     renderLeagues();
-                    updateLeagueQuickSelect(); // 入力タブのドロップダウンも更新
+                    updateLeagueQuickSelect(); // ?????????????????????????
                 })
                 .catch(error => {
-                    console.error('リーグ戦の読み込みに失敗:', error);
+                    console.error('????????????????????????', error);
                 });
         }
 
-        // リーグ戦一覧を表示
+        // ??????????????????
         function renderLeagues() {
             const container = document.getElementById('leagueList');
             if(!container) return;
@@ -1979,16 +1826,16 @@
             if(leagueArray.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-12 bg-gray-50 rounded-lg mb-4">
-                        <div class="text-4xl mb-3">🏆</div>
-                        <p class="text-gray-600 font-semibold mb-2">リーグ戦がありません</p>
-                        <p class="text-sm text-gray-500">「新しいリーグ戦を作成」ボタンから作成してください</p>
+                        <div class="text-4xl mb-3">??</div>
+                        <p class="text-gray-600 font-semibold mb-2">?????????????????</p>
+                        <p class="text-sm text-gray-500">?????????????????????????????????????????</p>
                     </div>
                 `;
                 return;
             }
 
             let html = '<div class="mb-4">';
-            html += '<h3 class="text-lg font-bold text-gray-800 mb-3">📋 リーグ戦一覧</h3>';
+            html += '<h3 class="text-lg font-bold text-gray-800 mb-3">?? ????????????</h3>';
             
             leagueArray.forEach(([leagueId, league]) => {
                 const isSelected = leagueId === selectedLeagueId;
@@ -2001,15 +1848,14 @@
                             <h4 class="font-bold text-gray-800 flex-1">${escapeHtml(league.name)}</h4>
                             <button onclick="deleteLeague('${leagueId}')" 
                                     class="text-red-500 text-sm px-2 py-1 hover:bg-red-50 rounded active:bg-red-100">
-                                🗑️
-                            </button>
+                                ????                            </button>
                         </div>
                         <div class="text-sm text-gray-600 mb-2">
-                            👥 ${league.players.map(p => escapeHtml(p)).join(' / ')}
+                            ?? ${league.players.map(p => escapeHtml(p)).join(' / ')}
                         </div>
                         <button onclick="selectLeague('${leagueId}')" 
                                 class="w-full ${isSelected ? 'bg-amber-500' : 'bg-blue-500'} text-white py-2 rounded-lg text-sm font-bold active:opacity-80">
-                            ${isSelected ? '✅ 選択中' : '📊 成績を表示'}
+                            ${isSelected ? '????????' : '?? ??????????'}
                         </button>
                     </div>
                 `;
@@ -2019,33 +1865,33 @@
             container.innerHTML = html;
         }
 
-        // リーグ戦を選択して成績を表示
+        // ??????????????????????????
         function selectLeague(leagueId) {
             selectedLeagueId = leagueId;
             const league = leagues[leagueId];
             
             if(!league) {
-                alert('リーグ戦が見つかりません');
+                alert('?????????????????????');
                 return;
             }
 
-            console.log('リーグ戦を選択:', leagueId, league);
-            renderLeagues(); // 選択状態を更新
+            console.log('?????????????', leagueId, league);
+            renderLeagues(); // ????????????
             calculateLeagueById(leagueId);
         }
 
-        // リーグ戦を削除
+        // ?????????????
         function deleteLeague(leagueId) {
             const league = leagues[leagueId];
             if(!league) return;
 
-            if(!confirm(`リーグ戦「${league.name}」を削除しますか？`)) {
+            if(!confirm(`??????????{league.name}??????????????)) {
                 return;
             }
 
             database.ref(`groups/${groupId}/leagues/${leagueId}`).remove()
                 .then(() => {
-                    console.log('リーグ戦を削除しました:', leagueId);
+                    console.log('???????????????????:', leagueId);
                     delete leagues[leagueId];
                     
                     if(selectedLeagueId === leagueId) {
@@ -2054,49 +1900,44 @@
                     }
                     
                     renderLeagues();
-                    updateLeagueQuickSelect(); // 入力タブのドロップダウンも更新
-                    showNotification('🗑️ リーグ戦を削除しました');
+                    updateLeagueQuickSelect(); // ?????????????????????????
+                    showNotification('???????????????????????');
                 })
                 .catch(error => {
-                    console.error('リーグ戦の削除に失敗:', error);
-                    alert('リーグ戦の削除に失敗しました');
+                    console.error('???????????????????', error);
+                    alert('?????????????????????????');
                 });
         }
 
-        // リーグ戦IDから成績を計算
-        function calculateLeagueById(leagueId) {
+        // ????????ID?????????????        function calculateLeagueById(leagueId) {
             const league = leagues[leagueId];
             if(!league) return;
 
             const selectedPlayers = league.players;
-            console.log('リーグ戦メンバー:', selectedPlayers);
+            console.log('???????????????:', selectedPlayers);
             
-            // 選択された年を取得
-            const yearSelect = document.getElementById('leagueYearSelect');
+            // ???????????????            const yearSelect = document.getElementById('leagueYearSelect');
             const selectedYear = yearSelect ? yearSelect.value : 'all';
 
-            // このメンバーで行われた試合を抽出
+            // ???????????????????????????
             const leagueGames = [];
             Object.entries(data.dates).forEach(([date, dateData]) => {
                 if(!dateData || !dateData.games || !dateData.players) return;
                 
-                // 年フィルタ
+                // ?????????
                 if(selectedYear !== 'all') {
                     const year = new Date(date).getFullYear();
                     if(year.toString() !== selectedYear) return;
                 }
                 
-                // この日のプレイヤーがリーグ戦メンバーと完全一致するか確認（順序は無視）
-                const dayPlayers = dateData.players.filter(p => p); // 空文字を除外
-                if(dayPlayers.length !== 4) return;
+                // ???????????????????????????????????????????????????????????????                const dayPlayers = dateData.players.filter(p => p); // ???????????                if(dayPlayers.length !== 4) return;
                 
-                // ソートして比較することで、順序に関係なく同じメンバーかを判定
-                const sortedDayPlayers = [...dayPlayers].sort();
+                // ???????????????????????????????????????????????????                const sortedDayPlayers = [...dayPlayers].sort();
                 const sortedSelectedPlayers = [...selectedPlayers].sort();
                 const isLeagueMatch = JSON.stringify(sortedDayPlayers) === JSON.stringify(sortedSelectedPlayers);
                 
                 if(isLeagueMatch) {
-                    console.log('リーグ戦の試合を発見:', date, 'プレイヤー順序:', dayPlayers);
+                    console.log('???????????????????', date, '?????????????', dayPlayers);
                     dateData.games.forEach((game, gameIndex) => {
                         leagueGames.push({
                             date: date,
@@ -2108,21 +1949,20 @@
                 }
             });
 
-            console.log('リーグ戦試合数:', leagueGames.length);
+            console.log('?????????????:', leagueGames.length);
 
             if(leagueGames.length === 0) {
                 document.getElementById('leagueResults').innerHTML = `
                     <div class="text-center py-12 bg-gray-50 rounded-lg">
-                        <div class="text-4xl mb-3">🤔</div>
-                        <p class="text-gray-600 font-semibold mb-2">この4人での対戦記録が見つかりません</p>
-                        <p class="text-sm text-gray-500">「${escapeHtml(league.name)}」のメンバー全員で対戦した記録が必要です</p>
+                        <div class="text-4xl mb-3">???/div>
+                        <p class="text-gray-600 font-semibold mb-2">???4??????????????????????????</p>
+                        <p class="text-sm text-gray-500">??{escapeHtml(league.name)}???????????????????????????????????/p>
                     </div>
                 `;
                 return;
             }
 
-            // 統計を計算
-            const stats = {};
+            // ?????????            const stats = {};
             selectedPlayers.forEach(p => {
                 stats[p] = {
                     name: p,
@@ -2140,33 +1980,31 @@
                     stats[playerName].totalGames++;
                     stats[playerName].totalScore += score;
                     
-                    // 順位計算
-                    const sorted = [...game.scores].sort((a,b) => b-a);
+                    // ????????                    const sorted = [...game.scores].sort((a,b) => b-a);
                     const rank = sorted.indexOf(score) + 1;
                     stats[playerName].ranks[rank]++;
                 });
             });
 
-            // 結果を表示
+            // ?????????
             renderLeagueResults(league.name, selectedPlayers, stats, leagueGames);
         }
 
-        // リーグ戦：結果表示（リーグ戦名を追加）
-        function renderLeagueResults(leagueName, players, stats, games) {
+        // ???????????????????????????????????        function renderLeagueResults(leagueName, players, stats, games) {
             const list = players.map(p => stats[p]).sort((a,b) => b.totalScore - a.totalScore);
             
             let html = `
                 <div class="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-lg p-4 mb-4 border-2 border-amber-300">
                     <h3 class="text-lg font-bold text-amber-800 mb-2 flex items-center">
-                        🏆 ${escapeHtml(leagueName)} - 成績
+                        ?? ${escapeHtml(leagueName)} - ????
                     </h3>
-                    <p class="text-sm text-amber-700">総対戦数: <span class="font-bold">${games.length}半荘</span></p>
+                    <p class="text-sm text-amber-700">????????: <span class="font-bold">${games.length}???</span></p>
                 </div>
             `;
 
             list.forEach((p, idx) => {
                 const avg = (p.totalScore / p.totalGames).toFixed(1);
-                const medals = ['🥇', '🥈', '🥉', '4️⃣'];
+                const medals = ['???, '???, '???, '4???'];
                 const borderColors = ['border-yellow-400', 'border-gray-400', 'border-orange-400', 'border-blue-300'];
                 const bgColors = ['bg-yellow-50', 'bg-gray-50', 'bg-orange-50', 'bg-blue-50'];
                 
@@ -2176,12 +2014,12 @@
                     const pct = ((count/p.totalGames)*100).toFixed(1);
                     const colors = ['bg-yellow-500 text-yellow-700 bg-yellow-50','bg-gray-400 text-gray-700 bg-gray-50','bg-orange-500 text-orange-700 bg-orange-50','bg-red-500 text-red-700 bg-red-50'][r-1].split(' ');
                     ranks += `<div class="flex items-center gap-2 mb-2">
-                        <span class="text-xs font-bold w-8 ${colors[1]}">${r}位</span>
+                        <span class="text-xs font-bold w-8 ${colors[1]}">${r}??/span>
                         <div class="flex-1 ${colors[2]} rounded-full h-7 overflow-visible relative">
                             <div class="${colors[0]} h-full rounded-full" style="width:${pct}%"></div>
                         </div>
                         <span class="text-xs font-bold ${colors[1]} w-12 text-right">${pct}%</span>
-                        <span class="text-xs text-gray-500 w-10 text-right">${count}回</span>
+                        <span class="text-xs text-gray-500 w-10 text-right">${count}??/span>
                     </div>`;
                 }
                 
@@ -2191,30 +2029,30 @@
                             <div class="text-4xl">${medals[idx]}</div>
                             <div>
                                 <h3 class="text-lg font-bold">${p.name}</h3>
-                                <p class="text-xs text-gray-600">${p.totalGames}半荘</p>
+                                <p class="text-xs text-gray-600">${p.totalGames}???</p>
                             </div>
                         </div>
                         <div class="text-right">
                             <div class="text-2xl font-bold ${p.totalScore>=0?'text-green-600':'text-red-600'}">
                                 ${p.totalScore>0?'+':''}${Number(p.totalScore).toFixed(1)}
                             </div>
-                            <div class="text-xs text-gray-600">平均: ${avg>0?'+':''}${avg}</div>
+                            <div class="text-xs text-gray-600">???? ${avg>0?'+':''}${avg}</div>
                         </div>
                     </div>
                     <div class="border-t border-gray-300 pt-3">
-                        <h4 class="text-xs font-bold mb-2">順位取得率</h4>
+                        <h4 class="text-xs font-bold mb-2">????????</h4>
                         ${ranks}
                     </div>
                 </div>`;
             });
 
-            // 日別成績を追加
+            // ??????????????
             html += `
                 <div class="mt-4 bg-white rounded-lg p-4 border-2 border-gray-300">
-                    <h3 class="text-lg font-bold text-gray-800 mb-3">📅 日別成績</h3>
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">?? ????????</h3>
             `;
             
-            // 日付ごとにグループ化
+            // ??????????????????
             const gamesByDate = {};
             games.forEach(game => {
                 if(!gamesByDate[game.date]) {
@@ -2223,11 +2061,10 @@
                 gamesByDate[game.date].push(game);
             });
             
-            // 日付を降順でソート
-            const sortedDates = Object.keys(gamesByDate).sort().reverse();
+            // ????????????????            const sortedDates = Object.keys(gamesByDate).sort().reverse();
             
             if(sortedDates.length === 0) {
-                html += '<div class="text-center py-4 text-gray-400">データなし</div>';
+                html += '<div class="text-center py-4 text-gray-400">?????????/div>';
             } else {
                 sortedDates.forEach(date => {
                     const dateGames = gamesByDate[date];
@@ -2238,7 +2075,7 @@
                                 <table class="w-full text-xs">
                                     <thead>
                                         <tr class="border-b-2 border-gray-300 bg-gray-100">
-                                            <th class="text-left py-2 px-2 font-bold">半荘</th>
+                                            <th class="text-left py-2 px-2 font-bold">???</th>
                                             ${players.map(p => `<th class="text-center py-2 px-2 font-bold">${escapeHtml(p)}</th>`).join('')}
                                         </tr>
                                     </thead>
@@ -2261,9 +2098,9 @@
                         html += `</tr>`;
                     });
                     
-                    // 日ごとの合計を表示
+                    // ????????????????
                     html += `<tr class="border-t-2 border-gray-300 bg-gray-100 font-bold">
-                        <td class="py-2 px-2">合計</td>`;
+                        <td class="py-2 px-2">????/td>`;
                     
                     players.forEach(playerName => {
                         let dayTotal = 0;
@@ -2291,16 +2128,15 @@
             document.getElementById('leagueResults').innerHTML = html;
         }
 
-        // 動的manifest.json生成（グループID付き）
-        function setupDynamicManifest() {
+        // ???manifest.json????????????D?????        function setupDynamicManifest() {
             const params = new URLSearchParams(window.location.search);
             const groupId = params.get('group') || '';
             const startUrl = groupId ? `./mobile-firebase.html?group=${groupId}` : './mobile-firebase.html';
             
             const manifest = {
-                name: "麻雀成績管理",
-                short_name: "麻雀成績",
-                description: "麻雀の成績を記録・管理するアプリ",
+                name: "????????????,
+                short_name: "????????",
+                description: "????????????????????????????",
                 start_url: startUrl,
                 display: "standalone",
                 background_color: "#ffffff",
@@ -2331,16 +2167,15 @@
             }
         }
         
-        // PWA設定を初期化
-        setupDynamicManifest();
+        // PWA??????????        setupDynamicManifest();
 
-        // メニューの開閉制御
+        // ????????????????
         function toggleMenu() {
             const menu = document.getElementById('menuDropdown');
             menu.classList.toggle('show');
         }
         
-        // メニュー外をクリックしたら閉じる
+        // ??????????????????????????
         document.addEventListener('click', (e) => {
             const menu = document.getElementById('menuDropdown');
             const menuContainer = document.querySelector('.menu-container');
@@ -2349,15 +2184,14 @@
             }
         });
 
-        // Service Worker登録（PWA対応）
-        if ('serviceWorker' in navigator) {
+        // Service Worker??????WA??????        if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./service-worker.js')
                     .then((registration) => {
-                        console.log('Service Worker登録成功:', registration.scope);
+                        console.log('Service Worker???????:', registration.scope);
                     })
                     .catch((error) => {
-                        console.log('Service Worker登録失敗:', error);
+                        console.log('Service Worker????????', error);
                     });
             });
         }
