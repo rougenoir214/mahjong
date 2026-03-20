@@ -663,11 +663,15 @@
                     // データの整合性を確保（全ての日付データにplayers, gamesを追加）
                     Object.keys(data.dates).forEach(date => {
                         const d = data.dates[date];
-                        if(!d.players || !Array.isArray(d.players)) {
+                        if(!d.players) {
                             d.players = [];
+                        } else if (!Array.isArray(d.players)) {
+                            d.players = Object.values(d.players);
                         }
-                        if(!d.games || !Array.isArray(d.games)) {
+                        if(!d.games) {
                             d.games = [];
+                        } else if (!Array.isArray(d.games)) {
+                            d.games = Object.values(d.games);
                         }
                         if(!d.type || typeof d.type !== 'number') {
                             d.type = 4;
@@ -675,13 +679,15 @@
                     });
                     
                     // プレイヤーデータの初期化
-                    if (firebaseData && firebaseData.allPlayers) {
-                        const raw = firebaseData.allPlayers;
+                    // allPlayersはfirebaseData.data内に保存されている
+                    const _dataObj = (firebaseData && firebaseData.data) ? firebaseData.data : firebaseData;
+                    if (_dataObj && _dataObj.allPlayers) {
+                        const raw = _dataObj.allPlayers;
                         allPlayers = Array.isArray(raw) ? raw : Object.values(raw);
-                    } else if (firebaseData && firebaseData.dates) {
+                    } else if (_dataObj && _dataObj.dates) {
                         // allPlayersがない場合はdatesの各日付のplayersから収集
                         const playerSet = new Set();
-                        Object.values(firebaseData.dates).forEach(d => {
+                        Object.values(_dataObj.dates).forEach(d => {
                             const ps = d.players;
                             if (ps) (Array.isArray(ps) ? ps : Object.values(ps)).forEach(p => p && playerSet.add(p));
                         });
@@ -756,24 +762,29 @@
                             // データの整合性を確保
                             Object.keys(data.dates).forEach(date => {
                                 const d = data.dates[date];
-                                if(!d.players || !Array.isArray(d.players)) {
+                                if(!d.players) {
                                     d.players = [];
+                                } else if (!Array.isArray(d.players)) {
+                                    d.players = Object.values(d.players);
                                 }
-                                if(!d.games || !Array.isArray(d.games)) {
+                                if(!d.games) {
                                     d.games = [];
+                                } else if (!Array.isArray(d.games)) {
+                                    d.games = Object.values(d.games);
                                 }
                                 if(!d.type || typeof d.type !== 'number') {
                                     d.type = 4;
                                 }
                             });
                         }
-                        if(firebaseData.allPlayers) {
-                            const raw = firebaseData.allPlayers;
+                        const _rt = (firebaseData && firebaseData.data) ? firebaseData.data : firebaseData;
+                        if(_rt && _rt.allPlayers) {
+                            const raw = _rt.allPlayers;
                             allPlayers = Array.isArray(raw) ? raw : Object.values(raw);
-                        } else if (firebaseData.dates) {
+                        } else if (_rt && _rt.dates) {
                             // allPlayersがない場合はdatesから収集
                             const playerSet = new Set();
-                            Object.values(firebaseData.dates).forEach(d => {
+                            Object.values(_rt.dates).forEach(d => {
                                 const ps = d.players;
                                 if (ps) (Array.isArray(ps) ? ps : Object.values(ps)).forEach(p => p && playerSet.add(p));
                             });
