@@ -675,8 +675,17 @@
                     });
                     
                     // プレイヤーデータの初期化
-                    if (firebaseData && Array.isArray(firebaseData.allPlayers)) {
-                        allPlayers = firebaseData.allPlayers;
+                    if (firebaseData && firebaseData.allPlayers) {
+                        const raw = firebaseData.allPlayers;
+                        allPlayers = Array.isArray(raw) ? raw : Object.values(raw);
+                    } else if (firebaseData && firebaseData.dates) {
+                        // allPlayersがない場合はdatesの各日付のplayersから収集
+                        const playerSet = new Set();
+                        Object.values(firebaseData.dates).forEach(d => {
+                            const ps = d.players;
+                            if (ps) (Array.isArray(ps) ? ps : Object.values(ps)).forEach(p => p && playerSet.add(p));
+                        });
+                        allPlayers = Array.from(playerSet);
                     } else {
                         allPlayers = [];
                     }
@@ -758,8 +767,17 @@
                                 }
                             });
                         }
-                        if(Array.isArray(firebaseData.allPlayers)) {
-                            allPlayers = firebaseData.allPlayers;
+                        if(firebaseData.allPlayers) {
+                            const raw = firebaseData.allPlayers;
+                            allPlayers = Array.isArray(raw) ? raw : Object.values(raw);
+                        } else if (firebaseData.dates) {
+                            // allPlayersがない場合はdatesから収集
+                            const playerSet = new Set();
+                            Object.values(firebaseData.dates).forEach(d => {
+                                const ps = d.players;
+                                if (ps) (Array.isArray(ps) ? ps : Object.values(ps)).forEach(p => p && playerSet.add(p));
+                            });
+                            allPlayers = Array.from(playerSet);
                         }
                         
                         // 画面更新（現在のタブに応じて）
@@ -2095,10 +2113,11 @@
             if(!league) return;
 
             document.getElementById('addMemberLeagueName').textContent = '🏆 ' + league.name;
-            document.getElementById('currentMemberList').textContent = (league.members || []).join('、');
+            const _memberArr = league.members ? (Array.isArray(league.members) ? league.members : Object.values(league.members)) : [];
+            document.getElementById('currentMemberList').textContent = _memberArr.join('、');
 
             // 現在未登録のプレイヤーだけ選択肢に出す
-            const currentMembers = new Set(league.members || []);
+            const currentMembers = new Set(_memberArr);
             const candidates = allPlayers.filter(p => !currentMembers.has(p));
 
             const list = document.getElementById('addMemberPlayerList');
@@ -2765,8 +2784,15 @@
 
         // 多人数リーグ：集計・表示
         function calculateMultiLeague(leagueId, league) {
-            const members = league.members || [];
+            const rawMembers = league.members;
+            const rawMembersArr = rawMembers
+                ? (Array.isArray(rawMembers) ? rawMembers : Object.values(rawMembers))
+                : [];
             const games = Array.isArray(league.games) ? league.games : Object.values(league.games || {});
+            // membersがない場合はgamesから収集
+            const members = rawMembersArr.length > 0
+                ? rawMembersArr
+                : [...new Set(games.flatMap(g => Array.isArray(g.players) ? g.players : Object.values(g.players || {})))];
 
             if(games.length === 0) {
                 document.getElementById('leagueResults').innerHTML = `
