@@ -2363,7 +2363,9 @@
             } else {
                 // 通常モード → 4人を自動設定
                 showNormalInputUI();
-                if(!league.players || league.players.length !== 4) {
+                const rawPlayers = league.players;
+                const lp = rawPlayers ? (Array.isArray(rawPlayers) ? rawPlayers : Object.values(rawPlayers)) : [];
+                if(lp.length !== 4) {
                     alert('リーグ戦データが見つかりません');
                     return;
                 }
@@ -2373,7 +2375,7 @@
                     gameTypeSelect.value = '4';
                     gameTypeChanged();
                 }
-                d.players = [...league.players];
+                d.players = [...lp];
                 render();
                 showNotification(`🏆 リーグ戦「${league.name}」のメンバーを設定しました`);
             }
@@ -2401,7 +2403,16 @@
 
             // メンバーのチェックボックスを生成
             const checks = document.getElementById('multiInputPlayerChecks');
-            checks.innerHTML = (league.members || []).map(p => `
+            const rawMembers = league.members;
+            const memberArr = rawMembers
+                ? (Array.isArray(rawMembers) ? rawMembers : Object.values(rawMembers))
+                : [];
+            // membersがない場合はgamesの参加者から収集
+            const finalMembers = memberArr.length > 0
+                ? memberArr
+                : [...new Set((Array.isArray(league.games) ? league.games : Object.values(league.games || {}))
+                    .flatMap(g => Array.isArray(g.players) ? g.players : Object.values(g.players || {})))];
+            checks.innerHTML = finalMembers.map(p => `
                 <label class="flex items-center gap-2 p-2 bg-white rounded-lg border cursor-pointer text-sm">
                     <input type="checkbox" class="multi-input-player w-4 h-4 accent-purple-500"
                            value="${escapeHtml(p)}" onchange="onMultiInputPlayerCheck()">
